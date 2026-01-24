@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="HealthCenter.API/HealthCenter.API.csproj" />
+  <Project Path="HealthCenter.Application/HealthCenter.Application.csproj" />
+  <Project Path="HealthCenter.Domain/HealthCenter.Domain.csproj" />
+  <Project Path="HealthCenter.Infrastructure/HealthCenter.Infrastructure.csproj" />
+</Solution>
