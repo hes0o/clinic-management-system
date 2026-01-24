@@ -23,7 +23,7 @@ public class QueueTicket
     {
         if (Status != QueueStatus.Waiting)
             throw new InvalidOperationException("Only waiting patients can be called");
-
+// calling the queuestatus funciton to be alive 
         Status = QueueStatus.Called;
     }
 
