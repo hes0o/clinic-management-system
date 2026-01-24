@@ -31,7 +31,7 @@ public class QueueTicket
     {
         if (Status != QueueStatus.Called)
             throw new InvalidOperationException("Only called patients can be marked missed");
-
+//this appointment is marked as missed 
         Status = QueueStatus.Missed;
     }
 
