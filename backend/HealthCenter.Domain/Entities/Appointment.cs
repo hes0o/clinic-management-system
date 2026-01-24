@@ -7,7 +7,7 @@ public class Appointment
     public DateTime ScheduledAt { get; private set; }
 
     private Appointment() { }
-
+// this class solves the appointment scheduling issues 
     public Appointment(Guid patientId, DateTime scheduledAt)
     {
         if (scheduledAt < DateTime.Now)
