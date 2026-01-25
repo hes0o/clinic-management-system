@@ -6,7 +6,11 @@ public class Patient
     public string FullName { get; private set; }
     public string PhoneNumber { get; private set; }
 
-    private Patient() { } // For future persistence tools
+    private Patient() 
+    {
+        FullName = null!;
+        PhoneNumber = null!;
+    } // For future persistence tools
 
     public Patient(string fullName, string phoneNumber)
     {

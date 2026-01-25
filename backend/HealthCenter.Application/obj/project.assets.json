@@ -1,11 +1,30 @@
 {
   "version": 3,
   "targets": {
-    "net10.0": {}
+    "net10.0": {
+      "HealthCenter.Domain/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "compile": {
+          "bin/placeholder/HealthCenter.Domain.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/HealthCenter.Domain.dll": {}
+        }
+      }
+    }
   },
-  "libraries": {},
+  "libraries": {
+    "HealthCenter.Domain/1.0.0": {
+      "type": "project",
+      "path": "../HealthCenter.Domain/HealthCenter.Domain.csproj",
+      "msbuildProject": "../HealthCenter.Domain/HealthCenter.Domain.csproj"
+    }
+  },
   "projectFileDependencyGroups": {
-    "net10.0": []
+    "net10.0": [
+      "HealthCenter.Domain >= 1.0.0"
+    ]
   },
   "packageFolders": {
     "/Users/hassanchawa/.nuget/packages/": {}
@@ -31,7 +50,11 @@
       "frameworks": {
         "net10.0": {
           "targetAlias": "net10.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "/Users/hassanchawa/clinic-management-system/backend/HealthCenter.Domain/HealthCenter.Domain.csproj": {
+              "projectPath": "/Users/hassanchawa/clinic-management-system/backend/HealthCenter.Domain/HealthCenter.Domain.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
