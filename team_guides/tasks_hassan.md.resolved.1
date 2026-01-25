@@ -1,0 +1,55 @@
+# 🦅 Task Guide: Hassan (Team Lead & Architect)
+
+**Mission:** Create the Project Foundation and ensure the C# code is clean.
+
+## 🛠️ Phase 1: The Setup (Week 1)
+1.  **Create Solution**:
+    ```bash
+    dotnet new install Avalonia.Templates
+    dotnet new avalonia.app -o HealthCenter.Desktop
+    cd HealthCenter.Desktop
+    dotnet new sln
+    dotnet sln add HealthCenter.Desktop.csproj
+    ```
+2.  **Install Base Packages**:
+    ```bash
+    dotnet add package Avalonia.ReactiveUI
+    dotnet add package Avalonia.Themes.Fluent
+    dotnet add package Microsoft.EntityFrameworkCore.Sqlite
+    dotnet add package Serilog
+    ```
+3.  **Setup Directory Structure** (Vertical Slices):
+    - Create folders: `Features/Reception`, `Features/Doctor`, `Features/Queue`.
+    - Create `Database/AppDbContext.cs`.
+
+## 🧭 Phase 2: Navigation & "Shell" (Week 2)
+1.  **Main Window**:
+    - Design the `MainWindow.axaml` to have a Sidebar (Left) and Content Area (Right).
+    - Use `TransitioningContentControl` for the Right area.
+2.  **Router**:
+    - Implement a `NavigationService` that allows switching views:
+      ```csharp
+      public void NavigateTo(ViewModelBase viewModel);
+      ```
+
+## 🔒 Phase 4: Security (Week 4)
+1.  **Database Security**:
+    - Install `Microsoft.EntityFrameworkCore.Sqlite.Core` (or compatible SQLCipher wrapper).
+    - Configure the Connection String with a Password: `Data Source=healthcenter.db;Password=MySecretKey;`.
+2.  **App Config**:
+    - Ensure sensitive settings (if any) are encrypted.
+
+## 📦 Phase 5: Release (Week 5)
+1.  **Publishing**:
+    - Run the publish command for the "Golden Master":
+      ```bash
+      dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true
+      ```
+2.  **Code Signing**:
+    - If possible, sign the `.exe` so Windows doesn't warn users.
+3.  **Repository Cleanup**:
+    - Merge all branches to `main`.
+    - Tag the release `v1.0.0`.
+
+---
+> **Tip for Lead**: Your job is to make sure Wissam and Ela don't cry. Keep the folder structure clean!

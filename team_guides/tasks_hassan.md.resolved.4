@@ -1,0 +1,31 @@
+# 🦅 Task Guide: Hassan (Team Lead) - Phase 1 Specs
+
+**Mission:** Initialize the Project & Enforce Architecture.
+
+## 📂 Your Workspace
+*   **Primary Directory**: Root Folder (`/`)
+*   **You Own**: [Program.cs](file:///Users/hassanchawa/clinic-management-system/backend/HealthCenter.API/Program.cs), `App.axaml.cs`, `HealthCenter.sln`
+
+## 1. Solution Specifications
+*   **Solution Name**: `HealthCenter`
+*   **Main Project Name**: `HealthCenter.Desktop`
+*   **Template**: Avalonia App (MVVM)
+*   **Target Framework**: .NET 10 (or latest available)
+
+## 2. Package Requirements
+You must install these specific packages for the team to use:
+*   `Avalonia.ReactiveUI` (Standard for MVVM)
+*   `Microsoft.EntityFrameworkCore.Sqlite` (Database engine)
+*   `Serilog` & `Serilog.Sinks.File` (For Ahmed's logging)
+
+## 3. Directory Structure Rules
+Enforce this "Vertical Slice" folder structure. Reject PRs that don't follow it:
+*   `/Features` -> Group code by "Business Feature" (Doctor, Queue), not by file type.
+*   `/Database` -> Only for DbContext and Base Entity classes.
+*   `/Styles` -> Merve's domain.
+*   `/Assets` -> Images and Fonts only.
+
+## 4. Acceptance Criteria
+*   The app must compile with `dotnet build`.
+*   The "Welcome to Avalonia" window must appear on `dotnet run`.
+*   [.gitignore](file:///Users/hassanchawa/clinic-management-system/.gitignore) must be set up to ignore `bin`, `obj`, and `*.db`.

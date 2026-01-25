@@ -1,0 +1,59 @@
+# 🧠 Task Guide: Bassam (Logic Core) - Phase 1 ONLY
+
+**Mission:** Create the Database Context and Patient Entity.
+
+## 1. Create the Patient Entity
+**Action**: Create file `Features/Shared/Patient.cs`.
+**Code**:
+```csharp
+using System;
+
+namespace HealthCenter.Desktop.Features.Shared;
+
+public class Patient
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string FullName { get; set; } = string.Empty;
+    public string PhoneNumber { get; set; } = string.Empty;
+    public int Age { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    
+    // Notes history (Simple string for now)
+    public string MedicalHistory { get; set; } = string.Empty;
+}
+```
+
+## 2. Create the Database Context
+**Action**: Create file `Database/AppDbContext.cs`.
+**Code**:
+```csharp
+using Microsoft.EntityFrameworkCore;
+using HealthCenter.Desktop.Features.Shared;
+using System;
+using System.IO;
+
+namespace HealthCenter.Desktop.Database;
+
+public class AppDbContext : DbContext
+{
+    public DbSet<Patient> Patients { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder options)
+    {
+        // Save the DB in the User's AppData folder so it doesn't get deleted
+        var folder = Environment.SpecialFolder.LocalApplicationData;
+        var path = Environment.GetFolderPath(folder);
+        var dbPath = Path.Join(path, "healthcenter.db");
+
+        options.UseSqlite($"Data Source={dbPath}");
+    }
+}
+```
+
+## 3. Test Connection
+**Action**: Write a temporary test in [Program.cs](file:///Users/hassanchawa/clinic-management-system/backend/HealthCenter.API/Program.cs) main method (ask Hassan where) to ensure the DB creates itself:
+```csharp
+using var db = new AppDbContext();
+db.Database.EnsureCreated();
+Console.WriteLine("Database created successfully!");
+```

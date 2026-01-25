@@ -1,0 +1,29 @@
+# 🎨 Task Guide: Merve (Design Lead)
+
+**Mission:** Make the app look beautiful and "Simple Arabic".
+
+## 🖌️ Phase 1: Global Styles (Day 1-2)
+1.  **Typography**:
+    - Find a good Arabic Font (Google "Tajawal" or "Cairo").
+    - Add it to `Assets/Fonts`.
+    - Configure `App.axaml` to use this font by default.
+2.  **Colors**:
+    - Define your intended color palette in `App.axaml`:
+        - `PrimaryColor`: #0078D7 (Blue)
+        - `BgColor`: #F3F3F3 (Light Gray)
+
+## 🔘 Phase 2: Controls (Day 3-4)
+1.  **Button Styles**:
+    - Create a Style for `Button.Primary` (Round corners, blue background, white text).
+    - Create a Style for `Button.Secondary` (Transparent, gray text).
+2.  **Input Fields**:
+    - Style `TextBox` to have a nice border and padding.
+    - Ensure `FlowDirection="RightToLeft"` works perfectly for Arabic inputs.
+
+## 🖼️ Phase 3: Icons & polish (Later)
+1.  **Icons**:
+    - Install `Material.Icons.Avalonia` package.
+    - Pick icons for: "Add Patient", "Doctor Stethoscope", "Queue TV".
+
+---
+> **Tip**: If it looks ugly, it's strictly your fault! 😉 Make it "Grandmother Friendly".
