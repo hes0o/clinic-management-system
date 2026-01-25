@@ -1,10 +1,16 @@
 namespace HealthCenter.Application.Dtos;
 
-/// <summary>
-/// DTOs - Immutable records following LSP
-/// </summary>
-public record PatientDto(Guid Id, string FullName, string Phone);
+public record CreatePatientRequestDto(
+    string FullName,
+    string PhoneNumber,
+    DateTime BirthDate,
+    string Gender
+);
 
-public record CreatePatientRequest(string FullName, string Phone);
-
-public record UpdatePatientContactRequest(string Phone);
+public record PatientResponseDto(
+    Guid Id,
+    string FullName,
+    string PhoneNumber,
+    DateTime BirthDate,
+    string Gender
+);
