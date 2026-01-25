@@ -8,6 +8,8 @@
     ".NETCoreApp,Version=v10.0": {
       "HealthCenter.API/1.0.0": {
         "dependencies": {
+          "HealthCenter.Application": "1.0.0",
+          "HealthCenter.Infrastructure": "1.0.0",
           "Microsoft.AspNetCore.OpenApi": "10.0.0",
           "Swashbuckle.AspNetCore": "10.1.0"
         },
@@ -70,6 +72,37 @@
             "fileVersion": "10.1.0.2093"
           }
         }
+      },
+      "HealthCenter.Application/1.0.0": {
+        "dependencies": {
+          "HealthCenter.Domain": "1.0.0"
+        },
+        "runtime": {
+          "HealthCenter.Application.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "HealthCenter.Domain/1.0.0": {
+        "runtime": {
+          "HealthCenter.Domain.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "HealthCenter.Infrastructure/1.0.0": {
+        "dependencies": {
+          "HealthCenter.Application": "1.0.0",
+          "HealthCenter.Domain": "1.0.0"
+        },
+        "runtime": {
+          "HealthCenter.Infrastructure.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
       }
     }
   },
@@ -120,6 +153,21 @@
       "sha512": "sha512-ilUsTvGA9hO1ulR7ibdWMWSg3438Iu+pDFcEYUorp+/ClHwaHFdpp/ATfBsFXv2sIRVDbQlEwd5BWBOdMdtKCA==",
       "path": "swashbuckle.aspnetcore.swaggerui/10.1.0",
       "hashPath": "swashbuckle.aspnetcore.swaggerui.10.1.0.nupkg.sha512"
+    },
+    "HealthCenter.Application/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "HealthCenter.Domain/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "HealthCenter.Infrastructure/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
     }
   }
 }

@@ -1,41 +1,94 @@
-using HealthCenter.Application.Services;
-using HealthCenter.Domain.Entities;
+using HealthCenter.Application.Dtos;
+using HealthCenter.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HealthCenter.API.Controllers;
 
+/// <summary>
+/// Patients API Controller - DIP compliant, depends on abstractions
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class PatientsController : ControllerBase
 {
-    private readonly PatientService _patientService;
+    private readonly IPatientService _patientService;
 
-    public PatientsController(PatientService patientService)
+    public PatientsController(IPatientService patientService)
     {
-        _patientService = patientService;
+        _patientService = patientService ?? throw new ArgumentNullException(nameof(patientService));
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Patient>>> GetAll()
+    [ProducesResponseType(typeof(IEnumerable<PatientDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<IEnumerable<PatientDto>>> GetAll()
     {
-        var patients = await _patientService.GetAllPatientsAsync();
-        return Ok(patients);
+        var result = await _patientService.GetAllPatientsAsync();
+        
+        if (!result.IsSuccess)
+            return StatusCode(500, new { error = result.Error });
+
+        return Ok(result.Value);
     }
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<Patient>> GetById(Guid id)
+    [HttpGet("{id:guid}")]
+    [ProducesResponseType(typeof(PatientDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<PatientDto>> GetById(Guid id)
     {
-        var patient = await _patientService.GetPatientByIdAsync(id);
-        if (patient == null)
-            return NotFound();
+        var result = await _patientService.GetPatientByIdAsync(id);
         
-        return Ok(patient);
+        if (!result.IsSuccess)
+            return result.Error!.Contains("not found") 
+                ? NotFound(new { error = result.Error })
+                : BadRequest(new { error = result.Error });
+
+        return Ok(result.Value);
     }
 
     [HttpPost]
-    public async Task<ActionResult<Patient>> Create(Patient patient)
+    [ProducesResponseType(typeof(PatientDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<PatientDto>> Create([FromBody] CreatePatientRequest request)
     {
-        var createdPatient = await _patientService.AddPatientAsync(patient);
-        return CreatedAtAction(nameof(GetById), new { id = createdPatient.Id }, createdPatient);
+        var result = await _patientService.AddPatientAsync(request);
+        
+        if (!result.IsSuccess)
+            return BadRequest(new { error = result.Error });
+
+        return CreatedAtAction(nameof(GetById), new { id = result.Value!.Id }, result.Value);
+    }
+
+    [HttpPut("{id:guid}/contact")]
+    [ProducesResponseType(typeof(PatientDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<PatientDto>> UpdateContact(Guid id, [FromBody] UpdatePatientContactRequest request)
+    {
+        var result = await _patientService.UpdatePatientContactAsync(id, request.Phone);
+        
+        if (!result.IsSuccess)
+            return result.Error!.Contains("not found")
+                ? NotFound(new { error = result.Error })
+                : BadRequest(new { error = result.Error });
+
+        return Ok(result.Value);
+    }
+
+    [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> Delete(Guid id)
+    {
+        var result = await _patientService.DeletePatientAsync(id);
+        
+        if (!result.IsSuccess)
+            return result.Error!.Contains("not found")
+                ? NotFound(new { error = result.Error })
+                : BadRequest(new { error = result.Error });
+
+        return NoContent();
     }
 }

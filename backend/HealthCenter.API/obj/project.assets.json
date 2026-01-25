@@ -113,6 +113,43 @@
         "frameworkReferences": [
           "Microsoft.AspNetCore.App"
         ]
+      },
+      "HealthCenter.Application/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "dependencies": {
+          "HealthCenter.Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/HealthCenter.Application.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/HealthCenter.Application.dll": {}
+        }
+      },
+      "HealthCenter.Domain/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "compile": {
+          "bin/placeholder/HealthCenter.Domain.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/HealthCenter.Domain.dll": {}
+        }
+      },
+      "HealthCenter.Infrastructure/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "dependencies": {
+          "HealthCenter.Application": "1.0.0",
+          "HealthCenter.Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/HealthCenter.Infrastructure.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/HealthCenter.Infrastructure.dll": {}
+        }
       }
     }
   },
@@ -489,39 +526,74 @@
         "swashbuckle.aspnetcore.swaggerui.10.1.0.nupkg.sha512",
         "swashbuckle.aspnetcore.swaggerui.nuspec"
       ]
+    },
+    "HealthCenter.Application/1.0.0": {
+      "type": "project",
+      "path": "../HealthCenter.Application/HealthCenter.Application.csproj",
+      "msbuildProject": "../HealthCenter.Application/HealthCenter.Application.csproj"
+    },
+    "HealthCenter.Domain/1.0.0": {
+      "type": "project",
+      "path": "../HealthCenter.Domain/HealthCenter.Domain.csproj",
+      "msbuildProject": "../HealthCenter.Domain/HealthCenter.Domain.csproj"
+    },
+    "HealthCenter.Infrastructure/1.0.0": {
+      "type": "project",
+      "path": "../HealthCenter.Infrastructure/HealthCenter.Infrastructure.csproj",
+      "msbuildProject": "../HealthCenter.Infrastructure/HealthCenter.Infrastructure.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net10.0": [
+      "HealthCenter.Application >= 1.0.0",
+      "HealthCenter.Infrastructure >= 1.0.0",
       "Microsoft.AspNetCore.OpenApi >= 10.0.0",
       "Swashbuckle.AspNetCore >= 10.1.0"
     ]
   },
   "packageFolders": {
-    "/Users/hassanchawa/.nuget/packages/": {}
+    "C:\\Users\\gamin\\.nuget\\packages\\": {},
+    "C:\\Program Files\\DevExpress 25.2\\Components\\Offline Packages": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/hassanchawa/clinic-management-system/backend/HealthCenter.API/HealthCenter.API.csproj",
+      "projectUniqueName": "C:\\Users\\gamin\\clinic-management-system\\backend\\HealthCenter.API\\HealthCenter.API.csproj",
       "projectName": "HealthCenter.API",
-      "projectPath": "/Users/hassanchawa/clinic-management-system/backend/HealthCenter.API/HealthCenter.API.csproj",
-      "packagesPath": "/Users/hassanchawa/.nuget/packages/",
-      "outputPath": "/Users/hassanchawa/clinic-management-system/backend/HealthCenter.API/obj/",
+      "projectPath": "C:\\Users\\gamin\\clinic-management-system\\backend\\HealthCenter.API\\HealthCenter.API.csproj",
+      "packagesPath": "C:\\Users\\gamin\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\gamin\\clinic-management-system\\backend\\HealthCenter.API\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files\\DevExpress 25.2\\Components\\Offline Packages",
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "/Users/hassanchawa/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\gamin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\DevExpress 25.2.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net10.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Program Files\\DevExpress 25.2\\Components\\System\\Components\\Packages": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net10.0": {
           "targetAlias": "net10.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "C:\\Users\\gamin\\clinic-management-system\\backend\\HealthCenter.Application\\HealthCenter.Application.csproj": {
+              "projectPath": "C:\\Users\\gamin\\clinic-management-system\\backend\\HealthCenter.Application\\HealthCenter.Application.csproj"
+            },
+            "C:\\Users\\gamin\\clinic-management-system\\backend\\HealthCenter.Infrastructure\\HealthCenter.Infrastructure.csproj": {
+              "projectPath": "C:\\Users\\gamin\\clinic-management-system\\backend\\HealthCenter.Infrastructure\\HealthCenter.Infrastructure.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
@@ -568,7 +640,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/10.0.100/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.101/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.AspNetCore": "(,10.0.32767]",
           "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",
