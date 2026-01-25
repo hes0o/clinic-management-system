@@ -1,2 +1,0 @@
-# clinic-management-system
-U
