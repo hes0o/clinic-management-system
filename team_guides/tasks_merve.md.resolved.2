@@ -1,0 +1,56 @@
+# 🎨 Task Guide: Merve (Design Lead) - Phase 1 ONLY
+
+**Mission:** Define the Application Look (Colors & Fonts).
+
+## 1. Define Colors
+**Action**: Open `App.axaml` and add the `Application.Resources` section.
+**Code**:
+```xml
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="HealthCenter.Desktop.App"
+             RequestedThemeVariant="Light">
+
+    <Application.Resources>
+        <!-- Primary Brand Color (Blue) -->
+        <SolidColorBrush x:Key="PrimaryBrush">#0078D7</SolidColorBrush>
+        <!-- Background Color (Light Gray) -->
+        <SolidColorBrush x:Key="BackgroundBrush">#F3F3F3</SolidColorBrush>
+        <!-- Text Color (Dark Gray) -->
+        <SolidColorBrush x:Key="TextBrush">#333333</SolidColorBrush>
+    </Application.Resources>
+
+    <Application.Styles>
+        <FluentTheme />
+        <!-- We will add your custom styles here later -->
+    </Application.Styles>
+</Application>
+```
+
+## 2. Create a "Round Button" Style
+**Action**: Create file `Styles/ButtonStyles.axaml` (Ask Hassan how to link it).
+**Code**:
+```xml
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+    <Style Selector="Button.primary">
+        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="Padding" Value="15,10"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+    
+    <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#006CC1"/> <!-- Darker Blue on Hover -->
+    </Style>
+</Styles>
+```
+
+## 3. Verify
+**Action**: Put a Button on the MainWindow to test:
+```xml
+<Button Classes="primary" Content="Test Button" />
+```
+Does it look Blue and Round? ✅

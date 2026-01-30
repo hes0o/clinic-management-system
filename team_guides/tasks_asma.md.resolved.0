@@ -1,0 +1,22 @@
+# 🧪 Task Guide: Asma (QA & Documentation)
+
+**Mission:** Break the app before the customer does.
+
+## 🕵️ Phase 1: Testing Plan (Day 1-2)
+1.  **Test Environment**:
+    - If you have access, set up a Virtual Machine with Windows and one with Linux.
+    - Ensure you can run Hassan's builds on both.
+2.  **Arabic Verification**:
+    - Create a patient with a very long Arabic name.
+    - Ensure it doesn't "Cut off" or align to the Left (It should be Right).
+
+## 📚 Phase 2: User Manual (Day 3-4)
+1.  **Write the Guide**:
+    - Create `docs/USER_MANUAL.pdf` (or .md).
+    - Chapter 1: "How to Add a Patient".
+    - Chapter 2: "How to Print a Ticket".
+2.  **Stress Test**:
+    - Click the "Add Patient" button 50 times very fast. Does the app freeze? Report to Bassam/Wissam if it does.
+
+---
+> **Tip**: Be annoying! Find every small misalignment and report it. Quality is your job.

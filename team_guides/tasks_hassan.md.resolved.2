@@ -1,0 +1,56 @@
+# 🦅 Task Guide: Hassan (Team Lead) - Phase 1 ONLY
+
+**Mission:** Initialize the Project & Solution Structure.
+
+## 1. Create the Solution
+**Action**: Open your terminal and run these exact commands:
+```bash
+# 1. Install the Avalonia templates if you haven't
+dotnet new install Avalonia.Templates
+
+# 2. Create the main project
+dotnet new avalonia.app -o HealthCenter.Desktop
+
+# 3. Create the Solution file
+cd HealthCenter.Desktop
+dotnet new sln -n HealthCenter
+
+# 4. Add the project to the solution
+dotnet sln add HealthCenter.Desktop.csproj
+```
+
+## 2. Install Packages
+**Action**: Install the necessary dependencies for the team:
+```bash
+# ReactiveUI for MVVM
+dotnet add package Avalonia.ReactiveUI
+
+# EntityFramework for Database
+dotnet add package Microsoft.EntityFrameworkCore.Sqlite
+dotnet add package Microsoft.EntityFrameworkCore.Design
+
+# Logging
+dotnet add package Serilog
+dotnet add package Serilog.Sinks.File
+```
+
+## 3. Create Folder Structure
+**Action**: Delete the default `Views` and `ViewModels` folders. Create this "Vertical Slice" structure instead:
+
+```text
+HealthCenter.Desktop/
+├── Assets/              (Images, Fonts)
+├── Database/            (AppDbContext.cs)
+├── Features/
+│   ├── Reception/       (Wissam's Area)
+│   ├── Doctor/          (Ela's Area)
+│   ├── Queue/           (Eylaf's Area)
+│   └── Shared/          (Common logic)
+├── Styles/              (Merve's Area)
+├── Program.cs
+└── App.axaml
+```
+
+## 4. Run the App
+**Action**: Run `dotnet run`. You should see a blank "Welcome to Avalonia" window.
+**Verification**: Take a screenshot and post it to the group chat. "Foundation is Ready".

@@ -1,0 +1,25 @@
+# 🧪 Task Guide: Asma (QA) - Phase 1 ONLY
+
+**Mission:** Verify the "Golden Path".
+
+## 1. The Startup Test
+**Action**: Wait for **Hassan** to finish the setup and **Ahmed** to finish the logging.
+**Steps**:
+1. Run the app on your machine.
+2. Monitor the `logs/` folder.
+3. Close the app.
+
+**Pass Criteria**:
+- App opened without crashing.
+- Log file was created.
+- File log contains "Starting up Health Center App...".
+
+## 2. The Arabic Layout Test
+**Action**: Wait for **Wissam** to create the form.
+**Steps**:
+1. Run the app featuring Wissam's form.
+2. Type an Arabic Name: "محمد عبدالله".
+3. Check the Cursor position. Is the cursor blinking on the *Left* of the text (Correct for RTL) or the Right?
+    - *Note: This is a common bug in cross-platform UI. We need to know early.*
+
+**Report**: Send a "Pass/Fail" message to the group.

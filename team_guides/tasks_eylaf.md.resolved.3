@@ -1,0 +1,26 @@
+# 📺 Task Guide: Eylaf (Queue) - Phase 1 Specs
+
+**Mission:** Design the TV Waiting Screen.
+
+## 1. Visual Specification
+This screen will be displayed on a large TV (1080p). Readability is the #1 priority.
+
+*   **Background**: High Contrast (Black or Dark Blue).
+*   **Fonts**: All text must be White or Neon Blue.
+*   **Font Size Rules**:
+    *   Ticket Number (e.g., "A-102"): Minimum **150px**.
+    *   Room Number: Minimum **60px**.
+    *   Headers: Minimum **30px**.
+
+## 2. Layout Structure
+*   **Top Section**: Header ("Now Serving...").
+*   **Center Section**: The Active Ticket (The detailed view).
+*   **Right/Bottom Section** (Optional): A list of the "Next 3" tickets (smaller font).
+
+## 3. Animation Specs
+*   When the Ticket Number changes (e.g., A-102 -> A-103), the number should NOT just snap.
+*   Implement a **Transition**: Fade In, Slide Up, or Scale Up. Use Avalonia's `TransitioningContentControl` or Animation styles.
+
+## 4. Acceptance Criteria
+*   Run the view on a Full Screen window. Stand 3 meters away. Is it readable?
+*   The layout must handle both English numbers ("123") and Arabic numbers if requested.

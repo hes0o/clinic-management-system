@@ -1,0 +1,45 @@
+# 🏨 Task Guide: Wissam (Reception) - Phase 1 ONLY
+
+**Mission:** Build the "Add Patient" Screen.
+
+## 1. Create the View
+**Action**: Create file `Features/Reception/AddPatientView.axaml`.
+**Code**:
+```xml
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="HealthCenter.Desktop.Features.Reception.AddPatientView">
+    
+    <StackPanel Margin="20" Spacing="15" Background="White">
+        <TextBlock Text="Add New Patient" FontSize="24" FontWeight="Bold" Foreground="#0078D7"/>
+        
+        <!-- Name Input -->
+        <StackPanel>
+            <TextBlock Text="Full Name" Margin="0,0,0,5"/>
+            <TextBox Watermark="Enter patient name..." />
+        </StackPanel>
+
+        <!-- Phone Input -->
+        <StackPanel>
+            <TextBlock Text="Phone Number" Margin="0,0,0,5"/>
+            <TextBox Watermark="05xxxxxxxx" />
+        </StackPanel>
+
+        <!-- Age Input -->
+        <StackPanel>
+            <TextBlock Text="Age" Margin="0,0,0,5"/>
+            <NumericUpDown Minimum="0" Maximum="120" Value="25" />
+        </StackPanel>
+
+        <!-- Save Button -->
+        <Button Classes="primary" Content="Register Patient" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+    </StackPanel>
+</UserControl>
+```
+
+## 2. Preview It
+**Action**: Ask Hassan to temporarily show your `AddPatientView` in the MainWindow so you can see it running.
+**Checklist**:
+- [ ] Are the inputs readable?
+- [ ] Does the button look clicky?
+- [ ] Is the "Right-to-Left" flow working (if you set FlowDirection)?

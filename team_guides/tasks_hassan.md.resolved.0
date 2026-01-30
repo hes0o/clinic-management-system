@@ -1,0 +1,42 @@
+# 🦅 Task Guide: Hassan (Team Lead & Architect)
+
+**Mission:** Create the Project Foundation and ensure the C# code is clean.
+
+## 🛠️ Phase 1: The Setup (Day 1-2)
+1.  **Create Solution**:
+    ```bash
+    dotnet new install Avalonia.Templates
+    dotnet new avalonia.app -o HealthCenter.Desktop
+    cd HealthCenter.Desktop
+    dotnet new sln
+    dotnet sln add HealthCenter.Desktop.csproj
+    ```
+2.  **Install Base Packages**:
+    ```bash
+    dotnet add package Avalonia.ReactiveUI
+    dotnet add package Avalonia.Themes.Fluent
+    dotnet add package Microsoft.EntityFrameworkCore.Sqlite
+    dotnet add package Serilog
+    ```
+3.  **Setup Directory Structure** (Vertical Slices):
+    - Create folders: `Features/Reception`, `Features/Doctor`, `Features/Queue`.
+    - Create `Database/AppDbContext.cs`.
+
+## 🧭 Phase 2: Navigation & "Shell" (Day 3-4)
+1.  **Main Window**:
+    - Design the `MainWindow.axaml` to have a Sidebar (Left) and Content Area (Right).
+    - Use `TransitioningContentControl` for the Right area.
+2.  **Router**:
+    - Implement a `NavigationService` that allows switching views:
+      ```csharp
+      public void NavigateTo(ViewModelBase viewModel);
+      ```
+
+## 🔒 Phase 3: Encryption & Installer (Later)
+1.  **Database Security**:
+    - Research `SQLCipher` for EF Core to encrypt the `.db` file.
+2.  **Publish**:
+    - Build the `.exe` for distribution.
+
+---
+> **Tip for Lead**: Your job is to make sure Wissam and Ela don't cry. Keep the folder structure clean!

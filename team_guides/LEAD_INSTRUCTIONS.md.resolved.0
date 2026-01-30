@@ -1,0 +1,51 @@
+# 👑 LEAD_INSTRUCTIONS.md (For Hassan Only)
+
+Use this checklist to manage your team during **Phase 1**.
+
+## 📢 Kickoff Message (Copy & Paste to Group Chat)
+> "Team, we are starting Phase 1. I have pushed your Task Guides to the `team_guides/` folder on GitHub. Please Pull the latest code.
+>
+> 📂 **Your Assignments:**
+> *   **Bassam**: Read [tasks_bassam.md](file:///Users/hassanchawa/.gemini/antigravity/brain/e22de052-7746-490c-b6d2-72a40839d5e5/team_guides/tasks_bassam.md). Work ONLY in `/Database`.
+> *   **Merve**: Read [tasks_merve.md](file:///Users/hassanchawa/.gemini/antigravity/brain/e22de052-7746-490c-b6d2-72a40839d5e5/team_guides/tasks_merve.md). Work ONLY in `/Styles`.
+> *   **Wissam**: Read [tasks_wissam.md](file:///Users/hassanchawa/.gemini/antigravity/brain/e22de052-7746-490c-b6d2-72a40839d5e5/team_guides/tasks_wissam.md). Work ONLY in `/Features/Reception`.
+> *   **Ela**: Read [tasks_ela.md](file:///Users/hassanchawa/.gemini/antigravity/brain/e22de052-7746-490c-b6d2-72a40839d5e5/team_guides/tasks_ela.md). Work ONLY in `/Features/Doctor`.
+> *   **Eylaf**: Read [tasks_eylaf.md](file:///Users/hassanchawa/.gemini/antigravity/brain/e22de052-7746-490c-b6d2-72a40839d5e5/team_guides/tasks_eylaf.md). Work ONLY in `/Features/Queue`.
+> *   **Ahmed**: Read [tasks_ahmed.md](file:///Users/hassanchawa/.gemini/antigravity/brain/e22de052-7746-490c-b6d2-72a40839d5e5/team_guides/tasks_ahmed.md). Work ONLY in `/Infrastructure`.
+> *   **Asma**: Read [tasks_asma.md](file:///Users/hassanchawa/.gemini/antigravity/brain/e22de052-7746-490c-b6d2-72a40839d5e5/team_guides/tasks_asma.md).
+>
+> ⚠️ **Rules:**
+> 1. Do NOT touch anyone else's folder.
+> 2. Read your Guide carefully. It defines the variable names you MUST use.
+> 3. Do not ask for the code. Implement the Spec using the requirements provided."
+
+## 🕵️ Review Checklist (When they submit work)
+
+### Reviewing Bassam (Database)
+- [ ] Did he name the class `Patient`? (Not `Patients` or `PatientEntity`).
+- [ ] Is the ID a `Guid`?
+- [ ] Is the DB saving to `%AppData%`? (If it saves to C:/ProgramFiles, reject it).
+
+### Reviewing Merve (Styles)
+- [ ] Open `App.axaml`. Are `PrimaryBrush` and `BackgroundBrush` defined?
+- [ ] Check a button. Does it use `Classes="primary"`?
+
+### Reviewing Wissam (Reception)
+- [ ] Open `AddPatientView.axaml`.
+- [ ] Is `FlowDirection` set to `RightToLeft`?
+- [ ] Are the variable names `NewPatientName` and `NewPatientPhone` used in Binding?
+
+### Reviewing Ela (Doctor)
+- [ ] Is the Layout a Split View (Sidebar + Main)?
+- [ ] Can you type multiple lines in the Diagnosis box?
+
+### Reviewing Eylaf (Queue)
+- [ ] Is the background Black/Dark?
+- [ ] Is the Ticket Number HUGE (Font size > 100)?
+
+### Reviewing Ahmed (Ops)
+- [ ] Run the app.
+- [ ] Check `bin/Debug/net10.0/Logs/`. Is a log file there?
+
+---
+**Goal:** If all these pass, we have a solid foundation for Phase 2.
