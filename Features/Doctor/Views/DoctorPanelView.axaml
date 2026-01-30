@@ -1,0 +1,268 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:HealthCenter.Desktop.Features.Doctor.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
+             x:Class="HealthCenter.Desktop.Features.Doctor.Views.DoctorPanelView"
+             x:DataType="vm:DoctorPanelViewModel"
+             FlowDirection="RightToLeft">
+
+    <Design.DataContext>
+        <vm:DoctorPanelViewModel/>
+    </Design.DataContext>
+
+    <UserControl.Styles>
+        <Style Selector="Button.primary">
+            <Setter Property="Background" Value="#2563EB"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16,10"/>
+        </Style>
+        <Style Selector="Button.success">
+            <Setter Property="Background" Value="#16A34A"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16,10"/>
+        </Style>
+        <Style Selector="Button.warning">
+            <Setter Property="Background" Value="#F59E0B"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16,10"/>
+        </Style>
+        <Style Selector="Button.danger">
+            <Setter Property="Background" Value="#DC2626"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16,10"/>
+        </Style>
+        <Style Selector="TextBox">
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid Background="#F3F4F6">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="350"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Left: Waiting List -->
+        <Border Grid.Column="0" Background="White" Padding="20">
+            <Grid RowDefinitions="Auto,Auto,*,Auto">
+                <!-- Header -->
+                <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                    <TextBlock Text="👨‍⚕️ لوحة الطبيب" 
+                               FontSize="24" 
+                               FontWeight="Bold"
+                               Foreground="#1E293B"/>
+                    <TextBlock Text="{Binding WaitingCount, StringFormat='في الانتظار: {0}'}" 
+                               FontSize="14" 
+                               Foreground="#64748B"/>
+                </StackPanel>
+
+                <!-- Call Next Button -->
+                <Button Grid.Row="1" 
+                        Classes="primary"
+                        Command="{Binding CallNextCommand}"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center"
+                        Margin="0,0,0,16"
+                        FontSize="18"
+                        Padding="20,14">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="📢"/>
+                        <TextBlock Text="نداء التالي"/>
+                    </StackPanel>
+                </Button>
+
+                <!-- Waiting Patients List -->
+                <Border Grid.Row="2" Background="#F8FAFC" CornerRadius="12" Padding="12">
+                    <ScrollViewer>
+                        <ItemsControl ItemsSource="{Binding WaitingPatients}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="White" 
+                                            CornerRadius="8" 
+                                            Padding="12"
+                                            Margin="0,0,0,8"
+                                            BoxShadow="0 1 2 0 #0a000000">
+                                        <Grid ColumnDefinitions="Auto,*,Auto">
+                                            <!-- Ticket Number -->
+                                            <Border Grid.Column="0" 
+                                                    Background="#E0F2FE" 
+                                                    CornerRadius="8" 
+                                                    Padding="12,8"
+                                                    Margin="0,0,12,0">
+                                                <TextBlock Text="{Binding TicketNumber}" 
+                                                           FontSize="20" 
+                                                           FontWeight="Bold"
+                                                           Foreground="#0369A1"/>
+                                            </Border>
+
+                                            <!-- Patient Info -->
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Patient.FullName}" 
+                                                           FontWeight="Medium"/>
+                                                <TextBlock Text="{Binding Status}" 
+                                                           FontSize="12"
+                                                           Foreground="#94A3B8"/>
+                                            </StackPanel>
+
+                                            <!-- Call Button -->
+                                            <Button Grid.Column="2"
+                                                    Command="{Binding $parent[ItemsControl].((vm:DoctorPanelViewModel)DataContext).CallSpecificCommand}"
+                                                    CommandParameter="{Binding}"
+                                                    Background="#10B981"
+                                                    Foreground="White"
+                                                    CornerRadius="6"
+                                                    Padding="10,6"
+                                                    Content="نداء"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Border>
+
+                <!-- Stats -->
+                <Border Grid.Row="3" Background="#F0FDF4" CornerRadius="8" Padding="12" Margin="0,12,0,0">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="24">
+                        <TextBlock Text="✅ تم اليوم:" Foreground="#166534"/>
+                        <TextBlock Text="{Binding CompletedToday}" 
+                                   FontWeight="Bold" 
+                                   FontSize="18"
+                                   Foreground="#166534"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Right: Current Patient & Diagnosis -->
+        <Grid Grid.Column="1" Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Current Patient Card -->
+            <Border Grid.Row="0" 
+                    Background="White" 
+                    CornerRadius="16" 
+                    Padding="24"
+                    Margin="0,0,0,20">
+                <Grid RowDefinitions="Auto,Auto">
+                    <StackPanel Grid.Row="0" Margin="0,0,0,16">
+                        <TextBlock Text="المريض الحالي" 
+                                   FontSize="16" 
+                                   Foreground="#64748B"/>
+                        <StackPanel Orientation="Horizontal" Spacing="20" Margin="0,8,0,0">
+                            <!-- Ticket Number -->
+                            <Border Background="#22D3EE" 
+                                    CornerRadius="12" 
+                                    Padding="24,16">
+                                <TextBlock Text="{Binding CurrentPatient.TicketNumber, FallbackValue='-'}" 
+                                           FontSize="48" 
+                                           FontWeight="ExtraBold"
+                                           Foreground="#0F172A"/>
+                            </Border>
+                            <!-- Patient Name -->
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{Binding CurrentPatient.Patient.FullName, FallbackValue='لا يوجد مريض'}" 
+                                           FontSize="32" 
+                                           FontWeight="Bold"
+                                           Foreground="#1E293B"/>
+                                <TextBlock Text="{Binding CurrentPatient.Patient.PhoneNumber}" 
+                                           FontSize="16" 
+                                           Foreground="#64748B"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Status Actions -->
+                    <StackPanel Grid.Row="1" 
+                                Orientation="Horizontal" 
+                                Spacing="12"
+                                IsVisible="{Binding CurrentPatient, Converter={x:Static ObjectConverters.IsNotNull}}">
+                        <Button Classes="success" Command="{Binding MarkPresentCommand}">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <TextBlock Text="✅"/>
+                                <TextBlock Text="حضر"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Classes="warning" Command="{Binding MarkAbsentCommand}">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <TextBlock Text="❌"/>
+                                <TextBlock Text="غائب"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Diagnosis Form -->
+            <Border Grid.Row="1" 
+                    Background="White" 
+                    CornerRadius="16" 
+                    Padding="24"
+                    IsVisible="{Binding CurrentPatient, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <Grid RowDefinitions="Auto,*,Auto,Auto">
+                    <TextBlock Grid.Row="0" 
+                               Text="📋 التشخيص والعلاج" 
+                               FontSize="20" 
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,20"/>
+
+                    <!-- Diagnosis -->
+                    <StackPanel Grid.Row="1" Spacing="16">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="التشخيص" FontWeight="Medium" Foreground="#374151"/>
+                            <TextBox Text="{Binding Diagnosis}"
+                                     AcceptsReturn="True"
+                                     TextWrapping="Wrap"
+                                     Height="100"
+                                     Watermark="أدخل التشخيص هنا..."/>
+                        </StackPanel>
+
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="الأدوية الموصوفة" FontWeight="Medium" Foreground="#374151"/>
+                            <TextBox Text="{Binding Prescriptions}"
+                                     AcceptsReturn="True"
+                                     TextWrapping="Wrap"
+                                     Height="80"
+                                     Watermark="الأدوية والجرعات..."/>
+                        </StackPanel>
+
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="ملاحظات" FontWeight="Medium" Foreground="#374151"/>
+                            <TextBox Text="{Binding Notes}"
+                                     AcceptsReturn="True"
+                                     TextWrapping="Wrap"
+                                     Height="60"
+                                     Watermark="ملاحظات إضافية..."/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Complete Button -->
+                    <Button Grid.Row="3" 
+                            Classes="success"
+                            Command="{Binding CompleteVisitCommand}"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Center"
+                            Margin="0,20,0,0"
+                            FontSize="18"
+                            Padding="20,14">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="✔️"/>
+                            <TextBlock Text="إنهاء الزيارة وحفظ"/>
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>
