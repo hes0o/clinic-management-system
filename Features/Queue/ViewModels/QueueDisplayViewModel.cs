@@ -16,6 +16,19 @@ public partial class QueueDisplayViewModel : HealthCenter.Desktop.ViewModels.Vie
     [ObservableProperty]
     private int _currentTicketNumber;
 
+    // Sidebar Properties (Mocked for UI consistency)
+    [ObservableProperty]
+    private int _todayPatientCount = 12; // Mock value
+
+    [ObservableProperty]
+    private int _waitingCount;
+
+    [RelayCommand]
+    private void NavigateTo(string view)
+    {
+        // No-op for visual demo
+    }
+
     [ObservableProperty]
     private string _currentPatientName = string.Empty;
 
@@ -26,10 +39,59 @@ public partial class QueueDisplayViewModel : HealthCenter.Desktop.ViewModels.Vie
     private ObservableCollection<QueueTicket> _recentCalled = new();
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CurrentDateGregorian))]
     private string _currentTime = DateTime.Now.ToString("HH:mm");
 
     [ObservableProperty]
     private string _currentDate = DateTime.Now.ToString("yyyy/MM/dd");
+    
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CurrentDateHijri))]
+    private string _hijriDate = string.Empty;
+    
+    [ObservableProperty]
+    private string _clinicHours = "8:00 ص - 4:00 م";
+    
+    [ObservableProperty]
+    private string _currentHealthTip = string.Empty;
+    
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PatientsAheadCount))]
+    private int _patientsAhead = 0;
+    
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(EstimatedWaitTimeMinutes))]
+    private int _estimatedWaitMinutes = 0;
+    
+    [ObservableProperty]
+    private double _averageServiceTimeMinutes = 10.0;
+    
+    [ObservableProperty]
+    private QueueTicket? _currentTicket;
+
+    // View Aliases for compatibility with new UI Key
+    public ObservableCollection<QueueTicket> WaitingList => WaitingQueue;
+    public string CurrentDateHijri => HijriDate;
+    public DateTime CurrentDateGregorian => DateTime.Now;
+    public int PatientsAheadCount => PatientsAhead;
+    public int EstimatedWaitTimeMinutes => EstimatedWaitMinutes;
+
+    [ObservableProperty]
+    private bool _isMuted = false;
+
+    private static readonly List<string> HealthTips = new()
+    {
+        "اشرب 8 أكواب من الماء يومياً للحفاظ على صحتك",
+        "المشي 30 دقيقة يومياً يحسن صحة القلب",
+        "النوم 7-8 ساعات ضروري لصحة جيدة",
+        "تناول الخضروات والفواكه الطازجة يومياً",
+        "اغسل يديك بانتظام للوقاية من الأمراض",
+        "ممارسة الرياضة تقوي المناعة وتحسن المزاج",
+        "تفاحة في اليوم تغنيك عن الطبيب",
+        "قلل من تناول المشروبات الغازية والسكريات",
+        "التعرض لأشعة الشمس مصدر فيتامين د",
+        "قلل من وقت الشاشات قبل النوم لنوم أفضل"
+    };
 
     public QueueDisplayViewModel()
     {
@@ -60,14 +122,17 @@ public partial class QueueDisplayViewModel : HealthCenter.Desktop.ViewModels.Vie
 
         if (currentlyBeingServed != null)
         {
+            CurrentTicket = currentlyBeingServed;
             CurrentTicketNumber = currentlyBeingServed.TicketNumber;
             CurrentPatientName = currentlyBeingServed.Patient?.FullName ?? "";
         }
         else
         {
+            CurrentTicket = null;
             CurrentTicketNumber = 0;
             CurrentPatientName = "لا يوجد";
         }
+
 
         // Get waiting queue
         var waiting = _db.QueueTickets

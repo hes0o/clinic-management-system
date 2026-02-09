@@ -14,10 +14,48 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly HealthCenterDbContext _db;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsReceptionVisible))]
+    [NotifyPropertyChangedFor(nameof(IsQueueVisible))]
+    [NotifyPropertyChangedFor(nameof(IsDoctorVisible))]
     private string _currentView = "Reception";
+
+    partial void OnCurrentViewChanged(string value)
+    {
+        if (value == "Queue")
+        {
+            IsSidebarToggleVisible = true;
+        }
+        else
+        {
+            IsSidebarToggleVisible = false;
+            IsSidebarVisible = true; // Always show sidebar in other views
+        }
+    }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SidebarToggleIcon))]
+    private bool _isSidebarVisible = true;
+
+    [ObservableProperty]
+    private bool _isSidebarToggleVisible;
+
+    public string SidebarToggleIcon => IsSidebarVisible ? "▶" : "◀"; // RTL: Right (Start) -> Hide with Right Arrow? Trial.
+
+    [RelayCommand]
+    private void ToggleSidebar()
+    {
+        IsSidebarVisible = !IsSidebarVisible;
+    }
+
+    public bool IsReceptionVisible => CurrentView == "Reception";
+    public bool IsQueueVisible => CurrentView == "Queue";
+    public bool IsDoctorVisible => CurrentView == "Doctor";
+
+    public Features.Queue.ViewModels.QueueDisplayViewModel QueueViewModel { get; } = new();
 
     [ObservableProperty]
     private ObservableCollection<Patient> _patients = new();
+
 
     [ObservableProperty]
     private ObservableCollection<QueueTicket> _todayQueue = new();
