@@ -6,6 +6,9 @@ using System.Linq;
 using Avalonia.Markup.Xaml;
 using HealthCenter.Desktop.ViewModels;
 using HealthCenter.Desktop.Views;
+using HealthCenter.Desktop.Infrastructure;
+using System;
+using Serilog;
 
 namespace HealthCenter.Desktop;
 
@@ -18,14 +21,19 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        GlobalExceptionHandler.RegisterAvaloniaHandlers();
+
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
-            // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
             DisableAvaloniaDataAnnotationValidation();
             desktop.MainWindow = new MainWindow
             {
                 DataContext = new MainWindowViewModel(),
+            };
+
+            desktop.ShutdownRequested += (s, e) =>
+            {
+                Log.Information("Application shutdown requested");
             };
         }
 
