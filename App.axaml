@@ -11,5 +11,11 @@
   
     <Application.Styles>
         <FluentTheme />
-    </Application.Styles>
+		<StyleInclude Source="/Styles/GlobalStyles.axaml"/>
+	</Application.Styles>
+	<Application.Resources>
+		<FontFamily x:Key="ArabicFont">
+			avares://HealthCenter.Desktop/Assets/Fonts/Cairo-VariableFont_slnt,wght.ttf#Cairo
+		</FontFamily>
+	</Application.Resources>
 </Application>
