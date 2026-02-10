@@ -8,180 +8,257 @@
              x:DataType="vm:QueueDisplayViewModel"
              FlowDirection="RightToLeft">
 
+    <UserControl.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="FontFamily" Value="Segoe UI, Arial"/>
+        </Style>
+        <Style Selector="Button.primary">
+            <Setter Property="Background" Value="#2563EB"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="BoxShadow" Value="0 1 3 0 #1a000000"/>
+        </Style>
+    </UserControl.Styles>
+
     <Design.DataContext>
         <vm:QueueDisplayViewModel/>
     </Design.DataContext>
 
-    <Grid Background="#0F172A">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="100"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="200"/>
-        </Grid.RowDefinitions>
+    <!-- Main Background: Light Gray like Dashboard -->
+    <Grid Background="#F3F4F6">
+       <!-- Content Area -->
+       <Grid Margin="24">
+           <Grid.RowDefinitions>
+               <RowDefinition Height="100"/>
+               <RowDefinition Height="*"/>
+               <RowDefinition Height="Auto"/>
+           </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <Border Grid.Row="0" Background="#1E293B" Padding="40,0">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                
-                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="24" VerticalAlignment="Center">
-                    <TextBlock Text="🏥" FontSize="48"/>
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="المركز الصحي" 
-                                   FontSize="32" 
-                                   FontWeight="Bold" 
-                                   Foreground="White"/>
-                        <TextBlock Text="شاشة الانتظار" 
-                                   FontSize="18" 
-                                   Foreground="#94A3B8"/>
-                    </StackPanel>
-                </StackPanel>
+           <!-- Row 0: Header -->
+           <Border Grid.Row="0" Background="White" Padding="40,0" BoxShadow="0 1 3 0 #1a000000" CornerRadius="12" Margin="0,0,0,24">
+               <Grid>
+                   <Grid.ColumnDefinitions>
+                       <ColumnDefinition Width="*"/>
+                       <ColumnDefinition Width="Auto"/>
+                   </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left">
-                    <TextBlock Text="{Binding CurrentTime}" 
-                               FontSize="36" 
-                               FontWeight="Bold" 
-                               Foreground="#22D3EE"/>
-                    <TextBlock Text="{Binding CurrentDate}" 
-                               FontSize="18" 
-                               Foreground="#94A3B8"
-                               HorizontalAlignment="Center"/>
-                </StackPanel>
-            </Grid>
-        </Border>
+                   <!-- Clinic Info -->
+                   <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="8">
+                       <TextBlock Text="العيادة العامة - General Clinic" 
+                                  FontSize="32" 
+                                  FontWeight="Bold" 
+                                  Foreground="#1E293B"/>
+                       <StackPanel Orientation="Horizontal" Spacing="16">
+                           <TextBlock Text="{Binding CurrentDateHijri}" 
+                                      FontSize="18" 
+                                      Foreground="#64748B"/>
+                           <TextBlock Text="|" 
+                                      Foreground="#E2E8F0"/>
+                           <TextBlock Text="{Binding CurrentDateGregorian, StringFormat='{}{0:dd MMMM yyyy}'}" 
+                                      FontSize="18" 
+                                      Foreground="#64748B"/>
+                       </StackPanel>
+                   </StackPanel>
 
-        <!-- Main Display Area -->
-        <Grid Grid.Row="1" Margin="40,24">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+                   <!-- Time & Mute -->
+                   <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="24" VerticalAlignment="Center">
+                       <TextBlock Text="{Binding CurrentTime}" 
+                                  FontSize="42" 
+                                  FontWeight="SemiBold" 
+                                  Foreground="#2563EB"
+                                  VerticalAlignment="Center"/>
+                       
+                       <Button Command="{Binding ToggleMuteCommand}" 
+                               Background="Transparent" 
+                               Padding="8"
+                               CornerRadius="8">
+                           <TextBlock Text="{Binding MuteIcon}" 
+                                      FontSize="24"/>
+                       </Button>
+                   </StackPanel>
+               </Grid>
+           </Border>
 
-            <!-- Current Number Display -->
-            <Border Grid.Column="0" 
-                    Background="#1E293B" 
-                    CornerRadius="24" 
-                    Margin="0,0,20,0"
-                    Padding="40">
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <TextBlock Text="الرقم الحالي" 
-                               FontSize="36" 
-                               Foreground="#94A3B8"
-                               HorizontalAlignment="Center"/>
-                    
-                    <!-- Big Ticket Number -->
-                    <Border Background="#22D3EE" 
-                            CornerRadius="32" 
-                            Padding="80,40"
-                            Margin="0,24"
-                            HorizontalAlignment="Center">
-                        <TextBlock Text="{Binding CurrentTicketNumber}" 
-                                   FontSize="200" 
-                                   FontWeight="ExtraBold" 
-                                   Foreground="#0F172A"
-                                   HorizontalAlignment="Center"/>
-                    </Border>
+           <!-- Row 1: Main Display Area -->
+           <Grid Grid.Row="1">
+               <Grid.ColumnDefinitions>
+                   <ColumnDefinition Width="1.5*"/>
+                   <ColumnDefinition Width="*"/>
+               </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="{Binding CurrentPatientName}" 
-                               FontSize="48" 
-                               FontWeight="SemiBold"
-                               Foreground="White"
-                               HorizontalAlignment="Center"/>
-                    
-                    <TextBlock Text="يرجى التوجه إلى العيادة" 
-                               FontSize="24" 
-                               Foreground="#FBBF24"
-                               Margin="0,16,0,0"
-                               HorizontalAlignment="Center"/>
-                </StackPanel>
-            </Border>
+               <!-- Col 0: Current Ticket (Right Side in RTL) -->
+               <Border Grid.Column="0" Background="White" Margin="0,0,0,0" CornerRadius="12" BoxShadow="0 1 3 0 #1a000000">
+                   <Grid>
+                       <Grid.RowDefinitions>
+                           <RowDefinition Height="*"/>
+                           <RowDefinition Height="Auto"/>
+                       </Grid.RowDefinitions>
 
-            <!-- Waiting List -->
-            <Border Grid.Column="1" 
-                    Background="#1E293B" 
-                    CornerRadius="24"
-                    Padding="24">
-                <StackPanel>
-                    <TextBlock Text="📋 قائمة الانتظار" 
-                               FontSize="28" 
-                               FontWeight="Bold"
-                               Foreground="White"
-                               Margin="0,0,0,20"/>
+                       <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="20">
+                           <TextBlock Text="الرقم الحالي" 
+                                      FontSize="36" 
+                                      Foreground="#64748B" 
+                                      HorizontalAlignment="Center"/>
+                           
+                           <Border Background="#F0F9FF" 
+                                   BorderBrush="#BFDBFE" 
+                                   BorderThickness="2" 
+                                   CornerRadius="24" 
+                                   Padding="60,30">
+                               <TextBlock Text="{Binding CurrentTicket.TicketNumber, FallbackValue='---'}" 
+                                          FontSize="140" 
+                                          FontWeight="Bold" 
+                                          Foreground="#2563EB" 
+                                          HorizontalAlignment="Center"/>
+                           </Border>
 
-                    <ItemsControl ItemsSource="{Binding WaitingQueue}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border Background="#334155" 
-                                        CornerRadius="12" 
-                                        Padding="20,16"
-                                        Margin="0,0,0,12">
-                                    <Grid ColumnDefinitions="Auto,*">
-                                        <Border Grid.Column="0" 
-                                                Background="#0F172A" 
-                                                CornerRadius="8" 
-                                                Padding="16,8"
-                                                Margin="0,0,16,0">
-                                            <TextBlock Text="{Binding TicketNumber}" 
-                                                       FontSize="32" 
-                                                       FontWeight="Bold"
-                                                       Foreground="#22D3EE"/>
-                                        </Border>
-                                        <TextBlock Grid.Column="1" 
-                                                   Text="{Binding Patient.FullName}" 
-                                                   FontSize="22"
-                                                   Foreground="White"
-                                                   VerticalAlignment="Center"/>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
-            </Border>
-        </Grid>
+                           <TextBlock Text="{Binding CurrentTicket.Patient.FullName}" 
+                                      FontSize="32" 
+                                      Foreground="#1E293B" 
+                                      FontWeight="SemiBold"
+                                      HorizontalAlignment="Center"/>
+                       </StackPanel>
 
-        <!-- Footer with recent calls -->
-        <Border Grid.Row="2" Background="#1E293B" Padding="40,16">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+                       <!-- Status Message -->
+                       <Border Grid.Row="1" Background="#FFF7ED" Padding="20" CornerRadius="0,0,12,12">
+                           <TextBlock Text="يرجى التوجه إلى العيادة" 
+                                      FontSize="24" 
+                                      Foreground="#EA580C" 
+                                      HorizontalAlignment="Center" 
+                                      FontWeight="SemiBold"/>
+                       </Border>
+                   </Grid>
+               </Border>
 
-                <TextBlock Grid.Column="0" 
-                           Text="✅ تم خدمتهم:" 
-                           FontSize="24" 
-                           Foreground="#94A3B8"
-                           VerticalAlignment="Center"
-                           Margin="0,0,24,0"/>
+               <!-- Col 1: Waiting List & Health Tips (Left Side in RTL) -->
+               <Grid Grid.Column="1" Margin="24,0,0,0">
+                   <Grid.RowDefinitions>
+                       <RowDefinition Height="*"/>
+                       <RowDefinition Height="Auto"/>
+                   </Grid.RowDefinitions>
 
-                <ItemsControl Grid.Column="1" ItemsSource="{Binding RecentCalled}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal" Spacing="16"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border Background="#16A34A" CornerRadius="12" Padding="24,12">
-                                <StackPanel Orientation="Horizontal" Spacing="12">
-                                    <TextBlock Text="{Binding TicketNumber}" 
-                                               FontSize="24" 
-                                               FontWeight="Bold"
-                                               Foreground="White"/>
-                                    <TextBlock Text="-" Foreground="White" FontSize="24"/>
-                                    <TextBlock Text="{Binding Patient.FullName}" 
-                                               FontSize="20"
-                                               Foreground="White"/>
-                                </StackPanel>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </Grid>
-        </Border>
+                   <!-- Waiting List -->
+                   <Border Grid.Row="0" Background="White" CornerRadius="12" BoxShadow="0 1 3 0 #1a000000" Padding="20">
+                       <Grid>
+                           <Grid.RowDefinitions>
+                               <RowDefinition Height="Auto"/>
+                               <RowDefinition Height="*"/>
+                           </Grid.RowDefinitions>
+
+                           <Border Grid.Row="0" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1" Padding="0,0,0,16" Margin="0,0,0,16">
+                               <Grid>
+                                   <Grid.ColumnDefinitions>
+                                       <ColumnDefinition Width="*"/>
+                                       <ColumnDefinition Width="Auto"/>
+                                   </Grid.ColumnDefinitions>
+                                   <TextBlock Text="قائمة الانتظار" FontSize="20" FontWeight="Bold" Foreground="#1E293B"/>
+                                   <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                       <TextBlock Text="{Binding PatientsAheadCount}" FontWeight="Bold" Foreground="#2563EB"/>
+                                       <TextBlock Text="في الانتظار" Foreground="#64748B"/>
+                                   </StackPanel>
+                               </Grid>
+                           </Border>
+
+                           <ListBox Grid.Row="1" 
+                                    ItemsSource="{Binding WaitingList}" 
+                                    Background="Transparent" 
+                                    BorderThickness="0">
+                               <ListBox.ItemTemplate>
+                                   <DataTemplate>
+                                       <Border Padding="12" Margin="0,0,0,12" Background="#F8FAFC" CornerRadius="8">
+                                           <Grid>
+                                               <Grid.ColumnDefinitions>
+                                                   <ColumnDefinition Width="Auto"/>
+                                                   <ColumnDefinition Width="*"/>
+                                                   <ColumnDefinition Width="Auto"/>
+                                               </Grid.ColumnDefinitions>
+
+                                               <Border Grid.Column="0" 
+                                                       Background="#EFF6FF" 
+                                                       CornerRadius="6" 
+                                                       Width="40" Height="40" 
+                                                       VerticalAlignment="Center">
+                                                   <TextBlock Text="{Binding TicketNumber}" 
+                                                              HorizontalAlignment="Center" 
+                                                              VerticalAlignment="Center" 
+                                                              FontWeight="Bold" 
+                                                              Foreground="#2563EB"/>
+                                               </Border>
+
+                                               <TextBlock Grid.Column="1" 
+                                                          Text="{Binding Patient.FullName}" 
+                                                          VerticalAlignment="Center" 
+                                                          Margin="12,0" 
+                                                          FontWeight="Medium" 
+                                                          Foreground="#334155"/>
+
+                                               <TextBlock Grid.Column="2" 
+                                                          Text="انتظار" 
+                                                          VerticalAlignment="Center" 
+                                                          FontSize="12" 
+                                                          Foreground="#64748B"/>
+                                           </Grid>
+                                       </Border>
+                                   </DataTemplate>
+                               </ListBox.ItemTemplate>
+                           </ListBox>
+                       </Grid>
+                   </Border>
+
+                   <!-- Estimated Time -->
+                   <Border Grid.Row="1" Background="#1E293B" Margin="0,24,0,0" CornerRadius="12" Padding="20">
+                       <Grid>
+                           <Grid.ColumnDefinitions>
+                               <ColumnDefinition Width="*"/>
+                               <ColumnDefinition Width="Auto"/>
+                           </Grid.ColumnDefinitions>
+                           
+                           <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                               <TextBlock Text="الوقت المتوقع" Foreground="#94A3B8" FontSize="14"/>
+                               <TextBlock Text="{Binding EstimatedWaitTimeMinutes, StringFormat='{}{0} دقيقة'}" 
+                                          Foreground="White" 
+                                          FontSize="28" 
+                                          FontWeight="Bold"/>
+                           </StackPanel>
+
+                           <Border Grid.Column="1" Background="#334155" Width="50" Height="50" CornerRadius="25">
+                               <TextBlock Text="" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                           </Border>
+                       </Grid>
+                   </Border>
+       
+               </Grid>
+           </Grid>
+
+           <!-- Row 2: Footer: Health Tips -->
+           <Border Grid.Row="2" Margin="40,24,40,24" Background="#DCFCE7" BorderBrush="#86EFAC" BorderThickness="1" CornerRadius="12" Padding="20">
+               <Grid>
+                   <Grid.ColumnDefinitions>
+                       <ColumnDefinition Width="*"/>
+                       <ColumnDefinition Width="Auto"/>
+                   </Grid.ColumnDefinitions>
+
+                   <TextBlock Grid.Column="0" 
+                              Text="{Binding CurrentHealthTip}" 
+                              FontSize="20" 
+                              Foreground="#166534" 
+                              FontWeight="SemiBold"
+                              HorizontalAlignment="Center" 
+                              VerticalAlignment="Center"/>
+
+                   <Border Grid.Column="1" Background="#16A34A" Padding="8,4" CornerRadius="6">
+                       <TextBlock Text="معلومة صحية" Foreground="White" FontSize="12"/>
+                   </Border>
+               </Grid>
+           </Border>
+       </Grid>
     </Grid>
 </UserControl>
+
