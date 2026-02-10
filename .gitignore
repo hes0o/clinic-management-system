@@ -30,3 +30,4 @@ Logs/
 
 # NuGet
 *.nupkg
+.DS_Store
