@@ -4,6 +4,7 @@
         xmlns:entities="using:HealthCenter.Desktop.Database.Entities"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:reception="using:HealthCenter.Desktop.Features.Reception.Views"
         mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="700"
         x:Class="HealthCenter.Desktop.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
@@ -57,16 +58,13 @@
         </Style>
     </Window.Styles>
 
+
     <Grid Background="#F3F4F6">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="250"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/> <ColumnDefinition Width="*"/>   </Grid.ColumnDefinitions>
 
-        <!-- Sidebar -->
         <Border Grid.Column="0" Background="#1E293B" Padding="0">
             <StackPanel Spacing="4">
-                <!-- Logo -->
                 <Border Padding="20" Background="#0F172A">
                     <StackPanel Spacing="8">
                         <TextBlock Text="🏥" FontSize="32" HorizontalAlignment="Center"/>
@@ -82,7 +80,6 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Navigation -->
                 <StackPanel Margin="12,20,12,0" Spacing="4">
                     <Button Command="{Binding NavigateToCommand}" 
                             CommandParameter="Reception"
@@ -127,7 +124,6 @@
                     </Button>
                 </StackPanel>
 
-                <!-- Stats at bottom -->
                 <StackPanel Margin="12,40,12,0" Spacing="12">
                     <Border Background="#334155" CornerRadius="8" Padding="12">
                         <StackPanel>
@@ -151,153 +147,9 @@
             </StackPanel>
         </Border>
 
-        <!-- Main Content -->
         <Grid Grid.Column="1" Margin="24">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <!-- Header -->
-            <StackPanel Grid.Row="0" Margin="0,0,0,24">
-                <TextBlock Text="الاستقبال وتسجيل المرضى" 
-                           FontSize="28" 
-                           FontWeight="Bold"
-                           Foreground="#1E293B"/>
-                <TextBlock Text="إضافة مريض جديد أو إنشاء تذكرة انتظار" 
-                           FontSize="14" 
-                           Foreground="#64748B"/>
-            </StackPanel>
-
-            <!-- Content Grid -->
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="350"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- Left: Patient List -->
-                <Border Grid.Column="0" Classes="card" Margin="0,0,16,0">
-                    <Grid RowDefinitions="Auto,Auto,*">
-                        <!-- Search -->
-                        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
-                            <TextBox Grid.Column="0"
-                                     Text="{Binding SearchQuery}"
-                                     Watermark="🔍 بحث بالاسم أو رقم الهاتف..."
-                                     Margin="0,0,8,0"/>
-                            <Button Grid.Column="1" 
-                                    Classes="primary"
-                                    Command="{Binding SearchPatientsCommand}"
-                                    Content="بحث"/>
-                        </Grid>
-
-                        <!-- Column Headers -->
-                        <Grid Grid.Row="1" Margin="0,0,0,8">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="150"/>
-                                <ColumnDefinition Width="120"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="الاسم" FontWeight="SemiBold" Foreground="#64748B"/>
-                            <TextBlock Grid.Column="1" Text="رقم الهاتف" FontWeight="SemiBold" Foreground="#64748B"/>
-                            <TextBlock Grid.Column="2" Text="التاريخ" FontWeight="SemiBold" Foreground="#64748B"/>
-                        </Grid>
-
-                        <!-- Patient List -->
-                        <ListBox Grid.Row="2" 
-                                 ItemsSource="{Binding Patients}"
-                                 SelectedItem="{Binding SelectedPatient}"
-                                 Background="Transparent"
-                                 BorderThickness="0">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate x:DataType="entities:Patient">
-                                    <Grid Margin="0,8" ColumnDefinitions="*,150,120">
-                                        <TextBlock Grid.Column="0" 
-                                                   Text="{Binding FullName}" 
-                                                   FontWeight="Medium"
-                                                   VerticalAlignment="Center"/>
-                                        <TextBlock Grid.Column="1" 
-                                                   Text="{Binding PhoneNumber}"
-                                                   Foreground="#64748B"
-                                                   VerticalAlignment="Center"/>
-                                        <TextBlock Grid.Column="2" 
-                                                   Text="{Binding CreatedAt, StringFormat='{}{0:MM/dd}'}"
-                                                   Foreground="#94A3B8"
-                                                   VerticalAlignment="Center"/>
-                                    </Grid>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                    </Grid>
-                </Border>
-
-                <!-- Right: Actions Panel -->
-                <StackPanel Grid.Column="1" Spacing="16">
-                    <!-- Add New Patient -->
-                    <Border Classes="card">
-                        <StackPanel Spacing="16">
-                            <TextBlock Text="➕ إضافة مريض جديد" 
-                                       FontSize="16" 
-                                       FontWeight="SemiBold"/>
-                            
-                            <StackPanel Spacing="8">
-                                <TextBlock Text="الاسم الكامل" Foreground="#64748B"/>
-                                <TextBox Text="{Binding NewPatientName}" 
-                                         Watermark="أدخل اسم المريض"/>
-                            </StackPanel>
-
-                            <StackPanel Spacing="8">
-                                <TextBlock Text="رقم الهاتف" Foreground="#64748B"/>
-                                <TextBox Text="{Binding NewPatientPhone}" 
-                                         Watermark="05xxxxxxxx"/>
-                            </StackPanel>
-
-                            <Button Classes="success"
-                                    Command="{Binding AddPatientCommand}"
-                                    HorizontalAlignment="Stretch"
-                                    HorizontalContentAlignment="Center">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock Text="💾"/>
-                                    <TextBlock Text="حفظ المريض"/>
-                                </StackPanel>
-                            </Button>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- Generate Ticket -->
-                    <Border Classes="card">
-                        <StackPanel Spacing="16">
-                            <TextBlock Text="🎫 إنشاء تذكرة انتظار" 
-                                       FontSize="16" 
-                                       FontWeight="SemiBold"/>
-                            
-                            <TextBlock Text="اختر مريض من القائمة ثم اضغط الزر" 
-                                       Foreground="#64748B"
-                                       TextWrapping="Wrap"/>
-
-                            <Border Background="#FEF3C7" 
-                                    CornerRadius="8" 
-                                    Padding="12"
-                                    IsVisible="{Binding SelectedPatient, Converter={x:Static ObjectConverters.IsNotNull}}">
-                                <TextBlock Text="{Binding SelectedPatient.FullName}"
-                                           FontWeight="SemiBold"
-                                           Foreground="#92400E"/>
-                            </Border>
-
-                            <Button Classes="primary"
-                                    Command="{Binding GenerateTicketCommand}"
-                                    HorizontalAlignment="Stretch"
-                                    HorizontalContentAlignment="Center"
-                                    IsEnabled="{Binding SelectedPatient, Converter={x:Static ObjectConverters.IsNotNull}}">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock Text="🎟️"/>
-                                    <TextBlock Text="إنشاء تذكرة"/>
-                                </StackPanel>
-                            </Button>
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
-            </Grid>
+            <reception:ReceptionView/>
         </Grid>
+
     </Grid>
 </Window>
