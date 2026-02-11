@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using HealthCenter.Desktop.Database;
 using HealthCenter.Desktop.Database.Entities;
 using Microsoft.EntityFrameworkCore;
+using HealthCenter.Desktop.Services; // ✅ إضافة خدمة المخزن
 
 namespace HealthCenter.Desktop.ViewModels;
 
@@ -46,6 +47,25 @@ public partial class MainWindowViewModel : ViewModelBase
         _db = new HealthCenterDbContext();
         _db.Database.EnsureCreated();
         LoadData();
+
+        // ✅ الاشتراك في تحديثات المخزن المركزي
+        // بمجرد إضافة مريض في شاشة الاستقبال، سيتم تحديث العدادات هنا
+        ClinicStore.Instance.QueueChanged += UpdateStatsFromStore;
+        
+        // تحديث أولي
+        UpdateStatsFromStore();
+    }
+
+    // ✅ دالة جديدة لتحديث الإحصائيات من ClinicStore
+    private void UpdateStatsFromStore()
+    {
+        // نستخدم القيم من المخزن المركزي لضمان التزامن مع شاشة الاستقبال
+        // إذا كان المخزن يحتوي بيانات، نعتمد عليه
+        if (ClinicStore.Instance.AllPatients.Any())
+        {
+            TodayPatientCount = ClinicStore.Instance.TodayCount;
+            WaitingCount = ClinicStore.Instance.WaitingCount;
+        }
     }
 
     private void LoadData()
@@ -63,7 +83,7 @@ public partial class MainWindowViewModel : ViewModelBase
             .ToList();
         TodayQueue = new ObservableCollection<QueueTicket>(queue);
 
-        // Stats
+        // Stats (Initial load from DB)
         TodayPatientCount = queue.Count;
         WaitingCount = queue.Count(q => q.Status == TicketStatus.Waiting || q.Status == TicketStatus.AwaitingRecall);
     }
