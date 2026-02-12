@@ -1,155 +1,34 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:HealthCenter.Desktop.ViewModels"
-        xmlns:entities="using:HealthCenter.Desktop.Database.Entities"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:reception="using:HealthCenter.Desktop.Features.Reception.Views"
-        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="700"
+        xmlns:comp="clr-namespace:HealthCenter.Desktop.Views.Components"
         x:Class="HealthCenter.Desktop.Views.MainWindow"
-        x:DataType="vm:MainWindowViewModel"
-        Title="HealthCenter - نظام إدارة المركز الصحي"
-        Width="1200" Height="700"
-        WindowStartupLocation="CenterScreen"
-        FlowDirection="RightToLeft">
+        Width="800" Height="450"
+        Title="HealthCenter">
 
-    <Design.DataContext>
-        <vm:MainWindowViewModel/>
-    </Design.DataContext>
+	<Grid>
 
-    <Window.Styles>
-        <Style Selector="TextBlock">
-            <Setter Property="FontFamily" Value="Segoe UI, Arial"/>
-        </Style>
-        <Style Selector="Button.primary">
-            <Setter Property="Background" Value="#2563EB"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="CornerRadius" Value="8"/>
-            <Setter Property="Padding" Value="16,10"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-        </Style>
-        <Style Selector="Button.success">
-            <Setter Property="Background" Value="#16A34A"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="CornerRadius" Value="8"/>
-            <Setter Property="Padding" Value="16,10"/>
-        </Style>
-        <Style Selector="Button.danger">
-            <Setter Property="Background" Value="#DC2626"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="CornerRadius" Value="8"/>
-            <Setter Property="Padding" Value="16,10"/>
-        </Style>
-        <Style Selector="TextBox">
-            <Setter Property="CornerRadius" Value="8"/>
-            <Setter Property="Padding" Value="12,10"/>
-            <Setter Property="BorderBrush" Value="#E5E7EB"/>
-        </Style>
-        <Style Selector="Border.card">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="CornerRadius" Value="12"/>
-            <Setter Property="Padding" Value="20"/>
-            <Setter Property="BoxShadow" Value="0 1 3 0 #1a000000"/>
-        </Style>
-        <Style Selector="Border.stat-card">
-            <Setter Property="Background" Value="#F0FDF4"/>
-            <Setter Property="CornerRadius" Value="12"/>
-            <Setter Property="Padding" Value="16"/>
-        </Style>
-    </Window.Styles>
+		<TransitioningContentControl>
+			<TransitioningContentControl.Transitions>
+				<Transitions>
+					<DoubleTransition Property="Opacity" Duration="0:0:0.15"/>
+				</Transitions>
+			</TransitioningContentControl.Transitions>
 
+			<StackPanel HorizontalAlignment="Center"
+						VerticalAlignment="Center"
+						Spacing="16">
 
-    <Grid Background="#F3F4F6">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="250"/> <ColumnDefinition Width="*"/>   </Grid.ColumnDefinitions>
+				<Button Classes="btn-animate"
+						Width="180"
+						Height="44"
+						Content="Test Button"/>
 
-        <Border Grid.Column="0" Background="#1E293B" Padding="0">
-            <StackPanel Spacing="4">
-                <Border Padding="20" Background="#0F172A">
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="🏥" FontSize="32" HorizontalAlignment="Center"/>
-                        <TextBlock Text="HealthCenter" 
-                                   FontSize="20" 
-                                   FontWeight="Bold" 
-                                   Foreground="White"
-                                   HorizontalAlignment="Center"/>
-                        <TextBlock Text="نظام إدارة المركز الصحي" 
-                                   FontSize="12" 
-                                   Foreground="#94A3B8"
-                                   HorizontalAlignment="Center"/>
-                    </StackPanel>
-                </Border>
+				<comp:NoDataPlaceholder/>
 
-                <StackPanel Margin="12,20,12,0" Spacing="4">
-                    <Button Command="{Binding NavigateToCommand}" 
-                            CommandParameter="Reception"
-                            HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Right"
-                            Background="#334155"
-                            Foreground="White"
-                            Padding="16,12"
-                            CornerRadius="8">
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <TextBlock Text="الاستقبال"/>
-                            <TextBlock Text="🏨"/>
-                        </StackPanel>
-                    </Button>
+			</StackPanel>
 
-                    <Button Command="{Binding NavigateToCommand}" 
-                            CommandParameter="Queue"
-                            HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Right"
-                            Background="Transparent"
-                            Foreground="#94A3B8"
-                            Padding="16,12"
-                            CornerRadius="8">
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <TextBlock Text="شاشة الانتظار"/>
-                            <TextBlock Text="📺"/>
-                        </StackPanel>
-                    </Button>
+		</TransitioningContentControl>
 
-                    <Button Command="{Binding NavigateToCommand}" 
-                            CommandParameter="Doctor"
-                            HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Right"
-                            Background="Transparent"
-                            Foreground="#94A3B8"
-                            Padding="16,12"
-                            CornerRadius="8">
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <TextBlock Text="لوحة الطبيب"/>
-                            <TextBlock Text="👨‍⚕️"/>
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
+	</Grid>
 
-                <StackPanel Margin="12,40,12,0" Spacing="12">
-                    <Border Background="#334155" CornerRadius="8" Padding="12">
-                        <StackPanel>
-                            <TextBlock Text="مرضى اليوم" Foreground="#94A3B8" FontSize="12"/>
-                            <TextBlock Text="{Binding TodayPatientCount}" 
-                                       Foreground="White" 
-                                       FontSize="28" 
-                                       FontWeight="Bold"/>
-                        </StackPanel>
-                    </Border>
-                    <Border Background="#334155" CornerRadius="8" Padding="12">
-                        <StackPanel>
-                            <TextBlock Text="في الانتظار" Foreground="#94A3B8" FontSize="12"/>
-                            <TextBlock Text="{Binding WaitingCount}" 
-                                       Foreground="#FBBF24" 
-                                       FontSize="28" 
-                                       FontWeight="Bold"/>
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
-            </StackPanel>
-        </Border>
-
-        <Grid Grid.Column="1" Margin="24">
-            <reception:ReceptionView/>
-        </Grid>
-
-    </Grid>
 </Window>
