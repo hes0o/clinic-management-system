@@ -1,0 +1,252 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HealthCenter.Desktop.Features.Reception.ViewModels"
+             x:Class="HealthCenter.Desktop.Features.Reception.Views.ReceptionView"
+             x:DataType="vm:ReceptionViewModel"
+             x:Name="ReceptionRoot">
+
+    <UserControl.DataContext>
+        <vm:ReceptionViewModel/>
+    </UserControl.DataContext>
+
+    <UserControl.Styles>
+        
+        <Style Selector="TextBox">
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Padding" Value="10,0"/> 
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="BorderBrush" Value="#94A3B8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="#F8FAFC"/>
+            <Setter Property="Foreground" Value="#0F172A"/>
+        </Style>
+        <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+             <Setter Property="BorderBrush" Value="#2563EB"/>
+             <Setter Property="BorderThickness" Value="2"/>
+        </Style>
+
+        <Style Selector="ComboBox">
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="BorderBrush" Value="#94A3B8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="#F8FAFC"/>
+            <Setter Property="Foreground" Value="#0F172A"/>
+        </Style>
+
+        <Style Selector="CalendarDatePicker">
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Background" Value="#F8FAFC"/>
+            <Setter Property="Foreground" Value="#0F172A"/>
+            <Setter Property="BorderBrush" Value="#94A3B8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="Padding" Value="10,0"/>
+        </Style>
+
+        <Style Selector="TabItem">
+            <Setter Property="Foreground" Value="#64748B"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,0,15,0"/>
+        </Style>
+        <Style Selector="TabItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Foreground" Value="#1E293B"/> 
+        </Style>
+        <Style Selector="TabItem:selected">
+            <Setter Property="Foreground" Value="#2563EB"/> 
+        </Style>
+
+        <Style Selector="Button.PrimaryBtn">
+            <Setter Property="Background" Value="#2563EB"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="0"/> 
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+        
+        <Style Selector="Button.PrimaryBtn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#1D4ED8"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        
+        <Style Selector="Button.PrimaryBtn:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="#1E3A8A"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+
+        <Style Selector="Button.IconBtn">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style Selector="Button.IconBtn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#F1F5F9"/> 
+        </Style>
+
+    </UserControl.Styles>
+
+    <Grid Background="#F1F5F9" FlowDirection="{Binding CurrentFlowDirection}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="White" Padding="20,15" BoxShadow="0 1 3 0 #1a000000" Margin="0,0,0,15">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel>
+                    <TextBlock Text="{Binding TitleText}" FontWeight="Bold" FontSize="20" Foreground="#1E293B"/>
+                    <TextBlock Text="وحدة إدارة الاستقبال وتسجيل المرضى" FontSize="13" Foreground="#64748B" Margin="0,5,0,0"/>
+                </StackPanel>
+                <Button Grid.Column="1" Content="{Binding LangButtonText}" Command="{Binding SwitchLanguageCommand}" 
+                        Background="Transparent" Foreground="#2563EB" BorderThickness="1" BorderBrush="#2563EB" CornerRadius="4"/>
+            </Grid>
+        </Border>
+
+        <TabControl Grid.Row="1" Margin="20,0,20,20" SelectedIndex="{Binding SelectedTabIndex}">
+            
+            <TabItem Header="{Binding TabRegisterHeader}">
+                <Grid>
+                    <Border Background="White" CornerRadius="12" Padding="40" Width="650" VerticalAlignment="Top" BoxShadow="0 4 6 0 #0D000000" Margin="0,20,0,0">
+                        <StackPanel Spacing="20">
+                            
+                            <TextBlock Text="{Binding TitleText}" FontSize="22" FontWeight="Bold" Foreground="#334155" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                            
+                            <Grid ColumnDefinitions="*, 20, *" RowDefinitions="Auto,Auto">
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="{Binding NameLabel}" Foreground="#475569" FontWeight="Medium" Margin="0,0,0,6"/>
+                                    <TextBox Text="{Binding PatientName}" Watermark="مثال: أحمد محمد"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="{Binding NationalIdLabel}" Foreground="#475569" FontWeight="Medium" Margin="0,0,0,6"/>
+                                    <TextBox Text="{Binding NationalId}" MaxLength="15"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*, 20, *" RowDefinitions="Auto,Auto">
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="{Binding PhoneLabel}" Foreground="#475569" FontWeight="Medium" Margin="0,0,0,6"/>
+                                    <TextBox Text="{Binding PhoneNumber}" MaxLength="10" Watermark="05xxxxxxxx"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="{Binding GenderLabel}" Foreground="#475569" FontWeight="Medium" Margin="0,0,0,6"/>
+                                    <ComboBox ItemsSource="{Binding GenderOptions}" SelectedItem="{Binding SelectedGender}" 
+                                              HorizontalAlignment="Stretch" PlaceholderText="اختر من القائمة..."/>
+                                </StackPanel>
+                            </Grid>
+                            
+                            <Grid ColumnDefinitions="*, 20, *" RowDefinitions="Auto,Auto">
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="{Binding BloodTypeLabel}" Foreground="#475569" FontWeight="Medium" Margin="0,0,0,6"/>
+                                    <ComboBox ItemsSource="{Binding BloodTypes}" SelectedItem="{Binding SelectedBloodType}"
+                                              HorizontalAlignment="Stretch" PlaceholderText="-"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="{Binding BirthDateLabel}" Foreground="#475569" FontWeight="Medium" Margin="0,0,0,6"/>
+                                    
+                                    <CalendarDatePicker SelectedDate="{Binding SelectedBirthDate}" 
+                                                        Watermark="DD/MM/YYYY" 
+                                                        UseFloatingWatermark="False"
+                                                        HorizontalAlignment="Stretch"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock Text="{Binding SuccessMessage}" Foreground="#16A34A" HorizontalAlignment="Center" FontWeight="Bold" IsVisible="{Binding SuccessMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                            <TextBlock Text="{Binding ErrorMessage}" Foreground="#DC2626" HorizontalAlignment="Center" IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                            
+                            <Button Classes="PrimaryBtn" 
+                                    Content="{Binding SaveButtonText}" 
+                                    Command="{Binding AddPatientCommand}" 
+                                    Margin="0,10,0,0"
+                                    Height="45"
+                                    HorizontalAlignment="Stretch"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="{Binding TabSearchHeader}">
+                <Grid RowDefinitions="Auto,*" Margin="10">
+                    
+                    <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,20">
+                        <TextBox Text="{Binding SearchQuery}" Watermark="{Binding SearchPlaceholder}">
+                            <TextBox.KeyBindings>
+                                <KeyBinding Gesture="Enter" Command="{Binding SearchCommand}"/>
+                            </TextBox.KeyBindings>
+                        </TextBox>
+                        
+                        <Button Grid.Column="1" 
+                                Classes="PrimaryBtn"
+                                Content="{Binding SearchBtnText}" 
+                                Command="{Binding SearchCommand}" 
+                                Margin="10,0,0,0" 
+                                Height="40" 
+                                Width="100"/>
+                    </Grid>
+                    
+                    <ScrollViewer Grid.Row="1">
+                        <ItemsControl ItemsSource="{Binding SearchResults}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="White" Margin="0,0,0,10" Padding="15" CornerRadius="8" BoxShadow="0 1 2 0 #0D000000" BorderBrush="#E2E8F0" BorderThickness="1">
+                                        <Grid ColumnDefinitions="Auto,*,Auto">
+                                            <Border Background="#F1F5F9" Width="45" Height="45" CornerRadius="25" Margin="0,0,15,0">
+                                                <TextBlock Text="👤" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="18"/>
+                                            </Border>
+                                            
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
+                                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                                    <TextBlock Text="{Binding FullName}" FontWeight="Bold" FontSize="16" Foreground="#1E293B"/>
+                                                    <Border Background="#FEF2F2" CornerRadius="4" Padding="6,2" IsVisible="{Binding BloodType, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                                        <TextBlock Text="{Binding BloodType}" FontSize="11" Foreground="#991B1B" FontWeight="Bold"/>
+                                                    </Border>
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                     <TextBlock Text="{Binding PhoneNumber}" Foreground="#64748B" FontSize="13"/>
+                                                     <TextBlock Text="•" Foreground="#CBD5E1"/>
+                                                     <TextBlock Text="{Binding NationalId}" Foreground="#64748B" FontSize="13"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                            
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                                                
+                                                <Button Classes="IconBtn"
+                                                        Content="🖨️" ToolTip.Tip="طباعة تذكرة"
+                                                        Command="{Binding #ReceptionRoot.((vm:ReceptionViewModel)DataContext).PrintTicketCommand}"
+                                                        CommandParameter="{Binding}"
+                                                        Foreground="#2563EB"/>
+                                                
+                                                <Button Classes="IconBtn"
+                                                        Content="✏️" ToolTip.Tip="تعديل"
+                                                        Command="{Binding #ReceptionRoot.((vm:ReceptionViewModel)DataContext).EditPatientCommand}"
+                                                        CommandParameter="{Binding}"
+                                                        Foreground="#D97706"/>
+
+                                                <Button Classes="IconBtn"
+                                                        Content="🗑️" ToolTip.Tip="حذف"
+                                                        Command="{Binding #ReceptionRoot.((vm:ReceptionViewModel)DataContext).DeletePatientCommand}"
+                                                        CommandParameter="{Binding}"
+                                                        Foreground="#DC2626"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</UserControl>
