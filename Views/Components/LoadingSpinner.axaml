@@ -1,0 +1,20 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="HealthCenter.Desktop.Views.Components.LoadingSpinner"
+             Width="40" Height="40">
+
+	<Grid>
+		<Ellipse Stroke="#94A3B8" StrokeThickness="4" Opacity="0.30"/>
+
+		<Path x:Name="SpinnerPath"
+			  Stroke="#3B82F6"
+			  StrokeThickness="4"
+			  StrokeLineCap="Round"
+			  Data="M 20,3 A 17,17 0 1 1 3,20">
+			<Path.RenderTransform>
+				<RotateTransform CenterX="20" CenterY="20"/>
+			</Path.RenderTransform>
+		</Path>
+
+	</Grid>
+</UserControl>

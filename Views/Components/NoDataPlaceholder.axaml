@@ -1,0 +1,26 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="HealthCenter.Desktop.Views.Components.NoDataPlaceholder">
+
+  <Border Padding="24"
+          CornerRadius="14"
+          Background="#111827">
+
+    <StackPanel Spacing="6"
+                HorizontalAlignment="Center">
+
+      <TextBlock Text="Veri yok"
+                 FontSize="18"
+                 FontWeight="SemiBold"
+                 Foreground="White"
+                 HorizontalAlignment="Center"/>
+
+      <TextBlock Text="Liste boş. Yeni kayıt ekleyebilirsin."
+                 Foreground="#CBD5E1"
+                 HorizontalAlignment="Center"/>
+
+    </StackPanel>
+
+  </Border>
+
+</UserControl>

@@ -12,6 +12,7 @@
     <Application.Styles>
         <FluentTheme />
 		<StyleInclude Source="/Styles/GlobalStyles.axaml"/>
+		<StyleInclude Source="/Styles/Animations.axaml"/>
 	</Application.Styles>
 	<Application.Resources>
 		<FontFamily x:Key="ArabicFont">
