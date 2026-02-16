@@ -21,7 +21,7 @@ public class User
     public required string FullName { get; set; }
     public UserRole Role { get; set; } = UserRole.Receptionist;
     public bool IsActive { get; set; } = true;
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime CreatedAt { get; set; }
 
     // Navigation properties
     public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();

@@ -15,8 +15,8 @@ public class Visit
     public string? Notes { get; set; }
     public string? Attachments { get; set; } // JSON array of file paths
     public decimal? InvoiceAmount { get; set; }
-    public DateTime VisitDate { get; set; } = DateTime.Now;
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime VisitDate {get; set; }
+    public DateTime CreatedAt { get; set; }
 
     // Navigation properties
     public Patient? Patient { get; set; }

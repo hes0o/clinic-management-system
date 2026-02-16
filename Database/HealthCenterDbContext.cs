@@ -115,7 +115,7 @@ public class HealthCenterDbContext : DbContext
             FullName = "مدير النظام",
             Role = UserRole.Admin,
             IsActive = true,
-            CreatedAt = DateTime.Now
+            CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0)
         });
 
         // Seed sample patients (10 patients with Arabic names)
@@ -141,7 +141,7 @@ public class HealthCenterDbContext : DbContext
                 Address = "الرياض، حي الملز",
                 BloodType = "A+",
                 EmergencyContact = "0559876543",
-                CreatedAt = DateTime.Now
+                CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0)
             },
             new Patient 
             { 
@@ -153,7 +153,7 @@ public class HealthCenterDbContext : DbContext
                 Address = "جدة، حي الروضة",
                 BloodType = "O-",
                 EmergencyContact = "0501234567",
-                CreatedAt = DateTime.Now
+                CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0)
             },
             new Patient 
             { 
@@ -165,7 +165,7 @@ public class HealthCenterDbContext : DbContext
                 Address = "الدمام، حي الفيصلية",
                 BloodType = "B+",
                 EmergencyContact = "0554445566",
-                CreatedAt = DateTime.Now
+                CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0)
             },
             new Patient 
             { 
@@ -177,7 +177,7 @@ public class HealthCenterDbContext : DbContext
                 Address = "مكة المكرمة، العزيزية",
                 BloodType = "AB+",
                 EmergencyContact = "0551112233",
-                CreatedAt = DateTime.Now
+                CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0)
             },
             new Patient 
             { 
@@ -189,7 +189,7 @@ public class HealthCenterDbContext : DbContext
                 Address = "أبها، حي المنهل",
                 BloodType = "O+",
                 EmergencyContact = "0561234567",
-                CreatedAt = DateTime.Now
+                CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0)
             },
             new Patient 
             { 
@@ -201,7 +201,7 @@ public class HealthCenterDbContext : DbContext
                 Address = "الرياض، حي النخيل",
                 BloodType = "A-",
                 EmergencyContact = "0522223333",
-                CreatedAt = DateTime.Now
+                CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0)
             },
             new Patient 
             { 
@@ -213,7 +213,7 @@ public class HealthCenterDbContext : DbContext
                 Address = "الطائف، حي الشهداء",
                 BloodType = "B-",
                 EmergencyContact = "0533334444",
-                CreatedAt = DateTime.Now
+                CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0)
             },
             new Patient 
             { 
@@ -225,7 +225,7 @@ public class HealthCenterDbContext : DbContext
                 Address = "المدينة المنورة، حي العزيزية",
                 BloodType = "O+",
                 EmergencyContact = "0577778888",
-                CreatedAt = DateTime.Now
+                CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0)
             },
             new Patient 
             { 
@@ -237,7 +237,7 @@ public class HealthCenterDbContext : DbContext
                 Address = "جدة، حي السلامة",
                 BloodType = "AB-",
                 EmergencyContact = "0588889999",
-                CreatedAt = DateTime.Now
+                CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0)
             },
             new Patient 
             { 
@@ -249,12 +249,12 @@ public class HealthCenterDbContext : DbContext
                 Address = "الخبر، حي الثقبة",
                 BloodType = "A+",
                 EmergencyContact = "0599998888",
-                CreatedAt = DateTime.Now
+                CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0)
             }
         );
 
         // Seed sample queue tickets (5 tickets for today)
-        var today = DateTime.Today;
+        var seedDate = new DateTime(2026, 2, 16); // Static date for seed data
         modelBuilder.Entity<QueueTicket>().HasData(
             new QueueTicket
             {
@@ -263,9 +263,9 @@ public class HealthCenterDbContext : DbContext
                 PatientId = patient1,
                 DoctorId = adminId,
                 Status = TicketStatus.Completed,
-                CreatedAt = today.AddHours(8),
-                CalledAt = today.AddHours(8).AddMinutes(15),
-                CompletedAt = today.AddHours(8).AddMinutes(30),
+                CreatedAt = new DateTime(2026, 2, 16, 8, 0, 0),
+                CalledAt = new DateTime(2026, 2, 16, 8, 15, 0),
+                CompletedAt = new DateTime(2026, 2, 16, 8, 30, 0),
                 CallCount = 1
             },
             new QueueTicket
@@ -275,8 +275,8 @@ public class HealthCenterDbContext : DbContext
                 PatientId = patient2,
                 DoctorId = adminId,
                 Status = TicketStatus.InProgress,
-                CreatedAt = today.AddHours(8).AddMinutes(10),
-                CalledAt = today.AddHours(8).AddMinutes(35),
+                CreatedAt = new DateTime(2026, 2, 16, 8, 10, 0),
+                CalledAt = new DateTime(2026, 2, 16, 8, 35, 0),
                 CallCount = 1
             },
             new QueueTicket
@@ -285,7 +285,7 @@ public class HealthCenterDbContext : DbContext
                 TicketNumber = 3,
                 PatientId = patient3,
                 Status = TicketStatus.Waiting,
-                CreatedAt = today.AddHours(8).AddMinutes(20),
+                CreatedAt = new DateTime(2026, 2, 16, 8, 20, 0),
                 CallCount = 0
             },
             new QueueTicket
@@ -294,7 +294,7 @@ public class HealthCenterDbContext : DbContext
                 TicketNumber = 4,
                 PatientId = patient4,
                 Status = TicketStatus.Waiting,
-                CreatedAt = today.AddHours(9),
+                CreatedAt = new DateTime(2026, 2, 16, 9, 0, 0),
                 CallCount = 0
             },
             new QueueTicket
@@ -303,7 +303,7 @@ public class HealthCenterDbContext : DbContext
                 TicketNumber = 5,
                 PatientId = patient5,
                 Status = TicketStatus.Waiting,
-                CreatedAt = today.AddHours(9).AddMinutes(15),
+                CreatedAt = new DateTime(2026, 2, 16, 9, 15, 0),
                 CallCount = 0
             }
         );
@@ -319,8 +319,8 @@ public class HealthCenterDbContext : DbContext
                 Prescriptions = "Amoxicillin 500mg - 3 مرات يومياً لمدة 5 أيام",
                 Notes = "المريض يعاني من ارتفاع طفيف في درجة الحرارة",
                 InvoiceAmount = 150.00m,
-                VisitDate = today.AddHours(8).AddMinutes(15),
-                CreatedAt = today.AddHours(8).AddMinutes(30)
+                VisitDate = new DateTime(2026, 2, 16, 8, 15, 0),
+                CreatedAt = new DateTime(2026, 2, 16, 8, 30, 0)
             },
             new Visit
             {
@@ -331,8 +331,8 @@ public class HealthCenterDbContext : DbContext
                 Prescriptions = "Amlodipine 5mg - مرة واحدة يومياً صباحاً",
                 Notes = "ينصح بتقليل الملح في الطعام وممارسة الرياضة",
                 InvoiceAmount = 200.00m,
-                VisitDate = today.AddDays(-1).AddHours(10),
-                CreatedAt = today.AddDays(-1).AddHours(10).AddMinutes(20)
+                VisitDate = new DateTime(2026, 2, 15, 10, 0, 0),
+                CreatedAt = new DateTime(2026, 2, 15, 10, 20, 0)
             },
             new Visit
             {
@@ -343,8 +343,8 @@ public class HealthCenterDbContext : DbContext
                 Prescriptions = "Metformin 500mg - مرتين يومياً مع الوجبات",
                 Notes = "مستوى السكر التراكمي مستقر، المتابعة بعد 3 أشهر",
                 InvoiceAmount = 180.00m,
-                VisitDate = today.AddDays(-2).AddHours(11),
-                CreatedAt = today.AddDays(-2).AddHours(11).AddMinutes(25)
+                VisitDate = new DateTime(2026, 2, 14, 11, 0, 0),
+                CreatedAt = new DateTime(2026, 2, 14, 11, 25, 0)
             }
         );
     }

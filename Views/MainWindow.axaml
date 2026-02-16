@@ -1,34 +1,10 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:comp="clr-namespace:HealthCenter.Desktop.Views.Components"
+        xmlns:reception="clr-namespace:HealthCenter.Desktop.Features.Reception.Views"
         x:Class="HealthCenter.Desktop.Views.MainWindow"
-        Width="800" Height="450"
-        Title="HealthCenter">
+        Width="1200" Height="700"
+        Title="مركز الرعاية الصحية">
 
-	<Grid>
-
-		<TransitioningContentControl>
-			<TransitioningContentControl.Transitions>
-				<Transitions>
-					<DoubleTransition Property="Opacity" Duration="0:0:0.15"/>
-				</Transitions>
-			</TransitioningContentControl.Transitions>
-
-			<StackPanel HorizontalAlignment="Center"
-						VerticalAlignment="Center"
-						Spacing="16">
-
-				<Button Classes="btn-animate"
-						Width="180"
-						Height="44"
-						Content="Test Button"/>
-
-				<comp:NoDataPlaceholder/>
-
-			</StackPanel>
-
-		</TransitioningContentControl>
-
-	</Grid>
+	<reception:ReceptionView/>
 
 </Window>
