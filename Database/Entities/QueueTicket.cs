@@ -23,7 +23,7 @@ public class QueueTicket
     public Guid PatientId { get; set; }
     public Guid? DoctorId { get; set; }
     public TicketStatus Status { get; set; } = TicketStatus.Waiting;
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime CreatedAt { get; set; }
     public DateTime? CalledAt { get; set; }
     public DateTime? CompletedAt { get; set; }
     public int CallCount { get; set; } = 0; // How many times patient was called

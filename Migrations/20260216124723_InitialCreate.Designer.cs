@@ -11,14 +11,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HealthCenter.Desktop.Migrations
 {
     [DbContext(typeof(HealthCenterDbContext))]
-    [Migration("20260216124020_InitialCreate")]
+    [Migration("20260216124723_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.3");
+            modelBuilder.HasAnnotation("ProductVersion", "9.0.1");
 
             modelBuilder.Entity("HealthCenter.Desktop.Database.Entities.Appointment", b =>
                 {
@@ -117,130 +117,130 @@ namespace HealthCenter.Desktop.Migrations
                             Id = new Guid("10000000-0000-0000-0000-000000000001"),
                             Address = "الرياض، حي الملز",
                             BloodType = "A+",
-                            CreatedAt = new DateTime(2026, 2, 16, 15, 40, 20, 452, DateTimeKind.Local).AddTicks(3940),
+                            CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             DateOfBirth = new DateTime(1985, 5, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             EmergencyContact = "0559876543",
                             FullName = "أحمد محمد علي",
                             Gender = 0,
                             PhoneNumber = "0501234567",
-                            UpdatedAt = new DateTime(2026, 2, 16, 15, 40, 20, 452, DateTimeKind.Local).AddTicks(3180)
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("10000000-0000-0000-0000-000000000002"),
                             Address = "جدة، حي الروضة",
                             BloodType = "O-",
-                            CreatedAt = new DateTime(2026, 2, 16, 15, 40, 20, 452, DateTimeKind.Local).AddTicks(4030),
+                            CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             DateOfBirth = new DateTime(1990, 8, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             EmergencyContact = "0501234567",
                             FullName = "فاطمة خالد العمري",
                             Gender = 1,
                             PhoneNumber = "0559876543",
-                            UpdatedAt = new DateTime(2026, 2, 16, 15, 40, 20, 452, DateTimeKind.Local).AddTicks(4020)
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("10000000-0000-0000-0000-000000000003"),
                             Address = "الدمام، حي الفيصلية",
                             BloodType = "B+",
-                            CreatedAt = new DateTime(2026, 2, 16, 15, 40, 20, 452, DateTimeKind.Local).AddTicks(4030),
+                            CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             DateOfBirth = new DateTime(1978, 3, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             EmergencyContact = "0554445566",
                             FullName = "عبدالله سعد الغامدي",
                             Gender = 0,
                             PhoneNumber = "0551112233",
-                            UpdatedAt = new DateTime(2026, 2, 16, 15, 40, 20, 452, DateTimeKind.Local).AddTicks(4030)
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("10000000-0000-0000-0000-000000000004"),
                             Address = "مكة المكرمة، العزيزية",
                             BloodType = "AB+",
-                            CreatedAt = new DateTime(2026, 2, 16, 15, 40, 20, 452, DateTimeKind.Local).AddTicks(4040),
+                            CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             DateOfBirth = new DateTime(1995, 12, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             EmergencyContact = "0551112233",
                             FullName = "نورة عبدالرحمن القحطاني",
                             Gender = 1,
                             PhoneNumber = "0544445566",
-                            UpdatedAt = new DateTime(2026, 2, 16, 15, 40, 20, 452, DateTimeKind.Local).AddTicks(4040)
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("10000000-0000-0000-0000-000000000005"),
                             Address = "أبها، حي المنهل",
                             BloodType = "O+",
-                            CreatedAt = new DateTime(2026, 2, 16, 15, 40, 20, 452, DateTimeKind.Local).AddTicks(4090),
+                            CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             DateOfBirth = new DateTime(1982, 7, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             EmergencyContact = "0561234567",
                             FullName = "محمد عبدالعزيز الشهري",
                             Gender = 0,
                             PhoneNumber = "0567778899",
-                            UpdatedAt = new DateTime(2026, 2, 16, 15, 40, 20, 452, DateTimeKind.Local).AddTicks(4040)
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("10000000-0000-0000-0000-000000000006"),
                             Address = "الرياض، حي النخيل",
                             BloodType = "A-",
-                            CreatedAt = new DateTime(2026, 2, 16, 15, 40, 20, 452, DateTimeKind.Local).AddTicks(4100),
+                            CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             DateOfBirth = new DateTime(1988, 11, 30, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             EmergencyContact = "0522223333",
                             FullName = "سارة أحمد الدوسري",
                             Gender = 1,
                             PhoneNumber = "0533334444",
-                            UpdatedAt = new DateTime(2026, 2, 16, 15, 40, 20, 452, DateTimeKind.Local).AddTicks(4100)
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("10000000-0000-0000-0000-000000000007"),
                             Address = "الطائف، حي الشهداء",
                             BloodType = "B-",
-                            CreatedAt = new DateTime(2026, 2, 16, 15, 40, 20, 452, DateTimeKind.Local).AddTicks(4110),
+                            CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             DateOfBirth = new DateTime(1992, 4, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             EmergencyContact = "0533334444",
                             FullName = "خالد فهد المطيري",
                             Gender = 0,
                             PhoneNumber = "0522223333",
-                            UpdatedAt = new DateTime(2026, 2, 16, 15, 40, 20, 452, DateTimeKind.Local).AddTicks(4110)
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("10000000-0000-0000-0000-000000000008"),
                             Address = "المدينة المنورة، حي العزيزية",
                             BloodType = "O+",
-                            CreatedAt = new DateTime(2026, 2, 16, 15, 40, 20, 452, DateTimeKind.Local).AddTicks(4110),
+                            CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             DateOfBirth = new DateTime(1975, 9, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             EmergencyContact = "0577778888",
                             FullName = "منى سليمان الحربي",
                             Gender = 1,
                             PhoneNumber = "0588889999",
-                            UpdatedAt = new DateTime(2026, 2, 16, 15, 40, 20, 452, DateTimeKind.Local).AddTicks(4110)
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("10000000-0000-0000-0000-000000000009"),
                             Address = "جدة، حي السلامة",
                             BloodType = "AB-",
-                            CreatedAt = new DateTime(2026, 2, 16, 15, 40, 20, 452, DateTimeKind.Local).AddTicks(4120),
+                            CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             DateOfBirth = new DateTime(1987, 2, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             EmergencyContact = "0588889999",
                             FullName = "ياسر علي الزهراني",
                             Gender = 0,
                             PhoneNumber = "0577778888",
-                            UpdatedAt = new DateTime(2026, 2, 16, 15, 40, 20, 452, DateTimeKind.Local).AddTicks(4120)
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("10000000-0000-0000-0000-000000000010"),
                             Address = "الخبر، حي الثقبة",
                             BloodType = "A+",
-                            CreatedAt = new DateTime(2026, 2, 16, 15, 40, 20, 452, DateTimeKind.Local).AddTicks(4120),
+                            CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             DateOfBirth = new DateTime(1993, 6, 14, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             EmergencyContact = "0599998888",
                             FullName = "ريم محمد القرني",
                             Gender = 1,
                             PhoneNumber = "0511112222",
-                            UpdatedAt = new DateTime(2026, 2, 16, 15, 40, 20, 452, DateTimeKind.Local).AddTicks(4120)
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });
 
@@ -291,9 +291,9 @@ namespace HealthCenter.Desktop.Migrations
                         {
                             Id = new Guid("20000000-0000-0000-0000-000000000001"),
                             CallCount = 1,
-                            CalledAt = new DateTime(2026, 2, 16, 8, 15, 0, 0, DateTimeKind.Local),
-                            CompletedAt = new DateTime(2026, 2, 16, 8, 30, 0, 0, DateTimeKind.Local),
-                            CreatedAt = new DateTime(2026, 2, 16, 8, 0, 0, 0, DateTimeKind.Local),
+                            CalledAt = new DateTime(2026, 2, 16, 8, 15, 0, 0, DateTimeKind.Unspecified),
+                            CompletedAt = new DateTime(2026, 2, 16, 8, 30, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2026, 2, 16, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             DoctorId = new Guid("00000000-0000-0000-0000-000000000001"),
                             PatientId = new Guid("10000000-0000-0000-0000-000000000001"),
                             Status = 6,
@@ -303,8 +303,8 @@ namespace HealthCenter.Desktop.Migrations
                         {
                             Id = new Guid("20000000-0000-0000-0000-000000000002"),
                             CallCount = 1,
-                            CalledAt = new DateTime(2026, 2, 16, 8, 35, 0, 0, DateTimeKind.Local),
-                            CreatedAt = new DateTime(2026, 2, 16, 8, 10, 0, 0, DateTimeKind.Local),
+                            CalledAt = new DateTime(2026, 2, 16, 8, 35, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2026, 2, 16, 8, 10, 0, 0, DateTimeKind.Unspecified),
                             DoctorId = new Guid("00000000-0000-0000-0000-000000000001"),
                             PatientId = new Guid("10000000-0000-0000-0000-000000000002"),
                             Status = 5,
@@ -314,7 +314,7 @@ namespace HealthCenter.Desktop.Migrations
                         {
                             Id = new Guid("20000000-0000-0000-0000-000000000003"),
                             CallCount = 0,
-                            CreatedAt = new DateTime(2026, 2, 16, 8, 20, 0, 0, DateTimeKind.Local),
+                            CreatedAt = new DateTime(2026, 2, 16, 8, 20, 0, 0, DateTimeKind.Unspecified),
                             PatientId = new Guid("10000000-0000-0000-0000-000000000003"),
                             Status = 0,
                             TicketNumber = 3
@@ -323,7 +323,7 @@ namespace HealthCenter.Desktop.Migrations
                         {
                             Id = new Guid("20000000-0000-0000-0000-000000000004"),
                             CallCount = 0,
-                            CreatedAt = new DateTime(2026, 2, 16, 9, 0, 0, 0, DateTimeKind.Local),
+                            CreatedAt = new DateTime(2026, 2, 16, 9, 0, 0, 0, DateTimeKind.Unspecified),
                             PatientId = new Guid("10000000-0000-0000-0000-000000000004"),
                             Status = 0,
                             TicketNumber = 4
@@ -332,7 +332,7 @@ namespace HealthCenter.Desktop.Migrations
                         {
                             Id = new Guid("20000000-0000-0000-0000-000000000005"),
                             CallCount = 0,
-                            CreatedAt = new DateTime(2026, 2, 16, 9, 15, 0, 0, DateTimeKind.Local),
+                            CreatedAt = new DateTime(2026, 2, 16, 9, 15, 0, 0, DateTimeKind.Unspecified),
                             PatientId = new Guid("10000000-0000-0000-0000-000000000005"),
                             Status = 0,
                             TicketNumber = 5
@@ -379,7 +379,7 @@ namespace HealthCenter.Desktop.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedAt = new DateTime(2026, 2, 16, 15, 40, 20, 452, DateTimeKind.Local).AddTicks(670),
+                            CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             FullName = "مدير النظام",
                             IsActive = true,
                             PasswordHash = "admin123",
@@ -435,38 +435,38 @@ namespace HealthCenter.Desktop.Migrations
                         new
                         {
                             Id = new Guid("30000000-0000-0000-0000-000000000001"),
-                            CreatedAt = new DateTime(2026, 2, 16, 8, 30, 0, 0, DateTimeKind.Local),
+                            CreatedAt = new DateTime(2026, 2, 16, 8, 30, 0, 0, DateTimeKind.Unspecified),
                             Diagnosis = "التهاب الحلق الحاد",
                             DoctorId = new Guid("00000000-0000-0000-0000-000000000001"),
                             InvoiceAmount = 150.00m,
                             Notes = "المريض يعاني من ارتفاع طفيف في درجة الحرارة",
                             PatientId = new Guid("10000000-0000-0000-0000-000000000001"),
                             Prescriptions = "Amoxicillin 500mg - 3 مرات يومياً لمدة 5 أيام",
-                            VisitDate = new DateTime(2026, 2, 16, 8, 15, 0, 0, DateTimeKind.Local)
+                            VisitDate = new DateTime(2026, 2, 16, 8, 15, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("30000000-0000-0000-0000-000000000002"),
-                            CreatedAt = new DateTime(2026, 2, 15, 10, 20, 0, 0, DateTimeKind.Local),
+                            CreatedAt = new DateTime(2026, 2, 15, 10, 20, 0, 0, DateTimeKind.Unspecified),
                             Diagnosis = "ارتفاع ضغط الدم",
                             DoctorId = new Guid("00000000-0000-0000-0000-000000000001"),
                             InvoiceAmount = 200.00m,
                             Notes = "ينصح بتقليل الملح في الطعام وممارسة الرياضة",
                             PatientId = new Guid("10000000-0000-0000-0000-000000000006"),
                             Prescriptions = "Amlodipine 5mg - مرة واحدة يومياً صباحاً",
-                            VisitDate = new DateTime(2026, 2, 15, 10, 0, 0, 0, DateTimeKind.Local)
+                            VisitDate = new DateTime(2026, 2, 15, 10, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("30000000-0000-0000-0000-000000000003"),
-                            CreatedAt = new DateTime(2026, 2, 14, 11, 25, 0, 0, DateTimeKind.Local),
+                            CreatedAt = new DateTime(2026, 2, 14, 11, 25, 0, 0, DateTimeKind.Unspecified),
                             Diagnosis = "فحص دوري - السكري",
                             DoctorId = new Guid("00000000-0000-0000-0000-000000000001"),
                             InvoiceAmount = 180.00m,
                             Notes = "مستوى السكر التراكمي مستقر، المتابعة بعد 3 أشهر",
                             PatientId = new Guid("10000000-0000-0000-0000-000000000008"),
                             Prescriptions = "Metformin 500mg - مرتين يومياً مع الوجبات",
-                            VisitDate = new DateTime(2026, 2, 14, 11, 0, 0, 0, DateTimeKind.Local)
+                            VisitDate = new DateTime(2026, 2, 14, 11, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });
 

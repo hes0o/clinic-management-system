@@ -52,7 +52,7 @@
 
         <!-- Left: Waiting List -->
         <Border Grid.Column="0" Background="White" Padding="20">
-            <Grid RowDefinitions="Auto,Auto,*,Auto">
+            <Grid RowDefinitions="Auto,Auto,Auto,*,Auto">
                 <!-- Header -->
                 <StackPanel Grid.Row="0" Margin="0,0,0,20">
                     <TextBlock Text="👨‍⚕️ لوحة الطبيب" 
@@ -63,6 +63,46 @@
                                FontSize="14" 
                                Foreground="#64748B"/>
                 </StackPanel>
+
+                <!-- Task 3: Statistics Dashboard -->
+                <Border Grid.Row="1" Background="#F8FAFC" CornerRadius="12" Padding="16" Margin="0,0,0,16">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="📊 إحصائيات اليوم" FontWeight="SemiBold" FontSize="14" Foreground="#1E293B"/>
+                        
+                        <!-- Today Patients -->
+                        <Border Background="#DBEAFE" CornerRadius="8" Padding="12,8">
+                            <Grid ColumnDefinitions="Auto,*">
+                                <TextBlock Grid.Column="0" Text="📅" FontSize="18" Margin="0,0,8,0"/>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="{Binding TodayPatients}" FontSize="20" FontWeight="Bold" Foreground="#1E40AF"/>
+                                    <TextBlock Text="مرضى اليوم" FontSize="12" Foreground="#64748B"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- Week Patients -->
+                        <Border Background="#D1FAE5" CornerRadius="8" Padding="12,8">
+                            <Grid ColumnDefinitions="Auto,*">
+                                <TextBlock Grid.Column="0" Text="📆" FontSize="18" Margin="0,0,8,0"/>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="{Binding WeekPatients}" FontSize="20" FontWeight="Bold" Foreground="#065F46"/>
+                                    <TextBlock Text="مرضى الأسبوع" FontSize="12" Foreground="#64748B"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- Month Patients -->
+                        <Border Background="#FEF3C7" CornerRadius="8" Padding="12,8">
+                            <Grid ColumnDefinitions="Auto,*">
+                                <TextBlock Grid.Column="0" Text="📊" FontSize="18" Margin="0,0,8,0"/>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="{Binding MonthPatients}" FontSize="20" FontWeight="Bold" Foreground="#92400E"/>
+                                    <TextBlock Text="مرضى الشهر" FontSize="12" Foreground="#64748B"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Border>
 
                 <!-- Call Next Button -->
                 <Button Grid.Row="1" 
@@ -218,34 +258,133 @@
                                Margin="0,0,0,20"/>
 
                     <!-- Diagnosis -->
-                    <StackPanel Grid.Row="1" Spacing="16">
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="التشخيص" FontWeight="Medium" Foreground="#374151"/>
-                            <TextBox Text="{Binding Diagnosis}"
-                                     AcceptsReturn="True"
-                                     TextWrapping="Wrap"
-                                     Height="100"
-                                     Watermark="أدخل التشخيص هنا..."/>
-                        </StackPanel>
+                    <ScrollViewer Grid.Row="1">
+                        <StackPanel Spacing="16">
+                            <!-- Task 2: Common Diagnosis Dropdown -->
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="التشخيص السريع" FontWeight="Medium" Foreground="#374151"/>
+                                <ComboBox ItemsSource="{Binding CommonDiagnoses}"
+                                          SelectedItem="{Binding SelectedDiagnosis}"
+                                          PlaceholderText="اختر تشخيص شائع..."
+                                          HorizontalAlignment="Stretch"
+                                          CornerRadius="8"/>
+                            </StackPanel>
 
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="الأدوية الموصوفة" FontWeight="Medium" Foreground="#374151"/>
-                            <TextBox Text="{Binding Prescriptions}"
-                                     AcceptsReturn="True"
-                                     TextWrapping="Wrap"
-                                     Height="80"
-                                     Watermark="الأدوية والجرعات..."/>
-                        </StackPanel>
+                            <!-- Manual Diagnosis Entry -->
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="التشخيص التفصيلي" FontWeight="Medium" Foreground="#374151"/>
+                                <TextBox Text="{Binding Diagnosis}"
+                                         AcceptsReturn="True"
+                                         TextWrapping="Wrap"
+                                         Height="100"
+                                         Watermark="أدخل التشخيص هنا..."/>
+                            </StackPanel>
 
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="ملاحظات" FontWeight="Medium" Foreground="#374151"/>
-                            <TextBox Text="{Binding Notes}"
-                                     AcceptsReturn="True"
-                                     TextWrapping="Wrap"
-                                     Height="60"
-                                     Watermark="ملاحظات إضافية..."/>
+                            <!-- Task 2: Vital Signs Section -->
+                            <Border Background="#F8FAFC" CornerRadius="12" Padding="16">
+                                <StackPanel Spacing="12">
+                                    <TextBlock Text="🩺 العلامات الحيوية" FontWeight="SemiBold" FontSize="16" Foreground="#1E293B"/>
+                                    
+                                    <Grid ColumnDefinitions="*,12,*" RowDefinitions="Auto,12,Auto">
+                                        <!-- Blood Pressure -->
+                                        <StackPanel Grid.Column="0" Grid.Row="0" Spacing="6">
+                                            <TextBlock Text="ضغط الدم (mmHg)" FontSize="13" Foreground="#64748B"/>
+                                            <TextBox Text="{Binding BloodPressure}" Watermark="120/80"/>
+                                        </StackPanel>
+
+                                        <!-- Temperature -->
+                                        <StackPanel Grid.Column="2" Grid.Row="0" Spacing="6">
+                                            <TextBlock Text="الحرارة (°C)" FontSize="13" Foreground="#64748B"/>
+                                            <TextBox Text="{Binding Temperature}" Watermark="37.0"/>
+                                        </StackPanel>
+
+                                        <!-- Heart Rate -->
+                                        <StackPanel Grid.Column="0" Grid.Row="2" Spacing="6">
+                                            <TextBlock Text="نبضات القلب (BPM)" FontSize="13" Foreground="#64748B"/>
+                                            <TextBox Text="{Binding HeartRate}" Watermark="72"/>
+                                        </StackPanel>
+
+                                        <!-- Weight -->
+                                        <StackPanel Grid.Column="2" Grid.Row="2" Spacing="6">
+                                            <TextBlock Text="الوزن (KG)" FontSize="13" Foreground="#64748B"/>
+                                            <TextBox Text="{Binding Weight}" Watermark="70.5"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Task 2: Common Medications Dropdown -->
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="الأدوية الشائعة" FontWeight="Medium" Foreground="#374151"/>
+                                <ComboBox ItemsSource="{Binding CommonMedications}"
+                                          SelectedItem="{Binding SelectedMedication}"
+                                          PlaceholderText="اضغط لإضافة دواء..."
+                                          HorizontalAlignment="Stretch"
+                                          CornerRadius="8"/>
+                            </StackPanel>
+
+                            <!-- Prescriptions Text Area -->
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="الأدوية الموصوفة" FontWeight="Medium" Foreground="#374151"/>
+                                <TextBox Text="{Binding Prescriptions}"
+                                         AcceptsReturn="True"
+                                         TextWrapping="Wrap"
+                                         Height="80"
+                                         Watermark="الأدوية والجرعات..."/>
+                            </StackPanel>
+
+                            <!-- Notes -->
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="ملاحظات" FontWeight="Medium" Foreground="#374151"/>
+                                <TextBox Text="{Binding Notes}"
+                                         AcceptsReturn="True"
+                                         TextWrapping="Wrap"
+                                         Height="60"
+                                         Watermark="ملاحظات إضافية..."/>
+                            </StackPanel>
+
+                            <!-- Task 1: Visit History Panel -->
+                            <Expander Header="📋 سجل الزيارات السابقة" 
+                                      IsExpanded="{Binding IsHistoryExpanded}"
+                                      CornerRadius="12"
+                                      Background="#FEF3C7">
+                                <Border Background="White" CornerRadius="8" Padding="12" Margin="0,8,0,0">
+                                    <ScrollViewer MaxHeight="300">
+                                        <ItemsControl ItemsSource="{Binding PatientHistory}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="#F8FAFC" 
+                                                            CornerRadius="8" 
+                                                            Padding="12"
+                                                            Margin="0,0,0,8">
+                                                        <StackPanel Spacing="8">
+                                                            <TextBlock Text="{Binding VisitDate, StringFormat='📅 {0:yyyy/MM/dd HH:mm}'}"
+                                                                       FontWeight="Bold" 
+                                                                       Foreground="#3B82F6"
+                                                                       FontSize="14"/>
+                                                            <TextBlock Text="{Binding Diagnosis, StringFormat='🩺 {0}'}" 
+                                                                       TextWrapping="Wrap"
+                                                                       Foreground="#1E293B"
+                                                                       FontSize="13"/>
+                                                            <TextBlock Text="{Binding Prescriptions, StringFormat='💊 {0}'}" 
+                                                                       Foreground="#64748B" 
+                                                                       FontSize="12"
+                                                                       TextWrapping="Wrap"/>
+                                                            <TextBlock Text="{Binding Notes, StringFormat='📝 {0}'}" 
+                                                                       Foreground="#94A3B8" 
+                                                                       FontSize="12"
+                                                                       TextWrapping="Wrap"
+                                                                       IsVisible="{Binding Notes, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </ScrollViewer>
+                                </Border>
+                            </Expander>
                         </StackPanel>
-                    </StackPanel>
+                    </ScrollViewer>
 
                     <!-- Complete Button -->
                     <Button Grid.Row="3" 

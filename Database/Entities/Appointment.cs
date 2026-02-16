@@ -24,7 +24,7 @@ public class Appointment
     public int DurationMinutes { get; set; } = 15;
     public AppointmentStatus Status { get; set; } = AppointmentStatus.Scheduled;
     public string? Notes { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime CreatedAt { get; set; }
 
     // Navigation properties
     public Patient? Patient { get; set; }
