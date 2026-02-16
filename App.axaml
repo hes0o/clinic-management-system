@@ -13,6 +13,11 @@
         <FluentTheme />
 		<StyleInclude Source="/Styles/GlobalStyles.axaml"/>
 		<StyleInclude Source="/Styles/Animations.axaml"/>
+		
+		<!-- Global font for Arabic support -->
+		<Style Selector=":is(Control)">
+			<Setter Property="TextElement.FontFamily" Value="Segoe UI, Tahoma, Arial, sans-serif"/>
+		</Style>
 	</Application.Styles>
 	<Application.Resources>
 		<FontFamily x:Key="ArabicFont">
