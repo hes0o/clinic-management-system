@@ -34,10 +34,72 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
     [ObservableProperty]
     private int _completedToday;
 
+    // Task 1: Visit History
+    [ObservableProperty]
+    private ObservableCollection<Visit> _patientHistory = new();
+
+    [ObservableProperty]
+    private bool _isHistoryExpanded = false;
+
+    // Task 2: Enhanced Diagnosis - Common Diagnoses
+    public ObservableCollection<string> CommonDiagnoses { get; } = new()
+    {
+        "نزلة برد",
+        "إنفلونزا",
+        "صداع",
+        "ألم المعدة",
+        "التهاب الحلق",
+        "ارتفاع ضغط الدم",
+        "السكري",
+        "حساسية",
+        "أخرى..."
+    };
+
+    [ObservableProperty]
+    private string? _selectedDiagnosis;
+
+    // Task 2: Common Medications
+    public ObservableCollection<string> CommonMedications { get; } = new()
+    {
+        "باراسيتامول 500mg - مرتين يومياً",
+        "أموكسيسيلين 500mg - ثلاث مرات يومياً",
+        "إيبوبروفين 400mg - عند الحاجة",
+        "أوميبرازول 20mg - قبل الفطور",
+        "أسبرين 100mg - مرة يومياً",
+        "فيتامين د 1000 وحدة - يومياً"
+    };
+
+    [ObservableProperty]
+    private string? _selectedMedication;
+
+    // Task 2: Vital Signs
+    [ObservableProperty]
+    private string _bloodPressure = string.Empty; // e.g., "120/80"
+
+    [ObservableProperty]
+    private decimal? _temperature; // in Celsius
+
+    [ObservableProperty]
+    private int? _heartRate; // BPM
+
+    [ObservableProperty]
+    private decimal? _weight; // in KG
+
+    // Task 3: Statistics
+    [ObservableProperty]
+    private int _todayPatients;
+
+    [ObservableProperty]
+    private int _weekPatients;
+
+    [ObservableProperty]
+    private int _monthPatients;
+
     public DoctorPanelViewModel()
     {
         _db = new HealthCenterDbContext();
         LoadQueue();
+        LoadStatistics();
     }
 
     public void LoadQueue()
@@ -67,6 +129,40 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
         // Stats
         CompletedToday = _db.QueueTickets
             .Count(q => q.CreatedAt.Date == today && q.Status == TicketStatus.Completed);
+
+        // Load visit history if current patient changed
+        if (CurrentPatient != null)
+        {
+            LoadPatientHistory(CurrentPatient.PatientId);
+        }
+        else
+        {
+            PatientHistory.Clear();
+        }
+    }
+
+    // Task 1: Load Patient Visit History
+    private void LoadPatientHistory(Guid patientId)
+    {
+        var history = _db.Visits
+            .Where(v => v.PatientId == patientId)
+            .OrderByDescending(v => v.VisitDate)
+            .Take(10)
+            .ToList();
+        
+        PatientHistory = new ObservableCollection<Visit>(history);
+    }
+
+    // Task 3: Load Statistics
+    private void LoadStatistics()
+    {
+        var today = DateTime.Today;
+        var weekStart = today.AddDays(-(int)today.DayOfWeek);
+        var monthStart = new DateTime(today.Year, today.Month, 1);
+        
+        TodayPatients = _db.Visits.Count(v => v.VisitDate.Date == today);
+        WeekPatients = _db.Visits.Count(v => v.VisitDate >= weekStart);
+        MonthPatients = _db.Visits.Count(v => v.VisitDate >= monthStart);
     }
 
     [RelayCommand]
@@ -164,11 +260,33 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
         Notes = string.Empty;
 
         LoadQueue();
+        LoadStatistics();
     }
 
     [RelayCommand]
     private void Refresh()
     {
         LoadQueue();
+        LoadStatistics();
+    }
+
+    // Task 2: Add selected diagnosis to diagnosis field
+    partial void OnSelectedDiagnosisChanged(string? value)
+    {
+        if (!string.IsNullOrEmpty(value) && value != "أخرى...")
+        {
+            Diagnosis = value;
+        }
+    }
+
+    // Task 2: Add selected medication to prescriptions field
+    partial void OnSelectedMedicationChanged(string? value)
+    {
+        if (!string.IsNullOrEmpty(value))
+        {
+            if (!string.IsNullOrWhiteSpace(Prescriptions))
+                Prescriptions += "\n";
+            Prescriptions += value;
+        }
     }
 }
