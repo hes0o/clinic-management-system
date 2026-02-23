@@ -1,48 +1,116 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+	<!-- Arabic font for all TextBlocks -->
 	<Style Selector="TextBlock">
 		<Setter Property="FontFamily" Value="{DynamicResource ArabicFont}" />
 	</Style>
 
+	<!-- ===== Button Helpers ===== -->
 	<Style Selector="Button.btn-primary">
-    <Setter Property="Background" Value="#3B82F6"/>
-    <Setter Property="Foreground" Value="White"/>
-    <Setter Property="CornerRadius" Value="8"/>
-    <Setter Property="Padding" Value="16,12"/>
-    <Setter Property="FontWeight" Value="SemiBold"/>
-  </Style>
+		<Setter Property="Background" Value="#3B82F6"/>
+		<Setter Property="Foreground" Value="White"/>
+		<Setter Property="CornerRadius" Value="8"/>
+		<Setter Property="Padding" Value="16,12"/>
+		<Setter Property="FontWeight" Value="SemiBold"/>
+	</Style>
+	<Style Selector="Button.btn-secondary">
+		<Setter Property="Background" Value="#E2E8F0"/>
+		<Setter Property="Foreground" Value="#1E293B"/>
+		<Setter Property="CornerRadius" Value="8"/>
+		<Setter Property="Padding" Value="16,12"/>
+		<Setter Property="FontWeight" Value="SemiBold"/>
+	</Style>
 
-  <Style Selector="Button.btn-secondary">
-    <Setter Property="Background" Value="#E2E8F0"/>
-    <Setter Property="Foreground" Value="#1E293B"/>
-    <Setter Property="CornerRadius" Value="8"/>
-    <Setter Property="Padding" Value="16,12"/>
-    <Setter Property="FontWeight" Value="SemiBold"/>
-  </Style>
+	<!-- ===== Global TextBox ===== -->
+	<Style Selector="TextBox">
+		<Setter Property="CornerRadius" Value="8"/>
+		<Setter Property="Padding" Value="12,10"/>
+		<Setter Property="Background" Value="White"/>
+		<Setter Property="Foreground" Value="#111827"/>
+		<Setter Property="BorderBrush" Value="#CBD5E1"/>
+		<Setter Property="BorderThickness" Value="1"/>
+		<Setter Property="CaretBrush" Value="#2563EB"/>
+		<Setter Property="SelectionBrush" Value="#BFDBFE"/>
+	</Style>
 
-  <Style Selector="TextBox">
-    <Setter Property="CornerRadius" Value="8"/>
-    <Setter Property="Padding" Value="12,10"/>
-    <Setter Property="Background" Value="White"/>
-    <Setter Property="BorderBrush" Value="#CBD5E1"/>
-    <Setter Property="BorderThickness" Value="1"/>
-  </Style>
+	<!-- Hover: light blue border, slight background tint -->
+	<Style Selector="TextBox:pointerover /template/ Border#PART_BorderElement">
+		<Setter Property="BorderBrush" Value="#93C5FD"/>
+		<Setter Property="Background" Value="#F9FAFB"/>
+	</Style>
 
-  <Style Selector="Border.card">
-    <Setter Property="Background" Value="#FFFFFF"/>
-    <Setter Property="CornerRadius" Value="16"/>
-    <Setter Property="Padding" Value="24"/>
-  </Style>
+	<!-- Focus: vivid blue border -->
+	<Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+		<Setter Property="BorderBrush" Value="#2563EB"/>
+		<Setter Property="BorderThickness" Value="2"/>
+		<Setter Property="Background" Value="White"/>
+	</Style>
 
-  <Style Selector="TextBlock.h1">
-    <Setter Property="FontSize" Value="24"/>
-    <Setter Property="FontWeight" Value="SemiBold"/>
-    <Setter Property="Foreground" Value="#1E293B"/>
-  </Style>
+	<!-- Watermark placeholder colour -->
+	<Style Selector="TextBox /template/ TextBlock#PART_Watermark">
+		<Setter Property="Foreground" Value="#9CA3AF"/>
+	</Style>
 
-  <Style Selector="TextBlock.muted">
-    <Setter Property="FontSize" Value="12"/>
-    <Setter Property="Foreground" Value="#94A3B8"/>
-  </Style>
+	<!-- THE KEY FIX: FluentTheme overrides Foreground on hover/focus to a near-invisible colour.
+	     We force it back to dark on every interactive state. -->
+	<Style Selector="TextBox:pointerover">
+		<Setter Property="Foreground" Value="#111827"/>
+	</Style>
+	<Style Selector="TextBox:focus">
+		<Setter Property="Foreground" Value="#111827"/>
+	</Style>
+	<Style Selector="TextBox:focus:pointerover">
+		<Setter Property="Foreground" Value="#111827"/>
+	</Style>
+	<Style Selector="TextBox:disabled">
+		<Setter Property="Foreground" Value="#9CA3AF"/>
+	</Style>
+
+	<!-- ===== Global ComboBox ===== -->
+	<Style Selector="ComboBox">
+		<Setter Property="CornerRadius" Value="8"/>
+		<Setter Property="Padding" Value="10,8"/>
+		<Setter Property="Background" Value="White"/>
+		<Setter Property="Foreground" Value="#111827"/>
+		<Setter Property="BorderBrush" Value="#CBD5E1"/>
+		<Setter Property="BorderThickness" Value="1"/>
+	</Style>
+	<Style Selector="ComboBox:pointerover">
+		<Setter Property="BorderBrush" Value="#93C5FD"/>
+	</Style>
+	<Style Selector="ComboBox:focus">
+		<Setter Property="BorderBrush" Value="#2563EB"/>
+		<Setter Property="BorderThickness" Value="2"/>
+	</Style>
+
+	<!-- Dropdown item hover -->
+	<Style Selector="ComboBoxItem:pointerover /template/ ContentPresenter">
+		<Setter Property="Background" Value="#EFF6FF"/>
+		<Setter Property="Foreground" Value="#1E40AF"/>
+	</Style>
+	<!-- Dropdown item selected -->
+	<Style Selector="ComboBoxItem:selected /template/ ContentPresenter">
+		<Setter Property="Background" Value="#2563EB"/>
+		<Setter Property="Foreground" Value="White"/>
+	</Style>
+
+	<!-- ===== Card Border ===== -->
+	<Style Selector="Border.card">
+		<Setter Property="Background" Value="#FFFFFF"/>
+		<Setter Property="CornerRadius" Value="16"/>
+		<Setter Property="Padding" Value="24"/>
+	</Style>
+
+	<!-- ===== Text Utilities ===== -->
+	<Style Selector="TextBlock.h1">
+		<Setter Property="FontSize" Value="24"/>
+		<Setter Property="FontWeight" Value="SemiBold"/>
+		<Setter Property="Foreground" Value="#1E293B"/>
+	</Style>
+	<Style Selector="TextBlock.muted">
+		<Setter Property="FontSize" Value="12"/>
+		<Setter Property="Foreground" Value="#94A3B8"/>
+	</Style>
 
 </Styles>

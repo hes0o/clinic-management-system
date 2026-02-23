@@ -55,6 +55,145 @@ namespace HealthCenter.Desktop.Migrations
                     b.ToTable("Appointments");
                 });
 
+            modelBuilder.Entity("HealthCenter.Desktop.Database.Entities.Invoice", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("CreatedById")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("PaymentMethod")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("TaxAmount")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("VisitId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("PatientId");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("VisitId");
+
+                    b.ToTable("Invoices");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("40000000-0000-0000-0000-000000000001"),
+                            Amount = 150.00m,
+                            CreatedAt = new DateTime(2026, 2, 16, 8, 35, 0, 0, DateTimeKind.Unspecified),
+                            CreatedById = new Guid("00000000-0000-0000-0000-000000000004"),
+                            PaidAt = new DateTime(2026, 2, 16, 8, 40, 0, 0, DateTimeKind.Unspecified),
+                            PatientId = new Guid("10000000-0000-0000-0000-000000000001"),
+                            PaymentMethod = 1,
+                            Status = 1,
+                            TaxAmount = 22.50m,
+                            VisitId = new Guid("30000000-0000-0000-0000-000000000001")
+                        },
+                        new
+                        {
+                            Id = new Guid("40000000-0000-0000-0000-000000000002"),
+                            Amount = 200.00m,
+                            CreatedAt = new DateTime(2026, 2, 15, 10, 25, 0, 0, DateTimeKind.Unspecified),
+                            CreatedById = new Guid("00000000-0000-0000-0000-000000000004"),
+                            PatientId = new Guid("10000000-0000-0000-0000-000000000006"),
+                            Status = 0,
+                            TaxAmount = 30.00m,
+                            VisitId = new Guid("30000000-0000-0000-0000-000000000002")
+                        });
+                });
+
+            modelBuilder.Entity("HealthCenter.Desktop.Database.Entities.LabTest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AttachmentPath")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("PerformedById")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("RequestedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("RequestedById")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ResultNotes")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("TestName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("VisitId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PatientId");
+
+                    b.HasIndex("PerformedById");
+
+                    b.HasIndex("RequestedById");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("VisitId");
+
+                    b.ToTable("LabTests");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("50000000-0000-0000-0000-000000000001"),
+                            CompletedAt = new DateTime(2026, 2, 14, 13, 0, 0, 0, DateTimeKind.Unspecified),
+                            PatientId = new Guid("10000000-0000-0000-0000-000000000008"),
+                            PerformedById = new Guid("00000000-0000-0000-0000-000000000005"),
+                            RequestedAt = new DateTime(2026, 2, 14, 11, 10, 0, 0, DateTimeKind.Unspecified),
+                            RequestedById = new Guid("00000000-0000-0000-0000-000000000002"),
+                            ResultNotes = "النتيجة: 6.2% - طبيعي بالنسبة لمريض سكري",
+                            Status = 2,
+                            TestName = "فحص السكر التراكمي Hba1c",
+                            VisitId = new Guid("30000000-0000-0000-0000-000000000003")
+                        });
+                });
+
             modelBuilder.Entity("HealthCenter.Desktop.Database.Entities.Patient", b =>
                 {
                     b.Property<Guid>("Id")
@@ -291,7 +430,7 @@ namespace HealthCenter.Desktop.Migrations
                             CalledAt = new DateTime(2026, 2, 16, 8, 15, 0, 0, DateTimeKind.Unspecified),
                             CompletedAt = new DateTime(2026, 2, 16, 8, 30, 0, 0, DateTimeKind.Unspecified),
                             CreatedAt = new DateTime(2026, 2, 16, 8, 0, 0, 0, DateTimeKind.Unspecified),
-                            DoctorId = new Guid("00000000-0000-0000-0000-000000000001"),
+                            DoctorId = new Guid("00000000-0000-0000-0000-000000000002"),
                             PatientId = new Guid("10000000-0000-0000-0000-000000000001"),
                             Status = 6,
                             TicketNumber = 1
@@ -302,7 +441,7 @@ namespace HealthCenter.Desktop.Migrations
                             CallCount = 1,
                             CalledAt = new DateTime(2026, 2, 16, 8, 35, 0, 0, DateTimeKind.Unspecified),
                             CreatedAt = new DateTime(2026, 2, 16, 8, 10, 0, 0, DateTimeKind.Unspecified),
-                            DoctorId = new Guid("00000000-0000-0000-0000-000000000001"),
+                            DoctorId = new Guid("00000000-0000-0000-0000-000000000002"),
                             PatientId = new Guid("10000000-0000-0000-0000-000000000002"),
                             Status = 5,
                             TicketNumber = 2
@@ -382,6 +521,56 @@ namespace HealthCenter.Desktop.Migrations
                             PasswordHash = "admin123",
                             Role = 0,
                             Username = "admin"
+                        },
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000002"),
+                            CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            FullName = "د. أحمد صالح",
+                            IsActive = true,
+                            PasswordHash = "doctor123",
+                            Role = 2,
+                            Username = "dr_ahmed"
+                        },
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000003"),
+                            CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            FullName = "الممرضة فاطمة",
+                            IsActive = true,
+                            PasswordHash = "nurse123",
+                            Role = 3,
+                            Username = "nurse_fatima"
+                        },
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000004"),
+                            CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            FullName = "المحاسب عمر",
+                            IsActive = true,
+                            PasswordHash = "cashier123",
+                            Role = 5,
+                            Username = "cashier_omar"
+                        },
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000005"),
+                            CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            FullName = "فني المختبر سالم",
+                            IsActive = true,
+                            PasswordHash = "tech123",
+                            Role = 6,
+                            Username = "tech_salem"
+                        },
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000006"),
+                            CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            FullName = "م. الاستقبال نور",
+                            IsActive = true,
+                            PasswordHash = "rec123",
+                            Role = 4,
+                            Username = "rec_nour"
                         });
                 });
 
@@ -394,6 +583,9 @@ namespace HealthCenter.Desktop.Migrations
                     b.Property<string>("Attachments")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("BloodPressure")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
@@ -403,10 +595,13 @@ namespace HealthCenter.Desktop.Migrations
                     b.Property<Guid>("DoctorId")
                         .HasColumnType("TEXT");
 
-                    b.Property<decimal?>("InvoiceAmount")
-                        .HasColumnType("TEXT");
+                    b.Property<int?>("HeartRate")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Notes")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("NurseId")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("PatientId")
@@ -415,12 +610,20 @@ namespace HealthCenter.Desktop.Migrations
                     b.Property<string>("Prescriptions")
                         .HasColumnType("TEXT");
 
+                    b.Property<decimal?>("Temperature")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("VisitDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("Weight")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
                     b.HasIndex("DoctorId");
+
+                    b.HasIndex("NurseId");
 
                     b.HasIndex("PatientId");
 
@@ -432,35 +635,43 @@ namespace HealthCenter.Desktop.Migrations
                         new
                         {
                             Id = new Guid("30000000-0000-0000-0000-000000000001"),
+                            BloodPressure = "120/80",
                             CreatedAt = new DateTime(2026, 2, 16, 8, 30, 0, 0, DateTimeKind.Unspecified),
                             Diagnosis = "التهاب الحلق الحاد",
-                            DoctorId = new Guid("00000000-0000-0000-0000-000000000001"),
-                            InvoiceAmount = 150.00m,
+                            DoctorId = new Guid("00000000-0000-0000-0000-000000000002"),
+                            HeartRate = 85,
                             Notes = "المريض يعاني من ارتفاع طفيف في درجة الحرارة",
+                            NurseId = new Guid("00000000-0000-0000-0000-000000000003"),
                             PatientId = new Guid("10000000-0000-0000-0000-000000000001"),
                             Prescriptions = "Amoxicillin 500mg - 3 مرات يومياً لمدة 5 أيام",
-                            VisitDate = new DateTime(2026, 2, 16, 8, 15, 0, 0, DateTimeKind.Unspecified)
+                            Temperature = 38.2m,
+                            VisitDate = new DateTime(2026, 2, 16, 8, 15, 0, 0, DateTimeKind.Unspecified),
+                            Weight = 70.0m
                         },
                         new
                         {
                             Id = new Guid("30000000-0000-0000-0000-000000000002"),
+                            BloodPressure = "150/95",
                             CreatedAt = new DateTime(2026, 2, 15, 10, 20, 0, 0, DateTimeKind.Unspecified),
                             Diagnosis = "ارتفاع ضغط الدم",
-                            DoctorId = new Guid("00000000-0000-0000-0000-000000000001"),
-                            InvoiceAmount = 200.00m,
+                            DoctorId = new Guid("00000000-0000-0000-0000-000000000002"),
+                            HeartRate = 72,
                             Notes = "ينصح بتقليل الملح في الطعام وممارسة الرياضة",
+                            NurseId = new Guid("00000000-0000-0000-0000-000000000003"),
                             PatientId = new Guid("10000000-0000-0000-0000-000000000006"),
                             Prescriptions = "Amlodipine 5mg - مرة واحدة يومياً صباحاً",
-                            VisitDate = new DateTime(2026, 2, 15, 10, 0, 0, 0, DateTimeKind.Unspecified)
+                            Temperature = 36.8m,
+                            VisitDate = new DateTime(2026, 2, 15, 10, 0, 0, 0, DateTimeKind.Unspecified),
+                            Weight = 95.5m
                         },
                         new
                         {
                             Id = new Guid("30000000-0000-0000-0000-000000000003"),
                             CreatedAt = new DateTime(2026, 2, 14, 11, 25, 0, 0, DateTimeKind.Unspecified),
                             Diagnosis = "فحص دوري - السكري",
-                            DoctorId = new Guid("00000000-0000-0000-0000-000000000001"),
-                            InvoiceAmount = 180.00m,
+                            DoctorId = new Guid("00000000-0000-0000-0000-000000000002"),
                             Notes = "مستوى السكر التراكمي مستقر، المتابعة بعد 3 أشهر",
+                            NurseId = new Guid("00000000-0000-0000-0000-000000000003"),
                             PatientId = new Guid("10000000-0000-0000-0000-000000000008"),
                             Prescriptions = "Metformin 500mg - مرتين يومياً مع الوجبات",
                             VisitDate = new DateTime(2026, 2, 14, 11, 0, 0, 0, DateTimeKind.Unspecified)
@@ -483,6 +694,67 @@ namespace HealthCenter.Desktop.Migrations
                     b.Navigation("Doctor");
 
                     b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("HealthCenter.Desktop.Database.Entities.Invoice", b =>
+                {
+                    b.HasOne("HealthCenter.Desktop.Database.Entities.User", "CreatedBy")
+                        .WithMany("Invoices")
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("HealthCenter.Desktop.Database.Entities.Patient", "Patient")
+                        .WithMany()
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HealthCenter.Desktop.Database.Entities.Visit", "Visit")
+                        .WithMany("Invoices")
+                        .HasForeignKey("VisitId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("Patient");
+
+                    b.Navigation("Visit");
+                });
+
+            modelBuilder.Entity("HealthCenter.Desktop.Database.Entities.LabTest", b =>
+                {
+                    b.HasOne("HealthCenter.Desktop.Database.Entities.Patient", "Patient")
+                        .WithMany()
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HealthCenter.Desktop.Database.Entities.User", "PerformedBy")
+                        .WithMany("PerformedLabTests")
+                        .HasForeignKey("PerformedById")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("HealthCenter.Desktop.Database.Entities.User", "RequestedBy")
+                        .WithMany("RequestedLabTests")
+                        .HasForeignKey("RequestedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("HealthCenter.Desktop.Database.Entities.Visit", "Visit")
+                        .WithMany("LabTests")
+                        .HasForeignKey("VisitId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Patient");
+
+                    b.Navigation("PerformedBy");
+
+                    b.Navigation("RequestedBy");
+
+                    b.Navigation("Visit");
                 });
 
             modelBuilder.Entity("HealthCenter.Desktop.Database.Entities.QueueTicket", b =>
@@ -511,6 +783,11 @@ namespace HealthCenter.Desktop.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("HealthCenter.Desktop.Database.Entities.User", "Nurse")
+                        .WithMany()
+                        .HasForeignKey("NurseId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("HealthCenter.Desktop.Database.Entities.Patient", "Patient")
                         .WithMany("Visits")
                         .HasForeignKey("PatientId")
@@ -518,6 +795,8 @@ namespace HealthCenter.Desktop.Migrations
                         .IsRequired();
 
                     b.Navigation("Doctor");
+
+                    b.Navigation("Nurse");
 
                     b.Navigation("Patient");
                 });
@@ -535,9 +814,22 @@ namespace HealthCenter.Desktop.Migrations
                 {
                     b.Navigation("Appointments");
 
+                    b.Navigation("Invoices");
+
+                    b.Navigation("PerformedLabTests");
+
                     b.Navigation("QueueTickets");
 
+                    b.Navigation("RequestedLabTests");
+
                     b.Navigation("Visits");
+                });
+
+            modelBuilder.Entity("HealthCenter.Desktop.Database.Entities.Visit", b =>
+                {
+                    b.Navigation("Invoices");
+
+                    b.Navigation("LabTests");
                 });
 #pragma warning restore 612, 618
         }

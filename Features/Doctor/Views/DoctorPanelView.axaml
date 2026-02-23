@@ -19,28 +19,76 @@
             <Setter Property="CornerRadius" Value="8"/>
             <Setter Property="Padding" Value="16,10"/>
         </Style>
+        <Style Selector="Button.primary:pointerover">
+            <Setter Property="Background" Value="#1D4ED8"/>
+        </Style>
+        <Style Selector="Button.primary:pressed">
+            <Setter Property="Background" Value="#1E40AF"/>
+            <Setter Property="RenderTransform" Value="scale(0.98)"/>
+        </Style>
+
         <Style Selector="Button.success">
             <Setter Property="Background" Value="#16A34A"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="CornerRadius" Value="8"/>
             <Setter Property="Padding" Value="16,10"/>
         </Style>
+        <Style Selector="Button.success:pointerover">
+            <Setter Property="Background" Value="#15803D"/>
+        </Style>
+        <Style Selector="Button.success:pressed">
+            <Setter Property="Background" Value="#166534"/>
+            <Setter Property="RenderTransform" Value="scale(0.98)"/>
+        </Style>
+
         <Style Selector="Button.warning">
             <Setter Property="Background" Value="#F59E0B"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="CornerRadius" Value="8"/>
             <Setter Property="Padding" Value="16,10"/>
         </Style>
+        <Style Selector="Button.warning:pointerover">
+            <Setter Property="Background" Value="#D97706"/>
+        </Style>
+        <Style Selector="Button.warning:pressed">
+            <Setter Property="Background" Value="#B45309"/>
+            <Setter Property="RenderTransform" Value="scale(0.98)"/>
+        </Style>
+
         <Style Selector="Button.danger">
             <Setter Property="Background" Value="#DC2626"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="CornerRadius" Value="8"/>
             <Setter Property="Padding" Value="16,10"/>
         </Style>
+        <Style Selector="Button.danger:pointerover">
+            <Setter Property="Background" Value="#B91C1C"/>
+        </Style>
+        <Style Selector="Button.danger:pressed">
+            <Setter Property="Background" Value="#991B1B"/>
+            <Setter Property="RenderTransform" Value="scale(0.98)"/>
+        </Style>
+
         <Style Selector="TextBox">
             <Setter Property="CornerRadius" Value="8"/>
             <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="Background" Value="#F8FAFC"/>
+            <Setter Property="Foreground" Value="#111827"/>
             <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="CaretBrush" Value="#2563EB"/>
+            <Setter Property="SelectionBrush" Value="#BFDBFE"/>
+        </Style>
+        <Style Selector="TextBox:pointerover /template/ Border#PART_BorderElement">
+            <Setter Property="BorderBrush" Value="#93C5FD"/>
+            <Setter Property="Background" Value="#F0F9FF"/>
+        </Style>
+        <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+            <Setter Property="BorderBrush" Value="#2563EB"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Background" Value="White"/>
+        </Style>
+        <Style Selector="TextBox /template/ TextBlock#PART_Watermark">
+            <Setter Property="Foreground" Value="#9CA3AF"/>
         </Style>
     </UserControl.Styles>
 
@@ -55,7 +103,7 @@
             <Grid RowDefinitions="Auto,Auto,Auto,*,Auto">
                 <!-- Header -->
                 <StackPanel Grid.Row="0" Margin="0,0,0,20">
-                    <TextBlock Text="👨‍⚕️ لوحة الطبيب" 
+                    <TextBlock Text="لوحة الطبيب" 
                                FontSize="24" 
                                FontWeight="Bold"
                                Foreground="#1E293B"/>
@@ -67,12 +115,12 @@
                 <!-- Task 3: Statistics Dashboard -->
                 <Border Grid.Row="1" Background="#F8FAFC" CornerRadius="12" Padding="16" Margin="0,0,0,16">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="📊 إحصائيات اليوم" FontWeight="SemiBold" FontSize="14" Foreground="#1E293B"/>
+                        <TextBlock Text="احصائيات اليوم" FontWeight="SemiBold" FontSize="14" Foreground="#1E293B"/>
                         
                         <!-- Today Patients -->
                         <Border Background="#DBEAFE" CornerRadius="8" Padding="12,8">
                             <Grid ColumnDefinitions="Auto,*">
-                                <TextBlock Grid.Column="0" Text="📅" FontSize="18" Margin="0,0,8,0"/>
+                                <TextBlock Grid.Column="0" Text="اليوم" FontSize="18" Margin="0,0,8,0"/>
                                 <StackPanel Grid.Column="1">
                                     <TextBlock Text="{Binding TodayPatients}" FontSize="20" FontWeight="Bold" Foreground="#1E40AF"/>
                                     <TextBlock Text="مرضى اليوم" FontSize="12" Foreground="#64748B"/>
@@ -83,7 +131,7 @@
                         <!-- Week Patients -->
                         <Border Background="#D1FAE5" CornerRadius="8" Padding="12,8">
                             <Grid ColumnDefinitions="Auto,*">
-                                <TextBlock Grid.Column="0" Text="📆" FontSize="18" Margin="0,0,8,0"/>
+                                <TextBlock Grid.Column="0" Text="الاسبوع" FontSize="18" Margin="0,0,8,0"/>
                                 <StackPanel Grid.Column="1">
                                     <TextBlock Text="{Binding WeekPatients}" FontSize="20" FontWeight="Bold" Foreground="#065F46"/>
                                     <TextBlock Text="مرضى الأسبوع" FontSize="12" Foreground="#64748B"/>
@@ -94,7 +142,7 @@
                         <!-- Month Patients -->
                         <Border Background="#FEF3C7" CornerRadius="8" Padding="12,8">
                             <Grid ColumnDefinitions="Auto,*">
-                                <TextBlock Grid.Column="0" Text="📊" FontSize="18" Margin="0,0,8,0"/>
+                                <TextBlock Grid.Column="0" Text="الشهر" FontSize="18" Margin="0,0,8,0"/>
                                 <StackPanel Grid.Column="1">
                                     <TextBlock Text="{Binding MonthPatients}" FontSize="20" FontWeight="Bold" Foreground="#92400E"/>
                                     <TextBlock Text="مرضى الشهر" FontSize="12" Foreground="#64748B"/>
@@ -104,23 +152,20 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Call Next Button -->
-                <Button Grid.Row="1" 
+                <!-- Call Next Button - its own row, below stats -->
+                <Button Grid.Row="2" 
                         Classes="primary"
                         Command="{Binding CallNextCommand}"
                         HorizontalAlignment="Stretch"
                         HorizontalContentAlignment="Center"
-                        Margin="0,0,0,16"
-                        FontSize="18"
-                        Padding="20,14">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Text="📢"/>
-                        <TextBlock Text="نداء التالي"/>
-                    </StackPanel>
+                        Margin="0,0,0,12"
+                        FontSize="16"
+                        Padding="16,12">
+                    <TextBlock Text="نداء المريض التالي" FontWeight="SemiBold"/>
                 </Button>
 
                 <!-- Waiting Patients List -->
-                <Border Grid.Row="2" Background="#F8FAFC" CornerRadius="12" Padding="12">
+                <Border Grid.Row="3" Background="#F8FAFC" CornerRadius="12" Padding="12">
                     <ScrollViewer>
                         <ItemsControl ItemsSource="{Binding WaitingPatients}">
                             <ItemsControl.ItemTemplate>
@@ -169,10 +214,10 @@
                     </ScrollViewer>
                 </Border>
 
-                <!-- Stats -->
-                <Border Grid.Row="3" Background="#F0FDF4" CornerRadius="8" Padding="12" Margin="0,12,0,0">
+                <!-- Completed today stats -->
+                <Border Grid.Row="4" Background="#F0FDF4" CornerRadius="8" Padding="12" Margin="0,12,0,0">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="24">
-                        <TextBlock Text="✅ تم اليوم:" Foreground="#166534"/>
+                        <TextBlock Text="تم اليوم:" Foreground="#166534"/>
                         <TextBlock Text="{Binding CompletedToday}" 
                                    FontWeight="Bold" 
                                    FontSize="18"
@@ -230,13 +275,11 @@
                                 IsVisible="{Binding CurrentPatient, Converter={x:Static ObjectConverters.IsNotNull}}">
                         <Button Classes="success" Command="{Binding MarkPresentCommand}">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <TextBlock Text="✅"/>
                                 <TextBlock Text="حضر"/>
                             </StackPanel>
                         </Button>
                         <Button Classes="warning" Command="{Binding MarkAbsentCommand}">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <TextBlock Text="❌"/>
                                 <TextBlock Text="غائب"/>
                             </StackPanel>
                         </Button>
@@ -252,7 +295,7 @@
                     IsVisible="{Binding CurrentPatient, Converter={x:Static ObjectConverters.IsNotNull}}">
                 <Grid RowDefinitions="Auto,*,Auto,Auto">
                     <TextBlock Grid.Row="0" 
-                               Text="📋 التشخيص والعلاج" 
+                               Text="التشخيص والعلاج" 
                                FontSize="20" 
                                FontWeight="SemiBold"
                                Margin="0,0,0,20"/>
@@ -283,7 +326,7 @@
                             <!-- Task 2: Vital Signs Section -->
                             <Border Background="#F8FAFC" CornerRadius="12" Padding="16">
                                 <StackPanel Spacing="12">
-                                    <TextBlock Text="🩺 العلامات الحيوية" FontWeight="SemiBold" FontSize="16" Foreground="#1E293B"/>
+                                    <TextBlock Text="العلامات الحيوية" FontWeight="SemiBold" FontSize="16" Foreground="#1E293B"/>
                                     
                                     <Grid ColumnDefinitions="*,12,*" RowDefinitions="Auto,12,Auto">
                                         <!-- Blood Pressure -->
@@ -344,7 +387,7 @@
                             </StackPanel>
 
                             <!-- Task 1: Visit History Panel -->
-                            <Expander Header="📋 سجل الزيارات السابقة" 
+                            <Expander Header="سجل الزيارات السابقة" 
                                       IsExpanded="{Binding IsHistoryExpanded}"
                                       CornerRadius="12"
                                       Background="#FEF3C7">
@@ -396,8 +439,7 @@
                             FontSize="18"
                             Padding="20,14">
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="✔️"/>
-                            <TextBlock Text="إنهاء الزيارة وحفظ"/>
+                            <TextBlock Text="انهاء الزيارة وحفظ"/>
                         </StackPanel>
                     </Button>
                 </Grid>

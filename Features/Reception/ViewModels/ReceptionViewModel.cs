@@ -1,231 +1,272 @@
+using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System.Collections.ObjectModel;
-using HealthCenter.Desktop.Features.Reception.Models;
-using Avalonia.Media; 
-using System.Linq;
-using System.Collections.Generic;
-using System;
+using Microsoft.EntityFrameworkCore;
+using HealthCenter.Desktop.Database;
+using HealthCenter.Desktop.Database.Entities;
 using HealthCenter.Desktop.Services;
 
 namespace HealthCenter.Desktop.Features.Reception.ViewModels;
 
+/// <summary>
+/// Reception panel: registers/searches patients, issues queue tickets.
+/// Uses EF Core directly — data persists to the database.
+/// </summary>
 public partial class ReceptionViewModel : ObservableObject
 {
-    public event Action<Patient>? OnPrintRequest;
+    private readonly HealthCenterDbContext _db;
 
-    // --- إعدادات اللغة ---
-    [ObservableProperty] private bool _isArabic = true;
-    [ObservableProperty] private FlowDirection _currentFlowDirection = FlowDirection.RightToLeft;
-    
-    // إعدادات الطابعة الشبكية
-    [ObservableProperty] private string _printerIp = "192.168.1.200"; 
-    [ObservableProperty] private int _printerPort = 9100;
-
-    // العناوين والنصوص
-    [ObservableProperty] private string _tabRegisterHeader = "تسجيل جديد";
-    [ObservableProperty] private string _tabSearchHeader = "بحث وتذاكر";
-    [ObservableProperty] private string _titleText = "تسجيل مريض جديد";
-    [ObservableProperty] private string _nameLabel = "الاسم الكامل";
-    [ObservableProperty] private string _phoneLabel = "رقم الهاتف";
-    [ObservableProperty] private string _nationalIdLabel = "الرقم الوطني";
-    [ObservableProperty] private string _genderLabel = "الجنس";
-    [ObservableProperty] private string _bloodTypeLabel = "زمرة الدم (اختياري)";
-    [ObservableProperty] private string _birthDateLabel = "تاريخ الميلاد";
-    [ObservableProperty] private string _saveButtonText = "حفظ البيانات";
-    [ObservableProperty] private string _searchPlaceholder = "ابحث بالاسم أو الرقم...";
-    [ObservableProperty] private string _searchBtnText = "بحث";
-    [ObservableProperty] private string _langButtonText = "English";
-
-    // --- بيانات الإدخال ---
-    [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(AddPatientCommand))]
-    private string _patientName = string.Empty;
-
-    [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(AddPatientCommand))]
-    private string _phoneNumber = string.Empty;
-
-    [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(AddPatientCommand))]
-    private string _nationalId = string.Empty;
-
-    [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(AddPatientCommand))] 
-    private GenderOption? _selectedGender;
-    
-    [ObservableProperty] private string? _selectedBloodType;
-    
-    // ✅ التعديل الأول: تغيير النوع إلى DateTime? ليتوافق مع CalendarDatePicker
-    [ObservableProperty] private DateTime? _selectedBirthDate;
-
-    // --- وضع التعديل ---
-    private string? _editingPatientId = null; 
-    [ObservableProperty] private bool _isEditMode = false;
-
-    // القوائم
-    public ObservableCollection<GenderOption> GenderOptions { get; } = new();
-    public ObservableCollection<string> BloodTypes { get; } = new()
-    {
-        "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"
-    };
-
-    // --- بيانات البحث ---
+    // ── Search ────────────────────────────────────────────────
     [ObservableProperty] private string _searchQuery = string.Empty;
+    [ObservableProperty] private Patient? _selectedPatient;
     public ObservableCollection<Patient> SearchResults { get; } = new();
-    
-    // رسائل التنبيه
-    [ObservableProperty] private string _errorMessage = string.Empty;
-    [ObservableProperty] private string _successMessage = string.Empty;
-    
-    [ObservableProperty] private int _selectedTabIndex = 0;
+
+    // ── Registration Form Fields ──────────────────────────────
+    [ObservableProperty] private string _patientName = string.Empty;
+    [ObservableProperty] private string _nationalId = string.Empty;
+    [ObservableProperty] private string _phoneNumber = string.Empty;
+    [ObservableProperty] private string? _emergencyContact;
+    [ObservableProperty] private DateTime? _selectedBirthDate;
+    [ObservableProperty] private string? _selectedGender;
+    [ObservableProperty] private string? _selectedBloodType;
+    [ObservableProperty] private string? _address;
+    [ObservableProperty] private string? _allergies;
+    [ObservableProperty] private string? _chronicConditions;
+    [ObservableProperty] private string? _insuranceProvider;
+    [ObservableProperty] private string? _insuranceNumber;
+
+    // ── State ─────────────────────────────────────────────────
+    [ObservableProperty] private bool _isEditMode;
+    [ObservableProperty] private int _selectedTabIndex;
+    [ObservableProperty] private string _statusMessage = string.Empty;
+    [ObservableProperty] private bool _isError;
+
+    // ── Today's Queue ─────────────────────────────────────────
+    public ObservableCollection<QueueTicket> TodayQueue { get; } = new();
+    [ObservableProperty] private int _todayCount;
+    [ObservableProperty] private int _waitingCount;
+
+    private Guid? _editingPatientId;
+
+    // ── Static Dropdowns ──────────────────────────────────────
+    public ObservableCollection<string> GenderOptions { get; } = new() { "ذكر", "أنثى" };
+    public ObservableCollection<string> BloodTypes { get; } = new()
+        { "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-" };
 
     public ReceptionViewModel()
     {
-        UpdateUiLanguage();
-        RefreshSearchResults();
+        _db = new HealthCenterDbContext();
+        _db.Database.EnsureCreated();
+        RefreshSearch();
+        LoadTodayQueue();
     }
 
-    partial void OnSearchQueryChanged(string value) => RefreshSearchResults();
+    // ── Reactive search as user types ────────────────────────
+    partial void OnSearchQueryChanged(string value) => RefreshSearch();
+    partial void OnSelectedPatientChanged(Patient? value) => LoadSelectedPatientDetails(value);
 
-    [RelayCommand]
-    private void Search() => RefreshSearchResults();
-
-    [RelayCommand]
-    private void SwitchLanguage()
+    // ── Search ────────────────────────────────────────────────
+    private void RefreshSearch()
     {
-        IsArabic = !IsArabic;
-        UpdateUiLanguage();
+        SearchResults.Clear();
+        var q = SearchQuery.Trim();
+
+        var patients = string.IsNullOrWhiteSpace(q)
+            ? _db.Patients.OrderByDescending(p => p.CreatedAt).Take(50).ToList()
+            : _db.Patients.Where(p =>
+                p.FullName.Contains(q) ||
+                (p.NationalId != null && p.NationalId.Contains(q)) ||
+                p.PhoneNumber.Contains(q))
+              .OrderBy(p => p.FullName)
+              .Take(50)
+              .ToList();
+
+        foreach (var p in patients)
+            SearchResults.Add(p);
     }
 
-    private void UpdateUiLanguage()
+    [RelayCommand]
+    private void Search() => RefreshSearch();
+
+    // ── Load queue ────────────────────────────────────────────
+    private void LoadTodayQueue()
     {
-        if (IsArabic)
+        TodayQueue.Clear();
+        var today = DateTime.Today;
+        var tickets = _db.QueueTickets
+            .Include(t => t.Patient)
+            .Where(t => t.CreatedAt.Date == today)
+            .OrderBy(t => t.TicketNumber)
+            .ToList();
+
+        TodayCount = tickets.Count;
+        WaitingCount = tickets.Count(t => t.Status == TicketStatus.Waiting || t.Status == TicketStatus.AwaitingRecall);
+
+        foreach (var t in tickets) TodayQueue.Add(t);
+    }
+
+    // ── Patient selection → pre-fill read-only details ────────
+    private void LoadSelectedPatientDetails(Patient? p)
+    {
+        if (p == null) return;
+        // Populate form for viewing (switches to Edit mode when Edit is clicked)
+    }
+
+    // ── Registration: Save / Update ───────────────────────────
+    [RelayCommand]
+    private void SavePatient()
+    {
+        if (string.IsNullOrWhiteSpace(PatientName) || PatientName.Trim().Length < 3)
+        { ShowError("الاسم يجب أن يكون 3 أحرف على الأقل."); return; }
+
+        if (string.IsNullOrWhiteSpace(PhoneNumber) || PhoneNumber.Trim().Length < 9)
+        { ShowError("رقم الهاتف غير صحيح."); return; }
+
+        if (IsEditMode && _editingPatientId.HasValue)
         {
-            CurrentFlowDirection = FlowDirection.RightToLeft;
-            NationalIdLabel = "الرقم الوطني";
-            SaveButtonText = IsEditMode ? "تعديل البيانات" : "حفظ البيانات";
-            SearchPlaceholder = "ابحث بالاسم أو الرقم...";
-            SearchBtnText = "بحث";
-            GenderOptions.Clear(); 
-            GenderOptions.Add(new GenderOption("ذكر", "M")); 
-            GenderOptions.Add(new GenderOption("أنثى", "F"));
+            // UPDATE
+            var existing = _db.Patients.Find(_editingPatientId.Value);
+            if (existing == null) { ShowError("المريض غير موجود."); return; }
+
+            existing.FullName = PatientName.Trim();
+            existing.NationalId = string.IsNullOrWhiteSpace(NationalId) ? null : NationalId.Trim();
+            existing.PhoneNumber = PhoneNumber.Trim();
+            existing.EmergencyContact = EmergencyContact;
+            existing.DateOfBirth = SelectedBirthDate;
+            existing.Gender = SelectedGender == "ذكر" ? Gender.Male : (SelectedGender == "أنثى" ? Gender.Female : null);
+            existing.Address = Address;
+            existing.BloodType = SelectedBloodType;
+            existing.Allergies = Allergies;
+            existing.ChronicConditions = ChronicConditions;
+            existing.InsuranceProvider = InsuranceProvider;
+            existing.InsuranceNumber = InsuranceNumber;
+            existing.UpdatedAt = DateTime.UtcNow;
+
+            _db.SaveChanges();
+            ShowSuccess("تم تحديث بيانات المريض بنجاح.");
         }
         else
         {
-            CurrentFlowDirection = FlowDirection.LeftToRight;
-            NationalIdLabel = "National ID";
-            SaveButtonText = IsEditMode ? "Update Data" : "Save Data";
-            SearchPlaceholder = "Search Name or ID...";
-            SearchBtnText = "Search";
-            GenderOptions.Clear(); 
-            GenderOptions.Add(new GenderOption("Male", "M")); 
-            GenderOptions.Add(new GenderOption("Female", "F"));
-        }
-    }
+            // Check NationalId uniqueness
+            if (!string.IsNullOrWhiteSpace(NationalId) &&
+                _db.Patients.Any(p => p.NationalId == NationalId.Trim()))
+            { ShowError("يوجد مريض مسجّل بهذا الرقم الوطني مسبقاً."); return; }
 
-    private bool CanAddPatient() => 
-        !string.IsNullOrWhiteSpace(PatientName) && PatientName.Length >= 3 &&
-        !string.IsNullOrWhiteSpace(PhoneNumber) && PhoneNumber.Length == 10 &&
-        !string.IsNullOrWhiteSpace(NationalId) && NationalId.Length >= 10 && 
-        SelectedGender != null;
-
-    [RelayCommand(CanExecute = nameof(CanAddPatient))]
-    private void AddPatient()
-    {
-        if (IsEditMode && _editingPatientId != null)
-        {
-            // --- تعديل ---
-            var existing = ClinicStore.Instance.AllPatients.FirstOrDefault(p => p.Id == _editingPatientId);
-            if (existing != null)
+            var patient = new Patient
             {
-                existing.FullName = PatientName;
-                existing.PhoneNumber = PhoneNumber;
-                existing.NationalId = NationalId;
-                existing.Gender = SelectedGender?.Value ?? "M";
-                existing.BloodType = SelectedBloodType ?? "";
-                
-                // ✅ التعديل الثاني: تعيين التاريخ مباشرة بدون .DateTimeOffset
-                existing.BirthDate = SelectedBirthDate; 
-                
-                SuccessMessage = IsArabic ? "تم تعديل البيانات بنجاح!" : "Data Updated!";
-            }
-            IsEditMode = false;
-            _editingPatientId = null;
-            SaveButtonText = IsArabic ? "حفظ البيانات" : "Save Data";
-        }
-        else
-        {
-            // --- إضافة جديدة ---
-            int nextTicketNumber = ClinicStore.Instance.TodayCount + 1;
-
-            var newPatient = new Patient 
-            { 
-                FullName = PatientName, 
-                PhoneNumber = PhoneNumber, 
-                NationalId = NationalId,
-                Gender = SelectedGender?.Value ?? "M",
-                BloodType = SelectedBloodType ?? "",
-                
-                // ✅ التعديل الثالث: تعيين التاريخ مباشرة
-                BirthDate = SelectedBirthDate,
-                
-                TicketNumber = nextTicketNumber,
-                RegistrationDate = DateTime.Now
+                FullName = PatientName.Trim(),
+                NationalId = string.IsNullOrWhiteSpace(NationalId) ? null : NationalId.Trim(),
+                PhoneNumber = PhoneNumber.Trim(),
+                EmergencyContact = EmergencyContact,
+                DateOfBirth = SelectedBirthDate,
+                Gender = SelectedGender == "ذكر" ? Gender.Male : (SelectedGender == "أنثى" ? Gender.Female : null),
+                Address = Address,
+                BloodType = SelectedBloodType,
+                Allergies = Allergies,
+                ChronicConditions = ChronicConditions,
+                InsuranceProvider = InsuranceProvider,
+                InsuranceNumber = InsuranceNumber,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
             };
-            
-            ClinicStore.Instance.AddPatientToQueue(newPatient);
-            SuccessMessage = IsArabic ? $"تم الحفظ! رقم التذكرة: {nextTicketNumber}" : $"Saved! Ticket #{nextTicketNumber}";
+            _db.Patients.Add(patient);
+            _db.SaveChanges();
+
+            SelectedPatient = patient;
+            ShowSuccess($"تم تسجيل المريض بنجاح.");
         }
 
-        PatientName = ""; PhoneNumber = ""; NationalId = ""; SelectedGender = null; 
-        SelectedBloodType = null; SelectedBirthDate = null;
-        RefreshSearchResults();
+        ClearForm();
+        RefreshSearch();
+        LoadTodayQueue();
+        SelectedTabIndex = 1; // Switch to search tab
     }
 
+    // ── Queue Ticket ──────────────────────────────────────────
+    [RelayCommand]
+    private void IssueTicket(Patient patient)
+    {
+        // Prevent double-ticketing today
+        if (_db.QueueTickets.Any(t =>
+            t.PatientId == patient.Id &&
+            t.CreatedAt.Date == DateTime.Today &&
+            t.Status != TicketStatus.Completed))
+        {
+            ShowError($"المريض {patient.FullName} لديه تذكرة نشطة اليوم.");
+            return;
+        }
+
+        // Find today's max ticket number
+        var today = DateTime.Today;
+        int nextNum = _db.QueueTickets.Any(t => t.CreatedAt.Date == today)
+            ? _db.QueueTickets.Where(t => t.CreatedAt.Date == today).Max(t => t.TicketNumber) + 1
+            : 1;
+
+        // Assign to first available doctor
+        var doctor = _db.Users.FirstOrDefault(u => u.Role == UserRole.Doctor && u.IsActive);
+
+        var ticket = new QueueTicket
+        {
+            PatientId = patient.Id,
+            DoctorId = doctor?.Id,
+            TicketNumber = nextNum,
+            Status = TicketStatus.Waiting,
+            CreatedAt = DateTime.Now,
+        };
+
+        _db.QueueTickets.Add(ticket);
+        _db.SaveChanges();
+
+        ShowSuccess($"تم إصدار تذكرة رقم {nextNum} للمريض {patient.FullName}");
+        LoadTodayQueue();
+    }
+
+    // ── Edit ──────────────────────────────────────────────────
     [RelayCommand]
     private void EditPatient(Patient patient)
     {
         PatientName = patient.FullName;
+        NationalId = patient.NationalId ?? string.Empty;
         PhoneNumber = patient.PhoneNumber;
-        NationalId = patient.NationalId;
-        SelectedGender = GenderOptions.FirstOrDefault(g => g.Value == patient.Gender);
+        EmergencyContact = patient.EmergencyContact;
+        SelectedBirthDate = patient.DateOfBirth;
+        SelectedGender = patient.Gender == Gender.Male ? "ذكر" : patient.Gender == Gender.Female ? "أنثى" : null;
         SelectedBloodType = patient.BloodType;
-        
-        // ✅ التعديل الرابع: قراءة التاريخ مباشرة
-        SelectedBirthDate = patient.BirthDate;
+        Address = patient.Address;
+        Allergies = patient.Allergies;
+        ChronicConditions = patient.ChronicConditions;
+        InsuranceProvider = patient.InsuranceProvider;
+        InsuranceNumber = patient.InsuranceNumber;
 
-        IsEditMode = true;
         _editingPatientId = patient.Id;
-        SaveButtonText = IsArabic ? "تعديل البيانات" : "Update Data";
-        SelectedTabIndex = 0; 
+        IsEditMode = true;
+        SelectedTabIndex = 0; // Switch to form tab
     }
 
     [RelayCommand]
-    private void DeletePatient(Patient patient)
+    private void CancelEdit()
     {
-        ClinicStore.Instance.RemovePatient(patient);
-        RefreshSearchResults();
+        ClearForm();
+        IsEditMode = false;
     }
 
-    private void RefreshSearchResults()
+    // ── Cancel / Clear ────────────────────────────────────────
+    private void ClearForm()
     {
-        SearchResults.Clear();
-        var q = SearchQuery.ToLower().Trim();
-        var source = ClinicStore.Instance.AllPatients;
-
-        var query = string.IsNullOrWhiteSpace(q) 
-            ? source 
-            : source.Where(p => 
-                p.FullName.ToLower().Contains(q) || 
-                p.PhoneNumber.Contains(q) || 
-                p.NationalId.Contains(q));
-        
-        foreach(var p in query.OrderBy(p => p.FullName)) 
-        {
-            SearchResults.Add(p);
-        }
+        PatientName = string.Empty; NationalId = string.Empty; PhoneNumber = string.Empty;
+        EmergencyContact = null; SelectedBirthDate = null; SelectedGender = null;
+        SelectedBloodType = null; Address = null; Allergies = null;
+        ChronicConditions = null; InsuranceProvider = null; InsuranceNumber = null;
+        _editingPatientId = null; IsEditMode = false;
     }
+
+    // ── Helpers ───────────────────────────────────────────────
+    private void ShowError(string msg) { StatusMessage = msg; IsError = true; }
+    private void ShowSuccess(string msg) { StatusMessage = msg; IsError = false; }
 
     [RelayCommand]
-    private void PrintTicket(Patient patient)
-    {
-        OnPrintRequest?.Invoke(patient);
-    }
+    private void RefreshQueue() { LoadTodayQueue(); RefreshSearch(); }
 }

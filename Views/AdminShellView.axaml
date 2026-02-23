@@ -1,0 +1,36 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HealthCenter.Desktop.ViewModels"
+             xmlns:reception="clr-namespace:HealthCenter.Desktop.Features.Reception.Views"
+             xmlns:doctor="clr-namespace:HealthCenter.Desktop.Features.Doctor.Views"
+             xmlns:nurse="clr-namespace:HealthCenter.Desktop.Features.Nurse.Views"
+             xmlns:cashier="clr-namespace:HealthCenter.Desktop.Features.Cashier.Views"
+             xmlns:lab="clr-namespace:HealthCenter.Desktop.Features.Lab.Views"
+             x:Class="HealthCenter.Desktop.Views.AdminShellView"
+             x:DataType="vm:AdminShellViewModel">
+
+    <TabControl TabStripPlacement="Top" Padding="0" Margin="0">
+
+        <TabItem Header="الاستقبال">
+            <reception:ReceptionView DataContext="{Binding ReceptionPanel}"/>
+        </TabItem>
+
+        <TabItem Header="لوحة الطبيب">
+            <doctor:DoctorPanelView DataContext="{Binding DoctorPanel}"/>
+        </TabItem>
+
+        <TabItem Header="التمريض">
+            <nurse:NursePanelView DataContext="{Binding NursePanel}"/>
+        </TabItem>
+
+        <TabItem Header="الصندوق">
+            <cashier:CashierPanelView DataContext="{Binding CashierPanel}"/>
+        </TabItem>
+
+        <TabItem Header="المختبر">
+            <lab:LabPanelView DataContext="{Binding LabPanel}"/>
+        </TabItem>
+
+    </TabControl>
+
+</UserControl>

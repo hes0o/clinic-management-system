@@ -1,39 +1,76 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:reception="clr-namespace:HealthCenter.Desktop.Features.Reception.Views"
-        xmlns:queue="clr-namespace:HealthCenter.Desktop.Features.Queue.Views"
-        xmlns:doctor="clr-namespace:HealthCenter.Desktop.Features.Doctor.Views"
+        xmlns:auth="clr-namespace:HealthCenter.Desktop.Features.Auth.Views"
+        xmlns:vm="using:HealthCenter.Desktop.ViewModels"
         x:Class="HealthCenter.Desktop.Views.MainWindow"
-        Width="1400" Height="800"
-        Title="نظام إدارة المركز الصحي">
+        x:DataType="vm:MainWindowViewModel"
+        Width="1400" Height="820"
+        Title="نظام إدارة المركز الصحي"
+        Background="#F1F5F9">
 
-	<TabControl TabStripPlacement="Top" Padding="0" Margin="0">
-		
-		<TabItem Header="📝 الاستقبال وتسجيل المرضى">
-			<reception:ReceptionView/>
-		</TabItem>
-		
-		<TabItem Header="📋 شاشة الانتظار">
-			<queue:QueueDisplayView/>
-		</TabItem>
-		
-		<TabItem Header="👨‍⚕️ لوحة الطبيب">
-			<doctor:DoctorPanelView/>
-		</TabItem>
-		
-	</TabControl>
-	
-	<Window.Styles>
-		<Style Selector="TabItem">
-			<Setter Property="FontSize" Value="16"/>
-			<Setter Property="FontWeight" Value="SemiBold"/>
-			<Setter Property="Padding" Value="20,12"/>
-			<Setter Property="Margin" Value="0,0,8,0"/>
-		</Style>
-		
-		<Style Selector="TabItem:selected">
-			<Setter Property="Foreground" Value="#2563EB"/>
-		</Style>
-	</Window.Styles>
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- ======== TOP BAR (visible when authenticated) ======== -->
+        <Border Grid.Row="0"
+                Background="White"
+                BorderBrush="#E2E8F0"
+                BorderThickness="0,0,0,1"
+                IsVisible="{Binding IsAuthenticated}">
+            <Grid Margin="20,10" ColumnDefinitions="Auto,*,Auto">
+                <!-- App name -->
+                <TextBlock Grid.Column="0"
+                           Text="نظام إدارة المركز الصحي"
+                           FontSize="16" FontWeight="Bold"
+                           Foreground="#1E293B"
+                           VerticalAlignment="Center"/>
+
+                <!-- Logged-in user info -->
+                <StackPanel Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="2">
+                    <TextBlock Text="{Binding LoggedInUserName}"
+                               FontSize="14" FontWeight="SemiBold"
+                               Foreground="#1E293B" HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding LoggedInUserRole}"
+                               FontSize="12"
+                               Foreground="#64748B" HorizontalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Logout -->
+                <Button Grid.Column="2"
+                        Content="تسجيل الخروج"
+                        Command="{Binding LogoutCommand}"
+                        Padding="14,8"
+                        CornerRadius="6"
+                        Background="#FEE2E2"
+                        Foreground="#DC2626"
+                        BorderThickness="0"
+                        VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <!-- ======== MAIN CONTENT AREA ======== -->
+        <Grid Grid.Row="1">
+            <!-- Login Screen -->
+            <auth:LoginView DataContext="{Binding LoginViewModel}"
+                            IsVisible="{Binding Path=(vm:MainWindowViewModel).IsAuthenticated,
+                                                RelativeSource={RelativeSource AncestorType=Window},
+                                                Converter={x:Static BoolConverters.Not}}"/>
+
+            <!-- Role-specific Dashboard (resolved by ViewLocator) -->
+            <ContentControl Content="{Binding ActiveDashboard}"
+                            IsVisible="{Binding IsAuthenticated}"/>
+        </Grid>
+    </Grid>
+
+    <Window.Styles>
+        <Style Selector="TabItem">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Padding" Value="18,10"/>
+            <Setter Property="Margin" Value="0,0,4,0"/>
+        </Style>
+        <Style Selector="TabItem:selected">
+            <Setter Property="Foreground" Value="#2563EB"/>
+        </Style>
+    </Window.Styles>
 
 </Window>

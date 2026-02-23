@@ -1,0 +1,93 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HealthCenter.Desktop.Features.Cashier.ViewModels"
+             x:Class="HealthCenter.Desktop.Features.Cashier.Views.CashierPanelView"
+             x:DataType="vm:CashierPanelViewModel"
+             FlowDirection="RightToLeft">
+
+    <Grid RowDefinitions="Auto,*" Background="#F8FAFC">
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="White" Padding="20,14" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel>
+                    <TextBlock Text="لوحة الصندوق" FontSize="20" FontWeight="Bold" Foreground="#1E293B"/>
+                    <TextBlock Text="ادارة الفواتير ومعالجة المدفوعات" FontSize="13" Foreground="#64748B"/>
+                </StackPanel>
+                <Button Grid.Column="1" Content="تحديث" Command="{Binding RefreshInvoicesCommand}"
+                        Padding="14,8" CornerRadius="6"
+                        Background="#2563EB" Foreground="White"/>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1" ColumnDefinitions="*,360" Margin="16">
+
+            <!-- Left: Pending Invoices List -->
+            <Border Grid.Column="0" Background="White" CornerRadius="10" Padding="16" Margin="0,0,12,0"
+                    BorderBrush="#E2E8F0" BorderThickness="1">
+                <Grid RowDefinitions="Auto,*">
+                    <TextBlock Grid.Row="0" Text="الفواتير المعلقة" FontWeight="SemiBold" FontSize="15"
+                               Foreground="#1E293B" Margin="0,0,0,12"/>
+                    <ListBox Grid.Row="1" ItemsSource="{Binding PendingInvoices}"
+                             SelectedItem="{Binding SelectedInvoice}"
+                             Background="Transparent">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border Padding="14,10" CornerRadius="6" Background="#F8FAFC"
+                                        Margin="0,0,0,6" BorderBrush="#E2E8F0" BorderThickness="1">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Patient.FullName}" FontWeight="SemiBold" Foreground="#1E293B"/>
+                                            <TextBlock Text="{Binding Amount, StringFormat='المبلغ: {0:N2} ريال'}"
+                                                       FontSize="13" Foreground="#64748B"/>
+                                            <TextBlock Text="{Binding CreatedAt, StringFormat='التاريخ: {0:yyyy/MM/dd}'}"
+                                                       FontSize="12" Foreground="#94A3B8"/>
+                                        </StackPanel>
+                                        <Border Grid.Column="1" Background="#FEF3C7" CornerRadius="6" Padding="8,4"
+                                                VerticalAlignment="Center">
+                                            <TextBlock Text="معلقة" FontSize="12" Foreground="#92400E" FontWeight="Medium"/>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+
+            <!-- Right: Payment Panel -->
+            <Border Grid.Column="1" Background="White" CornerRadius="10" Padding="24"
+                    BorderBrush="#E2E8F0" BorderThickness="1">
+                <Grid RowDefinitions="Auto,Auto,Auto,Auto,*,Auto">
+                    <TextBlock Grid.Row="0" Text="معالجة الدفع" FontSize="17" FontWeight="SemiBold"
+                               Foreground="#1E293B" Margin="0,0,0,4"/>
+                    <TextBlock Grid.Row="1"
+                               Text="{Binding SelectedInvoice.Patient.FullName, FallbackValue='لم يتم تحديد فاتورة'}"
+                               FontSize="14" Foreground="#64748B" Margin="0,0,0,4"/>
+                    <TextBlock Grid.Row="2"
+                               Text="{Binding SelectedInvoice.Amount, StringFormat='المبلغ الاجمالي: {0:N2} ريال'}"
+                               FontSize="16" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,20"/>
+
+                    <StackPanel Grid.Row="3" Spacing="8">
+                        <TextBlock Text="طريقة الدفع" FontWeight="Medium" Foreground="#374151"/>
+                        <ComboBox ItemsSource="{Binding PaymentMethods}"
+                                  SelectedItem="{Binding SelectedPaymentMethod}"
+                                  HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+
+                    <TextBlock Grid.Row="4" Text="{Binding StatusMessage}"
+                               Foreground="#16A34A" FontWeight="Medium"
+                               VerticalAlignment="Bottom" Margin="0,16,0,0"
+                               IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+
+                    <Button Grid.Row="5" Content="تاكيد الدفع - مدفوعة"
+                            Command="{Binding MarkAsPaidCommand}"
+                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                            Padding="0,12" FontSize="15" FontWeight="SemiBold"
+                            Background="#16A34A" Foreground="White" CornerRadius="8"
+                            Margin="0,12,0,0"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>
