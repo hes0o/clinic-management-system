@@ -5,97 +5,124 @@
 
 ## 📋 Role Overview
 
-**English:** Responsible for logging, error handling, configuration, and application settings.
+**English:** This sprint your job is to create a global error handling layer so that raw C# exceptions never appear in the UI. You will also create a reusable value converter so the team can display friendly Arabic status labels without code changes all over the place.
 
-**Arabic:** مسؤول عن السجلات ومعالجة الأخطاء والإعدادات.
-
----
-
-## 🌿 Branch Rules
-
-| Rule | Description |
-|------|-------------|
-| **Branch** | `feature/infrastructure` |
-| **Directory** | `/Infrastructure` folder |
-| **Merge To** | `develop` (via PR) |
-
-```bash
-git checkout -b feature/infrastructure
-git push -u origin feature/infrastructure
-```
+**Arabic:** مهمتك في هذا السبرينت هي إنشاء طبقة للتعامل مع الأخطاء على مستوى التطبيق كله، حتى لا تظهر أخطاء C# الخام في الواجهة. ستنشئ أيضاً محول قيم (Value Converter) قابلاً لإعادة الاستخدام لعرض الحالات بالعربية.
 
 ---
 
-## ✅ Task 1: Setup Serilog Logging
+## 🐛 Bug We Are Fixing
 
-**Priority:** 🔴 High | **Time:** 2 hours
-**File:** Create `/Infrastructure/LoggingService.cs`
+**Bug 1 — Raw Error Messages:**  
+If any unhandled exception reaches the UI (e.g., EF Core failure, null reference, etc.), the user currently sees raw English error text or the app crashes. We need a global safety net that catches these and shows a friendly Arabic error banner.
+
+---
+
+## ✅ Task 1: Global Exception Handler
+
+**Priority:** 🔴 High | **Estimated Time:** 1.5 hours  
+**File:** `/Infrastructure/GlobalExceptionHandler.cs` (new file)
 
 ### Instructions:
-1. Configure Serilog in Program.cs
-2. Log to file: `/Logs/healthcenter-{date}.log`
-3. Log levels: Debug, Info, Warning, Error
-4. Include timestamp and context
+1. Create `/Infrastructure/GlobalExceptionHandler.cs`
+2. Hook into `AppDomain.CurrentDomain.UnhandledException` and `TaskScheduler.UnobservedTaskException`
+3. When an unhandled exception occurs:
+   - Log it (console or file)
+   - Show a friendly dialog or notification to the user in Arabic
+   - Do NOT let the app crash silently
 
 ### Code Example:
 ```csharp
-// In Program.cs
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Debug()
-    .WriteTo.File("Logs/healthcenter-.log", 
-        rollingInterval: RollingInterval.Day,
-        outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
-    .CreateLogger();
-```
-
----
-
-## ✅ Task 2: Global Error Handling
-
-**Priority:** 🔴 High | **Time:** 1.5 hours
-
-### Instructions:
-1. Create global exception handler
-2. Log all unhandled exceptions
-3. Show user-friendly Arabic error message
-4. Don't crash the app on errors
-
-### Code Example:
-```csharp
-AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+public static class GlobalExceptionHandler
 {
-    Log.Fatal(e.ExceptionObject as Exception, "خطأ غير متوقع");
-    // Show dialog to user
-};
-```
+    public static void Register()
+    {
+        AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+        {
+            var ex = args.ExceptionObject as Exception;
+            Console.Error.WriteLine($"[FATAL] {ex?.Message}");
+            // Show a friendly Avalonia dialog
+            ShowFriendlyError("حدث خطأ غير متوقع. يرجى إعادة تشغيل التطبيق.");
+        };
 
----
+        TaskScheduler.UnobservedTaskException += (sender, args) =>
+        {
+            Console.Error.WriteLine($"[TASK ERROR] {args.Exception.Message}");
+            args.SetObserved(); // prevent crash
+        };
+    }
 
-## ✅ Task 3: Application Settings
-
-**Priority:** 🟡 Medium | **Time:** 1.5 hours
-**File:** Create `appsettings.json`
-
-### Instructions:
-1. Create settings file with:
-   - Database path
-   - Clinic name
-   - Working hours
-   - Default language
-2. Load settings at startup
-
-### Example:
-```json
-{
-  "ClinicName": "المركز الصحي",
-  "Database": {
-    "Path": "healthcenter.db"
-  },
-  "WorkingHours": {
-    "Start": "08:00",
-    "End": "22:00"
-  }
+    private static void ShowFriendlyError(string message)
+    {
+        // Use Avalonia dispatcher to show on UI thread
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        {
+            // Show a MessageBox or update a global status bar
+            Console.WriteLine($"UI Error: {message}");
+        });
+    }
 }
+```
+
+4. Call `GlobalExceptionHandler.Register()` at the top of `Program.cs` before the app starts.
+
+---
+
+## ✅ Task 2: Create `TicketStatusConverter` Value Converter
+
+**Priority:** 🔴 High | **Estimated Time:** 1 hour  
+**File:** `/Infrastructure/Converters/TicketStatusConverter.cs` (new file)
+
+### Instructions:
+1. Create the directory `/Infrastructure/Converters/` if it does not exist
+2. Create `TicketStatusConverter.cs` implementing `IValueConverter`
+3. It should convert a `TicketStatus` enum value to its Arabic string equivalent
+4. Register it in `App.axaml` resources so all views can use it
+
+### Code Example:
+```csharp
+using System;
+using System.Globalization;
+using Avalonia.Data.Converters;
+using HealthCenter.Desktop.Database.Entities;
+
+public class TicketStatusConverter : IValueConverter
+{
+    public static readonly TicketStatusConverter Instance = new();
+
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (value is TicketStatus status)
+        {
+            return status switch
+            {
+                TicketStatus.Waiting        => "في الانتظار",
+                TicketStatus.Called         => "تم النداء",
+                TicketStatus.InProgress     => "قيد الفحص",
+                TicketStatus.AwaitingRecall => "بانتظار إعادة النداء",
+                TicketStatus.Completed      => "منتهي",
+                TicketStatus.Present        => "حاضر",
+                _                           => value.ToString()
+            };
+        }
+        return value?.ToString();
+    }
+
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotImplementedException();
+}
+```
+
+5. Register in `App.axaml`:
+```xml
+<Application.Resources>
+    <converters:TicketStatusConverter x:Key="TicketStatusConverter"/>
+</Application.Resources>
+```
+
+6. Document usage for the team — they use it in XAML like:
+```xml
+<TextBlock Text="{Binding Status, Converter={StaticResource TicketStatusConverter}}"/>
 ```
 
 ---
@@ -104,11 +131,30 @@ AppDomain.CurrentDomain.UnhandledException += (s, e) =>
 
 ```
 /Infrastructure/
-├── LoggingService.cs     ← Create
-├── ErrorHandler.cs       ← Create
-└── SettingsService.cs    ← Create
+├── GlobalExceptionHandler.cs     ← Create
+└── Converters/
+    └── TicketStatusConverter.cs  ← Create
 
-appsettings.json          ← Create in root
+Program.cs                        ← Edit (register handler)
+App.axaml                         ← Edit (register converter)
+```
+
+---
+
+## 🌿 Branch Rules
+
+| Rule | Description |
+|------|-------------|
+| **Branch** | `feature/infrastructure` |
+| **Directory** | `/Infrastructure` + `App.axaml` + `Program.cs` |
+| **Merge To** | `develop` (via PR) |
+
+```bash
+git checkout feature/infrastructure
+git pull origin develop
+git add .
+git commit -m "feat(infra): global error handler + TicketStatus value converter"
+git push origin feature/infrastructure
 ```
 
 **Questions?** Ask Hassan

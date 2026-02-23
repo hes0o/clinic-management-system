@@ -5,13 +5,86 @@
 
 ## 📋 Role Overview | نظرة عامة على الدور
 
-**English:** You are responsible for all database-related work including Entity models, migrations, and data seeding. You work exclusively in the `/Database` folder.
+**English:** This sprint your job is to support the bug fixes by reviewing the database entities and ensuring the `TicketStatus` enum values have a proper Arabic display representation, so the UI can show human-readable status text instead of raw enum names like `Waiting`, `Called`, etc.
 
-**Arabic:** أنت مسؤول عن جميع أعمال قاعدة البيانات بما في ذلك نماذج الكيانات والتهجيرات وإدخال البيانات التجريبية. تعمل حصرياً في مجلد `/Database`.
+**Arabic:** مهمتك في هذا السبرينت هي دعم إصلاح الأخطاء من خلال مراجعة كيانات قاعدة البيانات والتأكد من أن قيم `TicketStatus` لها تمثيل عربي مقروء، حتى لا تظهر في الواجهة بأسمائها البرمجية.
 
 ---
 
-## 🌿 Branch Rules | قواعد الفروع
+## 🐛 Bug We Are Fixing
+
+**Bug 1 — Raw Status Values in UI:**  
+In the Nurse panel and Doctor panel, the ticket status shows as its raw enum name (e.g., `Waiting`, `AwaitingRecall`, `Called`) instead of a readable Arabic label. This must be fixed at the data/entity level.
+
+---
+
+## ✅ Task 1: Add Arabic Display For `TicketStatus` Enum
+
+**Priority:** 🔴 High | **Estimated Time:** 1.5 hours  
+**File:** `/Database/Entities/QueueTicket.cs`
+
+### English Instructions:
+1. Open the file that defines the `TicketStatus` enum (likely inside `QueueTicket.cs` or a shared enums file)
+2. Add a static extension method or a `Description` attribute to map each enum value to an Arabic label
+3. The mapping should be:
+   - `Waiting` → `"في الانتظار"`
+   - `Called` → `"تم النداء"`
+   - `InProgress` → `"قيد الفحص"`
+   - `AwaitingRecall` → `"بانتظار إعادة النداء"`
+   - `Completed` → `"منتهي"`
+   - `Present` → `"حاضر"`
+
+### Code Example:
+```csharp
+public static class TicketStatusExtensions
+{
+    public static string ToArabic(this TicketStatus status) => status switch
+    {
+        TicketStatus.Waiting        => "في الانتظار",
+        TicketStatus.Called         => "تم النداء",
+        TicketStatus.InProgress     => "قيد الفحص",
+        TicketStatus.AwaitingRecall => "بانتظار إعادة النداء",
+        TicketStatus.Completed      => "منتهي",
+        TicketStatus.Present        => "حاضر",
+        _                           => status.ToString()
+    };
+}
+```
+
+Place this class in the same file as `TicketStatus`, or in a new file `/Database/Entities/EnumExtensions.cs`.
+
+> **Note:** The UI team (Wissam, Ela) will then use `{Binding Status}` differently — coordinate with them to use `ToArabic()` in a value converter or by exposing a computed property.
+
+---
+
+## ✅ Task 2: Verify No Raw Exception Leaks from DB Layer
+
+**Priority:** 🟡 Medium | **Estimated Time:** 1 hour  
+**File:** `/Database/HealthCenterDbContext.cs`
+
+### English Instructions:
+1. Review any direct DB calls that might throw raw exceptions to the UI
+2. Ensure `EnsureCreated()` failures are caught and handled gracefully
+3. If there is any `try/catch` missing around migrations or seeding, add it
+4. Any caught exception should be logged (if logging is set up by Ahmed) — do NOT rethrow raw exceptions to the UI
+
+### Code Example:
+```csharp
+try
+{
+    _db.Database.EnsureCreated();
+}
+catch (Exception ex)
+{
+    // Log it (use Ahmed's LoggingService when available)
+    Console.Error.WriteLine($"DB init failed: {ex.Message}");
+    // Show user-friendly message via ShowError()
+}
+```
+
+---
+
+## 🌿 Branch Rules
 
 | Rule | Description |
 |------|-------------|
@@ -20,197 +93,21 @@
 | **Merge To** | `develop` (via PR) |
 | **Requires** | Hassan's approval |
 
-### Branch Setup Commands:
 ```bash
-# First time setup
-git checkout -b feature/database
-git push -u origin feature/database
-
-# Daily workflow
 git checkout feature/database
-git pull origin develop  # Get latest changes
+git pull origin develop
 # ... do your work ...
 git add .
-git commit -m "feat(db): your message here"
+git commit -m "fix(db): add Arabic display for TicketStatus enum"
 git push origin feature/database
 ```
 
 ---
 
-## ✅ Task 1: Enhance Patient Entity
-### المهمة 1: تحسين كيان المريض
+## ⚠️ Important Notes
 
-**Priority:** 🔴 High | **Estimated Time:** 2 hours
-**File:** `/Database/Entities/Patient.cs`
-
-#### English Instructions:
-1. Open `/Database/Entities/Patient.cs`
-2. Add the following new properties:
-   - `DateOfBirth` (DateTime?) - تاريخ الميلاد
-   - `Gender` (enum: Male/Female) - الجنس
-   - `Address` (string?) - العنوان
-   - `BloodType` (string?) - فصيلة الدم
-   - `EmergencyContact` (string?) - رقم الطوارئ
-   - `Notes` (string?) - ملاحظات
-3. Add data annotations for validation
-4. Test that the app still builds
-
-#### التعليمات بالعربية:
-1. افتح ملف `/Database/Entities/Patient.cs`
-2. أضف الخصائص الجديدة المذكورة أعلاه
-3. أضف تعليقات التحقق من البيانات
-4. تأكد أن التطبيق يعمل بعد التغييرات
-
-#### Code Example:
-```csharp
-public class Patient
-{
-    public Guid Id { get; set; }
-    
-    [Required]
-    [MaxLength(100)]
-    public string FullName { get; set; } = string.Empty;
-    
-    [Required]
-    [Phone]
-    public string PhoneNumber { get; set; } = string.Empty;
-    
-    // ADD THESE NEW FIELDS:
-    public DateTime? DateOfBirth { get; set; }
-    
-    public Gender? Gender { get; set; }
-    
-    [MaxLength(200)]
-    public string? Address { get; set; }
-    
-    [MaxLength(5)]
-    public string? BloodType { get; set; }
-    
-    [Phone]
-    public string? EmergencyContact { get; set; }
-    
-    public string? Notes { get; set; }
-    
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
-}
-
-public enum Gender
-{
-    Male,    // ذكر
-    Female   // أنثى
-}
-```
-
----
-
-## ✅ Task 2: Create Seed Data
-### المهمة 2: إنشاء بيانات تجريبية
-
-**Priority:** 🟡 Medium | **Estimated Time:** 1.5 hours
-**File:** `/Database/HealthCenterDbContext.cs`
-
-#### English Instructions:
-1. Open `HealthCenterDbContext.cs`
-2. In the `OnModelCreating` method, add seed data
-3. Add at least 10 sample patients with Arabic names
-4. Add 5 sample queue tickets for today
-5. Add 3 sample visits
-
-#### التعليمات بالعربية:
-1. افتح ملف `HealthCenterDbContext.cs`
-2. في دالة `OnModelCreating` أضف البيانات التجريبية
-3. أضف 10 مرضى تجريبيين بأسماء عربية
-4. أضف 5 تذاكر انتظار لليوم
-5. أضف 3 زيارات تجريبية
-
-#### Code Example:
-```csharp
-protected override void OnModelCreating(ModelBuilder modelBuilder)
-{
-    // Seed Patients
-    modelBuilder.Entity<Patient>().HasData(
-        new Patient 
-        { 
-            Id = Guid.NewGuid(), 
-            FullName = "أحمد محمد علي", 
-            PhoneNumber = "0501234567",
-            Gender = Gender.Male,
-            BloodType = "A+"
-        },
-        new Patient 
-        { 
-            Id = Guid.NewGuid(), 
-            FullName = "فاطمة خالد العمري", 
-            PhoneNumber = "0559876543",
-            Gender = Gender.Female,
-            BloodType = "O-"
-        }
-        // Add 8 more...
-    );
-}
-```
-
----
-
-## ✅ Task 3: Add EF Core Migrations Support
-### المهمة 3: إضافة دعم التهجيرات
-
-**Priority:** 🟡 Medium | **Estimated Time:** 1 hour
-
-#### English Instructions:
-1. Install EF Core Tools if not installed
-2. Add Design package to project
-3. Create initial migration
-4. Document migration commands for team
-
-#### التعليمات بالعربية:
-1. ثبت أدوات EF Core إذا لم تكن مثبتة
-2. أضف حزمة التصميم للمشروع
-3. أنشئ التهجير الأولي
-4. وثق أوامر التهجير للفريق
-
-#### Commands:
-```bash
-# Install EF Core tools globally
-dotnet tool install --global dotnet-ef
-
-# Add Design package (run in project folder)
-dotnet add package Microsoft.EntityFrameworkCore.Design
-
-# Create migration
-dotnet ef migrations add InitialCreate
-
-# Apply migration
-dotnet ef database update
-
-# Remove last migration (if needed)
-dotnet ef migrations remove
-```
-
----
-
-## 📁 Your Files | ملفاتك
-
-```
-/Database
-├── Entities/
-│   ├── Patient.cs      ← Edit this
-│   ├── Appointment.cs  ← Edit this
-│   ├── QueueTicket.cs  ← Edit this
-│   ├── Visit.cs        ← Edit this
-│   └── User.cs         ← Edit this
-├── HealthCenterDbContext.cs  ← Edit this
-└── Migrations/         ← Will be created
-```
-
----
-
-## ⚠️ Important Notes | ملاحظات مهمة
-
-- ❌ Do NOT edit files outside `/Database` folder
-- ✅ Always test with `dotnet build` before committing
-- ✅ Use nullable types (`?`) for optional fields
-- ✅ Add `[Required]` attribute for mandatory fields
-- ✅ Commit messages must start with `feat(db):` or `fix(db):`
+- Do NOT edit files outside `/Database`
+- Always test with `dotnet build` before committing
+- Coordinate with Wissam and Ela on how they will consume the `ToArabic()` extension
 
 **Questions?** Ask Hassan (Team Lead)
