@@ -1,0 +1,76 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HealthCenter.Desktop.Features.Auth.ViewModels"
+             x:Class="HealthCenter.Desktop.Features.Auth.Views.LoginView"
+             x:DataType="vm:LoginViewModel"
+             FlowDirection="RightToLeft">
+    
+    <Grid Background="#F3F4F6">
+        <Border Background="White" 
+                CornerRadius="16" 
+                Padding="48"
+                Width="400"
+                HorizontalAlignment="Center" 
+                VerticalAlignment="Center"
+                BoxShadow="0 10 25 0 #1A000000">
+            
+            <StackPanel Spacing="24">
+                <!-- Header -->
+                <StackPanel Spacing="8" HorizontalAlignment="Center" Margin="0,0,0,16">
+                    <PathIcon Data="{StaticResource AddRegular}" Width="48" Height="48" Foreground="#2563EB"/>
+                    <TextBlock Text="تسجيل الدخول" 
+                               FontSize="24" 
+                               FontWeight="Bold" 
+                               Foreground="#111827"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="نظام إدارة المركز الصحي" 
+                               FontSize="14" 
+                               Foreground="#6B7280"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Form Fields -->
+                <StackPanel Spacing="16">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="اسم المستخدم" FontWeight="Medium" Foreground="#374151"/>
+                        <TextBox Text="{Binding Username}" 
+                                 Watermark="أدخل اسم المستخدم"
+                                 Classes="modern"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="كلمة المرور" FontWeight="Medium" Foreground="#374151"/>
+                        <TextBox Text="{Binding Password}" 
+                                 PasswordChar="•"
+                                 Watermark="أدخل كلمة المرور"
+                                 Classes="modern"/>
+                    </StackPanel>
+                    
+                    <TextBlock Text="{Binding ErrorMessage}" 
+                           Foreground="#DC2626" 
+                           IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                           TextWrapping="Wrap"
+                           HorizontalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Action Buttons -->
+                <Button Content="دخول" 
+                        Command="{Binding LoginCommand}"
+                        Classes="primary"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center"
+                        Padding="0,12"
+                        FontSize="16"
+                        FontWeight="Bold"
+                        Margin="0,8,0,0"/>
+                
+                <!-- Helper texts -->
+                <TextBlock Text="اسم المستخدم المتوفر: admin أو dr_ahmed" 
+                           FontSize="12" 
+                           Foreground="#9CA3AF"
+                           HorizontalAlignment="Center"
+                           Margin="0,16,0,0"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

@@ -236,15 +236,25 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
     {
         if (CurrentPatient == null) return;
 
+        // Try to get an active Doctor or Admin user. Fallback to first user.
+        var doctor = _db.Users.FirstOrDefault(u => u.Role == UserRole.Doctor || u.Role == UserRole.SuperAdmin) 
+                     ?? _db.Users.FirstOrDefault();
+        var doctorId = doctor?.Id ?? Guid.Empty;
+
         // Create visit record
         var visit = new Visit
         {
             PatientId = CurrentPatient.PatientId,
-            DoctorId = Guid.Parse("00000000-0000-0000-0000-000000000001"), // Default doctor for now
+            DoctorId = doctorId,
             Diagnosis = Diagnosis,
             Prescriptions = Prescriptions,
             Notes = Notes,
-            VisitDate = DateTime.Now
+            BloodPressure = BloodPressure,
+            Temperature = Temperature,
+            HeartRate = HeartRate,
+            Weight = Weight,
+            VisitDate = DateTime.Now,
+            CreatedAt = DateTime.UtcNow
         };
 
         _db.Visits.Add(visit);
@@ -258,6 +268,12 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
         Diagnosis = string.Empty;
         Prescriptions = string.Empty;
         Notes = string.Empty;
+        BloodPressure = string.Empty;
+        Temperature = null;
+        HeartRate = null;
+        Weight = null;
+        SelectedDiagnosis = null;
+        SelectedMedication = null;
 
         LoadQueue();
         LoadStatistics();

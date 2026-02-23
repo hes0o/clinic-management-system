@@ -120,11 +120,15 @@ namespace HealthCenter.Desktop.Migrations
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     PatientId = table.Column<Guid>(type: "TEXT", nullable: false),
                     DoctorId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    NurseId = table.Column<Guid>(type: "TEXT", nullable: true),
                     Diagnosis = table.Column<string>(type: "TEXT", nullable: true),
                     Prescriptions = table.Column<string>(type: "TEXT", nullable: true),
                     Notes = table.Column<string>(type: "TEXT", nullable: true),
+                    BloodPressure = table.Column<string>(type: "TEXT", nullable: true),
+                    Temperature = table.Column<decimal>(type: "TEXT", nullable: true),
+                    HeartRate = table.Column<int>(type: "INTEGER", nullable: true),
+                    Weight = table.Column<decimal>(type: "TEXT", nullable: true),
                     Attachments = table.Column<string>(type: "TEXT", nullable: true),
-                    InvoiceAmount = table.Column<decimal>(type: "TEXT", nullable: true),
                     VisitDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
@@ -143,6 +147,95 @@ namespace HealthCenter.Desktop.Migrations
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Visits_Users_NurseId",
+                        column: x => x.NurseId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Invoices",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    VisitId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    PatientId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Amount = table.Column<decimal>(type: "TEXT", nullable: false),
+                    TaxAmount = table.Column<decimal>(type: "TEXT", nullable: false),
+                    Status = table.Column<int>(type: "INTEGER", nullable: false),
+                    PaymentMethod = table.Column<int>(type: "INTEGER", nullable: true),
+                    CreatedById = table.Column<Guid>(type: "TEXT", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    PaidAt = table.Column<DateTime>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Invoices", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Invoices_Patients_PatientId",
+                        column: x => x.PatientId,
+                        principalTable: "Patients",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Invoices_Users_CreatedById",
+                        column: x => x.CreatedById,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Invoices_Visits_VisitId",
+                        column: x => x.VisitId,
+                        principalTable: "Visits",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LabTests",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    VisitId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    PatientId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    TestName = table.Column<string>(type: "TEXT", nullable: false),
+                    ResultNotes = table.Column<string>(type: "TEXT", nullable: true),
+                    AttachmentPath = table.Column<string>(type: "TEXT", nullable: true),
+                    Status = table.Column<int>(type: "INTEGER", nullable: false),
+                    RequestedById = table.Column<Guid>(type: "TEXT", nullable: false),
+                    PerformedById = table.Column<Guid>(type: "TEXT", nullable: true),
+                    RequestedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CompletedAt = table.Column<DateTime>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LabTests", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_LabTests_Patients_PatientId",
+                        column: x => x.PatientId,
+                        principalTable: "Patients",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_LabTests_Users_PerformedById",
+                        column: x => x.PerformedById,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_LabTests_Users_RequestedById",
+                        column: x => x.RequestedById,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_LabTests_Visits_VisitId",
+                        column: x => x.VisitId,
+                        principalTable: "Visits",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.InsertData(
@@ -165,15 +258,23 @@ namespace HealthCenter.Desktop.Migrations
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "CreatedAt", "FullName", "IsActive", "PasswordHash", "Role", "Username" },
-                values: new object[] { new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2026, 1, 1, 8, 0, 0, 0, DateTimeKind.Unspecified), "مدير النظام", true, "admin123", 0, "admin" });
+                values: new object[,]
+                {
+                    { new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2026, 1, 1, 8, 0, 0, 0, DateTimeKind.Unspecified), "مدير النظام", true, "admin123", 0, "admin" },
+                    { new Guid("00000000-0000-0000-0000-000000000002"), new DateTime(2026, 1, 1, 8, 0, 0, 0, DateTimeKind.Unspecified), "د. أحمد صالح", true, "doctor123", 2, "dr_ahmed" },
+                    { new Guid("00000000-0000-0000-0000-000000000003"), new DateTime(2026, 1, 1, 8, 0, 0, 0, DateTimeKind.Unspecified), "الممرضة فاطمة", true, "nurse123", 3, "nurse_fatima" },
+                    { new Guid("00000000-0000-0000-0000-000000000004"), new DateTime(2026, 1, 1, 8, 0, 0, 0, DateTimeKind.Unspecified), "المحاسب عمر", true, "cashier123", 5, "cashier_omar" },
+                    { new Guid("00000000-0000-0000-0000-000000000005"), new DateTime(2026, 1, 1, 8, 0, 0, 0, DateTimeKind.Unspecified), "فني المختبر سالم", true, "tech123", 6, "tech_salem" },
+                    { new Guid("00000000-0000-0000-0000-000000000006"), new DateTime(2026, 1, 1, 8, 0, 0, 0, DateTimeKind.Unspecified), "م. الاستقبال نور", true, "rec123", 4, "rec_nour" }
+                });
 
             migrationBuilder.InsertData(
                 table: "QueueTickets",
                 columns: new[] { "Id", "CallCount", "CalledAt", "CompletedAt", "CreatedAt", "DoctorId", "PatientId", "Status", "TicketNumber" },
                 values: new object[,]
                 {
-                    { new Guid("20000000-0000-0000-0000-000000000001"), 1, new DateTime(2026, 2, 16, 8, 15, 0, 0, DateTimeKind.Unspecified), new DateTime(2026, 2, 16, 8, 30, 0, 0, DateTimeKind.Unspecified), new DateTime(2026, 2, 16, 8, 0, 0, 0, DateTimeKind.Unspecified), new Guid("00000000-0000-0000-0000-000000000001"), new Guid("10000000-0000-0000-0000-000000000001"), 6, 1 },
-                    { new Guid("20000000-0000-0000-0000-000000000002"), 1, new DateTime(2026, 2, 16, 8, 35, 0, 0, DateTimeKind.Unspecified), null, new DateTime(2026, 2, 16, 8, 10, 0, 0, DateTimeKind.Unspecified), new Guid("00000000-0000-0000-0000-000000000001"), new Guid("10000000-0000-0000-0000-000000000002"), 5, 2 },
+                    { new Guid("20000000-0000-0000-0000-000000000001"), 1, new DateTime(2026, 2, 16, 8, 15, 0, 0, DateTimeKind.Unspecified), new DateTime(2026, 2, 16, 8, 30, 0, 0, DateTimeKind.Unspecified), new DateTime(2026, 2, 16, 8, 0, 0, 0, DateTimeKind.Unspecified), new Guid("00000000-0000-0000-0000-000000000002"), new Guid("10000000-0000-0000-0000-000000000001"), 6, 1 },
+                    { new Guid("20000000-0000-0000-0000-000000000002"), 1, new DateTime(2026, 2, 16, 8, 35, 0, 0, DateTimeKind.Unspecified), null, new DateTime(2026, 2, 16, 8, 10, 0, 0, DateTimeKind.Unspecified), new Guid("00000000-0000-0000-0000-000000000002"), new Guid("10000000-0000-0000-0000-000000000002"), 5, 2 },
                     { new Guid("20000000-0000-0000-0000-000000000003"), 0, null, null, new DateTime(2026, 2, 16, 8, 20, 0, 0, DateTimeKind.Unspecified), null, new Guid("10000000-0000-0000-0000-000000000003"), 0, 3 },
                     { new Guid("20000000-0000-0000-0000-000000000004"), 0, null, null, new DateTime(2026, 2, 16, 9, 0, 0, 0, DateTimeKind.Unspecified), null, new Guid("10000000-0000-0000-0000-000000000004"), 0, 4 },
                     { new Guid("20000000-0000-0000-0000-000000000005"), 0, null, null, new DateTime(2026, 2, 16, 9, 15, 0, 0, DateTimeKind.Unspecified), null, new Guid("10000000-0000-0000-0000-000000000005"), 0, 5 }
@@ -181,13 +282,27 @@ namespace HealthCenter.Desktop.Migrations
 
             migrationBuilder.InsertData(
                 table: "Visits",
-                columns: new[] { "Id", "Attachments", "CreatedAt", "Diagnosis", "DoctorId", "InvoiceAmount", "Notes", "PatientId", "Prescriptions", "VisitDate" },
+                columns: new[] { "Id", "Attachments", "BloodPressure", "CreatedAt", "Diagnosis", "DoctorId", "HeartRate", "Notes", "NurseId", "PatientId", "Prescriptions", "Temperature", "VisitDate", "Weight" },
                 values: new object[,]
                 {
-                    { new Guid("30000000-0000-0000-0000-000000000001"), null, new DateTime(2026, 2, 16, 8, 30, 0, 0, DateTimeKind.Unspecified), "التهاب الحلق الحاد", new Guid("00000000-0000-0000-0000-000000000001"), 150.00m, "المريض يعاني من ارتفاع طفيف في درجة الحرارة", new Guid("10000000-0000-0000-0000-000000000001"), "Amoxicillin 500mg - 3 مرات يومياً لمدة 5 أيام", new DateTime(2026, 2, 16, 8, 15, 0, 0, DateTimeKind.Unspecified) },
-                    { new Guid("30000000-0000-0000-0000-000000000002"), null, new DateTime(2026, 2, 15, 10, 20, 0, 0, DateTimeKind.Unspecified), "ارتفاع ضغط الدم", new Guid("00000000-0000-0000-0000-000000000001"), 200.00m, "ينصح بتقليل الملح في الطعام وممارسة الرياضة", new Guid("10000000-0000-0000-0000-000000000006"), "Amlodipine 5mg - مرة واحدة يومياً صباحاً", new DateTime(2026, 2, 15, 10, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { new Guid("30000000-0000-0000-0000-000000000003"), null, new DateTime(2026, 2, 14, 11, 25, 0, 0, DateTimeKind.Unspecified), "فحص دوري - السكري", new Guid("00000000-0000-0000-0000-000000000001"), 180.00m, "مستوى السكر التراكمي مستقر، المتابعة بعد 3 أشهر", new Guid("10000000-0000-0000-0000-000000000008"), "Metformin 500mg - مرتين يومياً مع الوجبات", new DateTime(2026, 2, 14, 11, 0, 0, 0, DateTimeKind.Unspecified) }
+                    { new Guid("30000000-0000-0000-0000-000000000001"), null, "120/80", new DateTime(2026, 2, 16, 8, 30, 0, 0, DateTimeKind.Unspecified), "التهاب الحلق الحاد", new Guid("00000000-0000-0000-0000-000000000002"), 85, "المريض يعاني من ارتفاع طفيف في درجة الحرارة", new Guid("00000000-0000-0000-0000-000000000003"), new Guid("10000000-0000-0000-0000-000000000001"), "Amoxicillin 500mg - 3 مرات يومياً لمدة 5 أيام", 38.2m, new DateTime(2026, 2, 16, 8, 15, 0, 0, DateTimeKind.Unspecified), 70.0m },
+                    { new Guid("30000000-0000-0000-0000-000000000002"), null, "150/95", new DateTime(2026, 2, 15, 10, 20, 0, 0, DateTimeKind.Unspecified), "ارتفاع ضغط الدم", new Guid("00000000-0000-0000-0000-000000000002"), 72, "ينصح بتقليل الملح في الطعام وممارسة الرياضة", new Guid("00000000-0000-0000-0000-000000000003"), new Guid("10000000-0000-0000-0000-000000000006"), "Amlodipine 5mg - مرة واحدة يومياً صباحاً", 36.8m, new DateTime(2026, 2, 15, 10, 0, 0, 0, DateTimeKind.Unspecified), 95.5m },
+                    { new Guid("30000000-0000-0000-0000-000000000003"), null, null, new DateTime(2026, 2, 14, 11, 25, 0, 0, DateTimeKind.Unspecified), "فحص دوري - السكري", new Guid("00000000-0000-0000-0000-000000000002"), null, "مستوى السكر التراكمي مستقر، المتابعة بعد 3 أشهر", new Guid("00000000-0000-0000-0000-000000000003"), new Guid("10000000-0000-0000-0000-000000000008"), "Metformin 500mg - مرتين يومياً مع الوجبات", null, new DateTime(2026, 2, 14, 11, 0, 0, 0, DateTimeKind.Unspecified), null }
                 });
+
+            migrationBuilder.InsertData(
+                table: "Invoices",
+                columns: new[] { "Id", "Amount", "CreatedAt", "CreatedById", "PaidAt", "PatientId", "PaymentMethod", "Status", "TaxAmount", "VisitId" },
+                values: new object[,]
+                {
+                    { new Guid("40000000-0000-0000-0000-000000000001"), 150.00m, new DateTime(2026, 2, 16, 8, 35, 0, 0, DateTimeKind.Unspecified), new Guid("00000000-0000-0000-0000-000000000004"), new DateTime(2026, 2, 16, 8, 40, 0, 0, DateTimeKind.Unspecified), new Guid("10000000-0000-0000-0000-000000000001"), 1, 1, 22.50m, new Guid("30000000-0000-0000-0000-000000000001") },
+                    { new Guid("40000000-0000-0000-0000-000000000002"), 200.00m, new DateTime(2026, 2, 15, 10, 25, 0, 0, DateTimeKind.Unspecified), new Guid("00000000-0000-0000-0000-000000000004"), null, new Guid("10000000-0000-0000-0000-000000000006"), null, 0, 30.00m, new Guid("30000000-0000-0000-0000-000000000002") }
+                });
+
+            migrationBuilder.InsertData(
+                table: "LabTests",
+                columns: new[] { "Id", "AttachmentPath", "CompletedAt", "PatientId", "PerformedById", "RequestedAt", "RequestedById", "ResultNotes", "Status", "TestName", "VisitId" },
+                values: new object[] { new Guid("50000000-0000-0000-0000-000000000001"), null, new DateTime(2026, 2, 14, 13, 0, 0, 0, DateTimeKind.Unspecified), new Guid("10000000-0000-0000-0000-000000000008"), new Guid("00000000-0000-0000-0000-000000000005"), new DateTime(2026, 2, 14, 11, 10, 0, 0, DateTimeKind.Unspecified), new Guid("00000000-0000-0000-0000-000000000002"), "النتيجة: 6.2% - طبيعي بالنسبة لمريض سكري", 2, "فحص السكر التراكمي Hba1c", new Guid("30000000-0000-0000-0000-000000000003") });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Appointments_DoctorId",
@@ -203,6 +318,51 @@ namespace HealthCenter.Desktop.Migrations
                 name: "IX_Appointments_ScheduledTime",
                 table: "Appointments",
                 column: "ScheduledTime");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Invoices_CreatedById",
+                table: "Invoices",
+                column: "CreatedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Invoices_PatientId",
+                table: "Invoices",
+                column: "PatientId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Invoices_Status",
+                table: "Invoices",
+                column: "Status");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Invoices_VisitId",
+                table: "Invoices",
+                column: "VisitId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LabTests_PatientId",
+                table: "LabTests",
+                column: "PatientId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LabTests_PerformedById",
+                table: "LabTests",
+                column: "PerformedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LabTests_RequestedById",
+                table: "LabTests",
+                column: "RequestedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LabTests_Status",
+                table: "LabTests",
+                column: "Status");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LabTests_VisitId",
+                table: "LabTests",
+                column: "VisitId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Patients_FullName",
@@ -246,6 +406,11 @@ namespace HealthCenter.Desktop.Migrations
                 column: "DoctorId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Visits_NurseId",
+                table: "Visits",
+                column: "NurseId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Visits_PatientId",
                 table: "Visits",
                 column: "PatientId");
@@ -261,6 +426,12 @@ namespace HealthCenter.Desktop.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Appointments");
+
+            migrationBuilder.DropTable(
+                name: "Invoices");
+
+            migrationBuilder.DropTable(
+                name: "LabTests");
 
             migrationBuilder.DropTable(
                 name: "QueueTickets");

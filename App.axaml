@@ -2,7 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="HealthCenter.Desktop.App"
              xmlns:local="using:HealthCenter.Desktop"
-             RequestedThemeVariant="Default">
+             RequestedThemeVariant="Light">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
     <Application.DataTemplates>
@@ -23,5 +23,19 @@
 		<FontFamily x:Key="ArabicFont">
 			avares://HealthCenter.Desktop/Assets/Fonts/Cairo-VariableFont_slnt,wght.ttf#Cairo
 		</FontFamily>
+
+		<!-- Override FluentTheme's internal brush resources for TextBox.
+		     These are used INSIDE the control template via DynamicResource,
+		     which is why outer style selectors alone cannot fix the invisible text problem. -->
+		<SolidColorBrush x:Key="TextControlForeground" Color="#111827"/>
+		<SolidColorBrush x:Key="TextControlForegroundPointerOver" Color="#111827"/>
+		<SolidColorBrush x:Key="TextControlForegroundFocused" Color="#111827"/>
+		<SolidColorBrush x:Key="TextControlForegroundDisabled" Color="#9CA3AF"/>
+		<SolidColorBrush x:Key="TextControlBackground" Color="#FFFFFF"/>
+		<SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="#F9FAFB"/>
+		<SolidColorBrush x:Key="TextControlBackgroundFocused" Color="#FFFFFF"/>
+		<SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="#9CA3AF"/>
+		<SolidColorBrush x:Key="TextControlPlaceholderForegroundPointerOver" Color="#9CA3AF"/>
+		<SolidColorBrush x:Key="TextControlPlaceholderForegroundFocused" Color="#9CA3AF"/>
 	</Application.Resources>
 </Application>
