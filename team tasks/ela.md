@@ -3,15 +3,178 @@
 
 ---
 
-## 📋 Role Overview | نظرة عامة على الدور
+## 📋 Role Overview
 
-**English:** You are responsible for the Doctor module - patient examination workflow, diagnosis entry, prescription management, and visit history.
+**English:** This sprint you are fixing two bugs in the Doctor panel: (1) the diagnosis form shows stale data from the previous patient after "Call Next" is pressed, and (2) no error/success feedback is shown to the doctor when actions complete or fail.
 
-**Arabic:** أنت مسؤول عن وحدة الطبيب - سير عمل فحص المريض وإدخال التشخيص وإدارة الوصفات وسجل الزيارات.
+**Arabic:** مهمتك في هذا السبرينت هي إصلاح خطأين في لوحة الطبيب: (1) نموذج التشخيص يُبقي بيانات المريض السابق بعد الضغط على "نداء التالي"، (2) لا توجد رسائل نجاح أو خطأ للطبيب عند تنفيذ الأوامر.
 
 ---
 
-## 🌿 Branch Rules | قواعد الفروع
+## 🐛 Bugs You Are Fixing
+
+### Bug 2 — Stale Patient Data After "Call Next"
+**Location:** `DoctorPanelViewModel.cs` — `CallNext()` and `CallSpecific()` methods  
+**Problem:** When a new patient is called, the diagnosis form fields (Diagnosis, Prescriptions, Notes, BloodPressure, Temperature, HeartRate, Weight, SelectedDiagnosis, SelectedMedication) still contain the **previous patient's data**. The doctor may accidentally save the wrong diagnosis for the new patient.
+
+### Bug 1 (partial) — No Error/Success Feedback in Doctor Panel
+**Location:** `DoctorPanelView.axaml`  
+**Problem:** There is no status message banner in the Doctor panel UI. When "انهاء الزيارة وحفظ" is pressed there is no visual confirmation. If something fails, the doctor sees nothing.
+
+---
+
+## ✅ Task 1: Clear Form When New Patient Is Called
+
+**Priority:** 🔴 High | **Estimated Time:** 1 hour  
+**File:** `/Features/Doctor/ViewModels/DoctorPanelViewModel.cs`
+
+### Instructions:
+1. Open `DoctorPanelViewModel.cs`
+2. Create a private helper method `ClearDiagnosisForm()` that resets all form fields:
+   - `Diagnosis = string.Empty`
+   - `Prescriptions = string.Empty`
+   - `Notes = string.Empty`
+   - `BloodPressure = string.Empty`
+   - `Temperature = null`
+   - `HeartRate = null`
+   - `Weight = null`
+   - `SelectedDiagnosis = null`
+   - `SelectedMedication = null`
+3. Call `ClearDiagnosisForm()` at the **start** of `CallNext()` and `CallSpecific()` — **before** saving/updating the previous patient's status
+
+### Code Example:
+```csharp
+private void ClearDiagnosisForm()
+{
+    Diagnosis = string.Empty;
+    Prescriptions = string.Empty;
+    Notes = string.Empty;
+    BloodPressure = string.Empty;
+    Temperature = null;
+    HeartRate = null;
+    Weight = null;
+    SelectedDiagnosis = null;
+    SelectedMedication = null;
+}
+
+[RelayCommand]
+private void CallNext()
+{
+    if (WaitingPatients.Count == 0) return;
+
+    ClearDiagnosisForm(); // ← ADD THIS FIRST
+
+    if (CurrentPatient != null && CurrentPatient.Status == TicketStatus.Called)
+    {
+        CurrentPatient.Status = TicketStatus.AwaitingRecall;
+        CurrentPatient.CallCount++;
+        _db.SaveChanges();
+    }
+
+    var next = WaitingPatients.FirstOrDefault();
+    if (next == null) return;
+
+    next.Status = TicketStatus.Called;
+    next.CalledAt = DateTime.Now;
+    next.CallCount++;
+    _db.SaveChanges();
+
+    LoadQueue();
+}
+```
+
+Apply the same `ClearDiagnosisForm()` call at the start of `CallSpecific()` too.
+
+---
+
+## ✅ Task 2: Add Error/Success Banner to Doctor Panel UI
+
+**Priority:** 🔴 High | **Estimated Time:** 1.5 hours  
+**Files:**
+- `/Features/Doctor/ViewModels/DoctorPanelViewModel.cs`
+- `/Features/Doctor/Views/DoctorPanelView.axaml`
+
+### Instructions (ViewModel):
+1. Make `DoctorPanelViewModel` inherit from `ViewModelBase` (Hassan will have added `ShowError` / `ShowSuccess` / `ClearStatus` methods)
+2. In `CompleteVisit()`, call `ShowSuccess("تمت زيارة المريض بنجاح وتم الحفظ.")` at the end
+3. If the visit save fails (wrap in try/catch), call `ShowError("حدث خطأ أثناء الحفظ. يرجى المحاولة مجدداً.")`
+4. In `CallNext()` and `CallSpecific()`, call `ClearStatus()` so the previous message disappears
+
+### Code Example (ViewModel):
+```csharp
+[RelayCommand]
+private void CompleteVisit()
+{
+    if (CurrentPatient == null) return;
+
+    try
+    {
+        // ... existing save logic ...
+        _db.SaveChanges();
+        ClearDiagnosisForm();
+        LoadQueue();
+        LoadStatistics();
+        ShowSuccess("تمت زيارة المريض بنجاح وتم الحفظ.");
+    }
+    catch (Exception)
+    {
+        ShowError("حدث خطأ أثناء الحفظ. يرجى المحاولة مجدداً.");
+    }
+}
+```
+
+### Instructions (XAML):
+Add a status banner **above the diagnosis form** (between the Current Patient card and the Diagnosis form). Use the same pattern as Reception:
+
+```xml
+<!-- Success Banner -->
+<Border IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+        CornerRadius="8" Padding="14,10" Margin="0,0,0,12"
+        Background="{Binding IsError, Converter={x:Static BoolConverters.Not},
+                     ConverterParameter='#F0FDF4|#FEF2F2'}">
+    <TextBlock Text="{Binding StatusMessage}"
+               Foreground="{Binding IsError, Converter={x:Static BoolConverters.Not},
+                            ConverterParameter='#15803D|#DC2626'}"
+               TextWrapping="Wrap" FontWeight="Medium"/>
+</Border>
+```
+
+> **Simpler approach (if converter chaining is complex):** Use two separate Borders — one for success (IsError = false) and one for error (IsError = true), same as Reception view does it.
+
+---
+
+## ✅ Task 3: Fix Raw Status Text in Waiting List
+
+**Priority:** 🟡 Medium | **Estimated Time:** 30 minutes  
+**File:** `/Features/Doctor/Views/DoctorPanelView.axaml`
+
+### Instructions:
+Coordinate with Ahmed — he will create a `TicketStatusConverter`. Once it's available, use it in the waiting list item template where `{Binding Status}` currently shows the raw enum name:
+
+```xml
+<!-- BEFORE (shows raw enum): -->
+<TextBlock Text="{Binding Status}" FontSize="12" Foreground="#94A3B8"/>
+
+<!-- AFTER (shows Arabic): -->
+<TextBlock Text="{Binding Status, Converter={StaticResource TicketStatusConverter}}"
+           FontSize="12" Foreground="#94A3B8"/>
+```
+
+---
+
+## 📁 Your Files
+
+```
+/Features/Doctor/
+├── ViewModels/
+│   └── DoctorPanelViewModel.cs   ← Edit
+└── Views/
+    └── DoctorPanelView.axaml     ← Edit
+```
+
+---
+
+## 🌿 Branch Rules
 
 | Rule | Description |
 |------|-------------|
@@ -20,218 +183,20 @@
 | **Merge To** | `develop` (via PR) |
 | **Requires** | Hassan's approval |
 
-### Branch Setup Commands:
 ```bash
-# First time setup
-git checkout -b feature/doctor
-git push -u origin feature/doctor
-
-# Daily workflow
 git checkout feature/doctor
 git pull origin develop
-# ... do your work ...
 git add .
-git commit -m "feat(doctor): your message here"
+git commit -m "fix(doctor): clear form on call next + add error/success banner"
 git push origin feature/doctor
 ```
 
 ---
 
-## ✅ Task 1: Patient Visit History Panel
-### المهمة 1: لوحة سجل زيارات المريض
+## ⚠️ Important Notes
 
-**Priority:** 🔴 High | **Estimated Time:** 3 hours
-**File:** `/Features/Doctor/Views/DoctorPanelView.axaml`
-
-#### English Instructions:
-1. Add a collapsible panel showing patient's previous visits
-2. Display for each visit:
-   - Visit date
-   - Diagnosis
-   - Prescribed medications
-   - Doctor's notes
-3. Sort by most recent first
-4. Limit to last 10 visits (with "load more" option)
-
-#### التعليمات بالعربية:
-1. أضف لوحة قابلة للطي تعرض زيارات المريض السابقة
-2. اعرض لكل زيارة: التاريخ، التشخيص، الأدوية، ملاحظات الطبيب
-3. رتب من الأحدث للأقدم
-4. حدد بـ 10 زيارات مع خيار "تحميل المزيد"
-
-#### Code Example (ViewModel):
-```csharp
-[ObservableProperty]
-private ObservableCollection<Visit> _patientHistory = new();
-
-[ObservableProperty]
-private bool _isHistoryExpanded = false;
-
-private void LoadPatientHistory(Guid patientId)
-{
-    var history = _db.Visits
-        .Where(v => v.PatientId == patientId)
-        .OrderByDescending(v => v.VisitDate)
-        .Take(10)
-        .ToList();
-    
-    PatientHistory = new ObservableCollection<Visit>(history);
-}
-```
-
-#### XAML Example:
-```xml
-<!-- Visit History Panel -->
-<Expander Header="📋 سجل الزيارات السابقة" IsExpanded="{Binding IsHistoryExpanded}">
-    <ItemsControl ItemsSource="{Binding PatientHistory}">
-        <ItemsControl.ItemTemplate>
-            <DataTemplate>
-                <Border Classes="card" Margin="0,8">
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="{Binding VisitDate, StringFormat='yyyy/MM/dd'}"
-                                   FontWeight="Bold" Foreground="#3B82F6"/>
-                        <TextBlock Text="{Binding Diagnosis}" TextWrapping="Wrap"/>
-                        <TextBlock Text="{Binding Prescriptions}" 
-                                   Foreground="#64748B" FontSize="13"/>
-                    </StackPanel>
-                </Border>
-            </DataTemplate>
-        </ItemsControl.ItemTemplate>
-    </ItemsControl>
-</Expander>
-```
-
----
-
-## ✅ Task 2: Enhanced Diagnosis Form
-### المهمة 2: نموذج تشخيص محسّن
-
-**Priority:** 🔴 High | **Estimated Time:** 2.5 hours
-
-#### English Instructions:
-1. Add common diagnosis dropdown (autocomplete):
-   - Common cold (نزلة برد)
-   - Flu (إنفلونزا)
-   - Headache (صداع)
-   - Stomach pain (ألم المعدة)
-   - Custom entry option
-2. Add vital signs section:
-   - Blood pressure
-   - Temperature
-   - Heart rate
-   - Weight
-3. Add common medications dropdown with dosage
-
-#### التعليمات بالعربية:
-1. أضف قائمة منسدلة للتشخيصات الشائعة
-2. أضف قسم العلامات الحيوية
-3. أضف قائمة منسدلة للأدوية الشائعة مع الجرعات
-
-#### Code Example:
-```csharp
-public ObservableCollection<string> CommonDiagnoses { get; } = new()
-{
-    "نزلة برد",
-    "إنفلونزا",
-    "صداع",
-    "ألم المعدة",
-    "التهاب الحلق",
-    "ارتفاع ضغط الدم",
-    "السكري",
-    "أخرى..."
-};
-
-public ObservableCollection<string> CommonMedications { get; } = new()
-{
-    "باراسيتامول 500mg - مرتين يومياً",
-    "أموكسيسيلين 500mg - ثلاث مرات يومياً",
-    "إيبوبروفين 400mg - عند الحاجة",
-    "أوميبرازول 20mg - قبل الفطور"
-};
-
-// Vital Signs
-[ObservableProperty]
-private string _bloodPressure = string.Empty; // e.g., "120/80"
-
-[ObservableProperty]
-private decimal? _temperature; // in Celsius
-
-[ObservableProperty]
-private int? _heartRate; // BPM
-
-[ObservableProperty]
-private decimal? _weight; // in KG
-```
-
----
-
-## ✅ Task 3: Doctor Statistics Dashboard
-### المهمة 3: لوحة إحصائيات الطبيب
-
-**Priority:** 🟡 Medium | **Estimated Time:** 2 hours
-
-#### English Instructions:
-1. Add statistics section showing:
-   - Patients today
-   - Patients this week
-   - Patients this month
-   - Most common diagnoses (top 5)
-2. Display as cards with icons
-3. Refresh on demand
-
-#### التعليمات بالعربية:
-1. أضف قسم إحصائيات يعرض:
-   - مرضى اليوم
-   - مرضى هذا الأسبوع
-   - مرضى هذا الشهر
-   - التشخيصات الأكثر شيوعاً
-2. اعرض كبطاقات مع أيقونات
-3. تحديث عند الطلب
-
-#### Code Example:
-```csharp
-[ObservableProperty]
-private int _todayPatients;
-
-[ObservableProperty]
-private int _weekPatients;
-
-[ObservableProperty]
-private int _monthPatients;
-
-private void LoadStatistics()
-{
-    var today = DateTime.Today;
-    var weekStart = today.AddDays(-(int)today.DayOfWeek);
-    var monthStart = new DateTime(today.Year, today.Month, 1);
-    
-    TodayPatients = _db.Visits.Count(v => v.VisitDate.Date == today);
-    WeekPatients = _db.Visits.Count(v => v.VisitDate >= weekStart);
-    MonthPatients = _db.Visits.Count(v => v.VisitDate >= monthStart);
-}
-```
-
----
-
-## 📁 Your Files | ملفاتك
-
-```
-/Features/Doctor/
-├── Views/
-│   ├── DoctorPanelView.axaml       ← Edit
-│   ├── DoctorPanelView.axaml.cs    ← Edit
-│   └── PatientHistoryPanel.axaml   ← Create
-└── ViewModels/
-    └── DoctorPanelViewModel.cs     ← Edit
-```
-
----
-
-## ⚠️ Important Notes | ملاحظات مهمة
-
-- Medical data is sensitive - validate all entries
-- Use proper units (°C for temperature, mmHg for BP)
-- Always show previous allergies if available
-- Confirm before completing a visit (no accidental submissions)
+- Pull `develop` first to get Hassan's `ViewModelBase` changes before you start
+- The `ClearDiagnosisForm()` fix (Task 1) is the highest priority — do it first
+- Test by: calling patient A → filling diagnosis → pressing "نداء التالي" → verifying all fields are empty
 
 **Questions?** Ask Hassan (Team Lead)

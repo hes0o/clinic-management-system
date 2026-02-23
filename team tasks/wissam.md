@@ -1,241 +1,200 @@
-# 🏨 Wissam - Reception Feature Engineer
-## وسام - مهندس ميزة الاستقبال
+# 🏨 Wissam - Reception & Nurse Feature Engineer
+## وسام - مهندس ميزة الاستقبال والتمريض
 
 ---
 
-## 📋 Role Overview | نظرة عامة على الدور
+## 📋 Role Overview
 
-**English:** You are responsible for the Reception module - patient registration, search functionality, and ticket printing. This is the first screen users see.
+**English:** This sprint your job is to fix two issues across the Nurse panel and the Reception panel: (1) stale vitals form data persists when the nurse selects a different patient, and (2) raw status text and non-user-friendly error presentation needs improving in both panels.
 
-**Arabic:** أنت مسؤول عن وحدة الاستقبال - تسجيل المرضى ووظيفة البحث وطباعة التذاكر. هذه أول شاشة يراها المستخدمون.
+**Arabic:** مهمتك في هذا السبرينت هي إصلاح مشكلتين في لوحة التمريض ولوحة الاستقبال: (1) بيانات نموذج العلامات الحيوية تبقى عند اختيار مريض مختلف، (2) تحسين عرض حالة التذاكر ورسائل الخطأ.
 
 ---
 
-## 🌿 Branch Rules | قواعد الفروع
+## 🐛 Bugs You Are Fixing
+
+### Bug 2 — Stale Vitals Data in Nurse Panel
+**Location:** `NursePanelViewModel.cs` — `SelectedTicket` property change  
+**Problem:** When the nurse selects a different patient from the queue list, the form fields (BloodPressure, Temperature, HeartRate, Weight) still show the data she typed for the **previous** patient. She may accidentally save the wrong patient's vitals.
+
+### Bug 1 — Status Message Color in Nurse Panel
+**Location:** `NursePanelView.axaml`  
+**Problem:** The `StatusMessage` text is always shown in green (`#16A34A`), even when it's an error message (e.g., "لا يوجد طبيب مسجّل في النظام." is shown green instead of red). Error messages must be red and success messages must be green.
+
+---
+
+## ✅ Task 1: Clear Vitals Form When a New Patient Is Selected (Nurse Panel)
+
+**Priority:** 🔴 High | **Estimated Time:** 1 hour  
+**File:** `/Features/Nurse/ViewModels/NursePanelViewModel.cs`
+
+### Instructions:
+1. Open `NursePanelViewModel.cs`
+2. Add a `partial void OnSelectedTicketChanged(QueueTicket? value)` method
+3. Inside it, clear all vitals fields when a new ticket is selected:
+   - `BloodPressure = string.Empty`
+   - `Temperature = string.Empty`
+   - `HeartRate = string.Empty`
+   - `Weight = string.Empty`
+   - Also clear the `StatusMessage` so previous feedback does not confuse the nurse
+
+### Code Example:
+```csharp
+// This is called automatically by CommunityToolkit.Mvvm when SelectedTicket changes
+partial void OnSelectedTicketChanged(QueueTicket? value)
+{
+    // Clear the form so previous patient's data doesn't contaminate
+    BloodPressure = string.Empty;
+    Temperature = string.Empty;
+    HeartRate = string.Empty;
+    Weight = string.Empty;
+    StatusMessage = string.Empty; // clear previous status
+    IsError = false;
+}
+```
+
+> **Note:** `ObservableProperty` automatically generates the `OnSelectedTicketChanged` partial method. You just need to implement it.
+
+---
+
+## ✅ Task 2: Fix Error/Success Display in Nurse Panel
+
+**Priority:** 🔴 High | **Estimated Time:** 45 minutes  
+**Files:**
+- `/Features/Nurse/ViewModels/NursePanelViewModel.cs`
+- `/Features/Nurse/Views/NursePanelView.axaml`
+
+### Instructions (ViewModel):
+1. Make sure `NursePanelViewModel` inherits from `ViewModelBase` (pull `develop` to get Hassan's updated base class with `ShowError`/`ShowSuccess`/`IsError`)
+2. Replace all direct `StatusMessage = "..."` assignments with:
+   - `ShowSuccess("...")` for success cases
+   - `ShowError("...")` for error/warning cases
+
+### What to change in `SaveVitals()`:
+```csharp
+// BEFORE:
+StatusMessage = "الرجاء تحديد مريض من القائمة أولاً.";
+// AFTER:
+ShowError("الرجاء تحديد مريض من القائمة أولاً.");
+
+// BEFORE:
+StatusMessage = "لا يوجد طبيب مسجّل في النظام.";
+// AFTER:
+ShowError("لا يوجد طبيب مسجّل في النظام.");
+
+// BEFORE:
+StatusMessage = $"تم حفظ العلامات الحيوية للمريض: {SelectedTicket.Patient?.FullName}";
+// AFTER:
+ShowSuccess($"تم حفظ العلامات الحيوية للمريض: {SelectedTicket.Patient?.FullName}");
+
+// In RefreshQueue():
+// BEFORE:
+StatusMessage = "تم تحديث قائمة المرضى.";
+// AFTER:
+ShowSuccess("تم تحديث قائمة المرضى.");
+```
+
+### Instructions (XAML):
+Replace the single green `TextBlock` with two separate bordered banners — one for success, one for error (same pattern as Reception view):
+
+```xml
+<!-- Success Banner -->
+<Border IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+        CornerRadius="6" Padding="12,8" Margin="0,0,0,8"
+        Background="#F0FDF4"
+        IsVisible="{Binding IsError, Converter={x:Static BoolConverters.Not}}">
+    <TextBlock Text="{Binding StatusMessage}"
+               Foreground="#15803D" TextWrapping="Wrap" FontWeight="Medium"/>
+</Border>
+
+<!-- Error Banner -->
+<Border CornerRadius="6" Padding="12,8" Margin="0,0,0,8"
+        Background="#FEF2F2"
+        IsVisible="{Binding IsError}">
+    <TextBlock Text="{Binding StatusMessage}"
+               Foreground="#DC2626" TextWrapping="Wrap" FontWeight="Medium"/>
+</Border>
+```
+
+Place these banners just **above** the vitals fields grid (after the patient name label).
+
+---
+
+## ✅ Task 3: Fix Raw Status Text in Nurse Queue List
+
+**Priority:** 🟡 Medium | **Estimated Time:** 30 minutes  
+**File:** `/Features/Nurse/Views/NursePanelView.axaml`
+
+### Instructions:
+Coordinate with Ahmed — he will create a `TicketStatusConverter`. Once it's available, use it on the status text in the patient list:
+
+```xml
+<!-- BEFORE: -->
+<TextBlock Text="{Binding Status}" FontSize="12" Foreground="#94A3B8"/>
+
+<!-- AFTER: -->
+<TextBlock Text="{Binding Status, Converter={StaticResource TicketStatusConverter}}"
+           FontSize="12" Foreground="#94A3B8"/>
+```
+
+---
+
+## ✅ Task 4: Verify Reception View Error Display is Correct
+
+**Priority:** 🟡 Medium | **Estimated Time:** 30 minutes  
+**File:** `/Features/Reception/Views/ReceptionView.axaml`
+
+The Reception view already has a good error/success pattern. Your job is to:
+1. Verify the success border (`Background="#F0FDF4"`) has `IsVisible` bound to both `StatusMessage IsNotNullOrEmpty` AND `IsError = false` (right now it always shows when there's a message, even if it's an error)
+2. Compare with the current AXAML and fix if needed:
+```xml
+<!-- Success border should only show when NOT an error: -->
+<Border IsVisible="{Binding IsError, Converter={x:Static BoolConverters.Not}}"
+        ...>
+```
+
+---
+
+## 📁 Your Files
+
+```
+/Features/Nurse/
+├── ViewModels/
+│   └── NursePanelViewModel.cs   ← Edit
+└── Views/
+    └── NursePanelView.axaml     ← Edit
+
+/Features/Reception/
+└── Views/
+    └── ReceptionView.axaml      ← Verify/Edit
+```
+
+---
+
+## 🌿 Branch Rules
 
 | Rule | Description |
 |------|-------------|
 | **Your Branch** | `feature/reception` |
-| **Work Directory** | `/Features/Reception` folder |
+| **Work Directory** | `/Features/Nurse` + `/Features/Reception` |
 | **Merge To** | `develop` (via PR) |
 | **Requires** | Hassan's approval |
 
-### Branch Setup Commands:
 ```bash
-# First time setup
-git checkout -b feature/reception
-git push -u origin feature/reception
-
-# Daily workflow
 git checkout feature/reception
 git pull origin develop
-# ... do your work ...
 git add .
-git commit -m "feat(reception): your message here"
+git commit -m "fix(nurse): clear vitals on patient switch + fix error/success display"
 git push origin feature/reception
 ```
 
 ---
 
-## ✅ Task 1: Enhanced Patient Registration Form
-### المهمة 1: نموذج تسجيل مريض محسّن
+## ⚠️ Important Notes
 
-**Priority:** 🔴 High | **Estimated Time:** 3 hours
-**Files:** 
-- `/Features/Reception/Views/ReceptionView.axaml`
-- `/Features/Reception/ViewModels/ReceptionViewModel.cs`
-
-#### English Instructions:
-1. Create a dedicated Reception folder structure:
-   ```
-   /Features/Reception/
-   ├── Views/
-   │   └── ReceptionView.axaml
-   │   └── ReceptionView.axaml.cs
-   └── ViewModels/
-       └── ReceptionViewModel.cs
-   ```
-2. Add new fields to registration form:
-   - Full Name (required) - الاسم الكامل
-   - Phone Number (required) - رقم الهاتف
-   - Date of Birth (optional) - تاريخ الميلاد
-   - Gender dropdown (Male/Female) - الجنس
-   - Blood Type dropdown - فصيلة الدم
-   - Address (optional) - العنوان
-   - Emergency Contact - رقم الطوارئ
-3. Add validation:
-   - Phone must be 10 digits starting with 05
-   - Name must be at least 3 characters
-   - Show error messages in Arabic
-
-#### التعليمات بالعربية:
-1. أنشئ هيكل مجلد الاستقبال
-2. أضف الحقول الجديدة لنموذج التسجيل
-3. أضف التحقق من صحة البيانات
-
-#### Code Example (ViewModel):
-```csharp
-public partial class ReceptionViewModel : ViewModelBase
-{
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(AddPatientCommand))]
-    private string _patientName = string.Empty;
-
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(AddPatientCommand))]
-    private string _phoneNumber = string.Empty;
-
-    [ObservableProperty]
-    private DateTime? _dateOfBirth;
-
-    [ObservableProperty]
-    private Gender? _selectedGender;
-
-    [ObservableProperty]
-    private string? _bloodType;
-
-    [ObservableProperty]
-    private string _errorMessage = string.Empty;
-
-    public ObservableCollection<string> BloodTypes { get; } = new()
-    {
-        "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"
-    };
-
-    public ObservableCollection<Gender> Genders { get; } = new()
-    {
-        Gender.Male, Gender.Female
-    };
-
-    private bool CanAddPatient() =>
-        !string.IsNullOrWhiteSpace(PatientName) &&
-        PatientName.Length >= 3 &&
-        PhoneNumber.Length == 10 &&
-        PhoneNumber.StartsWith("05");
-
-    [RelayCommand(CanExecute = nameof(CanAddPatient))]
-    private void AddPatient()
-    {
-        // Validation
-        if (!PhoneNumber.StartsWith("05") || PhoneNumber.Length != 10)
-        {
-            ErrorMessage = "رقم الهاتف يجب أن يبدأ بـ 05 ويتكون من 10 أرقام";
-            return;
-        }
-        // ... save patient
-    }
-}
-```
-
----
-
-## ✅ Task 2: Advanced Search Functionality
-### المهمة 2: وظيفة بحث متقدمة
-
-**Priority:** 🟡 Medium | **Estimated Time:** 2 hours
-
-#### English Instructions:
-1. Implement multi-criteria search:
-   - Search by name (partial match)
-   - Search by phone number
-   - Search by date registered
-2. Add search filters dropdown
-3. Show "No results found" message in Arabic
-4. Highlight search terms in results
-
-#### التعليمات بالعربية:
-1. نفذ البحث بمعايير متعددة
-2. أضف قائمة منسدلة لفلاتر البحث
-3. اعرض رسالة "لا توجد نتائج" بالعربية
-4. ظلل مصطلحات البحث في النتائج
-
-#### Code Example:
-```csharp
-[RelayCommand]
-private void Search()
-{
-    var query = SearchQuery.Trim().ToLower();
-    
-    var results = _db.Patients
-        .Where(p => 
-            p.FullName.ToLower().Contains(query) ||
-            p.PhoneNumber.Contains(query))
-        .OrderByDescending(p => p.CreatedAt)
-        .Take(50)
-        .ToList();
-
-    if (results.Count == 0)
-    {
-        StatusMessage = "لا توجد نتائج للبحث";
-    }
-    
-    Patients = new ObservableCollection<Patient>(results);
-}
-```
-
----
-
-## ✅ Task 3: Ticket Printing Feature
-### المهمة 3: ميزة طباعة التذكرة
-
-**Priority:** 🟡 Medium | **Estimated Time:** 2.5 hours
-
-#### English Instructions:
-1. Create a ticket preview dialog
-2. Design ticket layout (80mm thermal printer format):
-   - Clinic name & logo
-   - Ticket number (large, centered)
-   - Patient name
-   - Date & time
-   - Estimated wait count
-3. Add print button functionality
-4. Show success message after printing
-
-#### التعليمات بالعربية:
-1. أنشئ نافذة معاينة التذكرة
-2. صمم شكل التذكرة (تنسيق طابعة حرارية 80 مم)
-3. أضف وظيفة زر الطباعة
-4. اعرض رسالة نجاح بعد الطباعة
-
-#### Ticket Design (ASCII Preview):
-```
-╔══════════════════════════════╗
-║       🏥 المركز الصحي        ║
-║══════════════════════════════║
-║                              ║
-║            ٢٣               ║
-║      (رقم التذكرة)          ║
-║                              ║
-║──────────────────────────────║
-║  الاسم: أحمد محمد علي        ║
-║  التاريخ: 2026/01/31        ║
-║  الوقت: 10:30 ص             ║
-║──────────────────────────────║
-║  أمامك: 5 مرضى             ║
-╚══════════════════════════════╝
-```
-
----
-
-## 📁 Your Files | ملفاتك
-
-```
-/Features/Reception/
-├── Views/
-│   ├── ReceptionView.axaml       ← Create/Edit
-│   ├── ReceptionView.axaml.cs    ← Create/Edit
-│   └── TicketPreviewDialog.axaml ← Create
-└── ViewModels/
-    └── ReceptionViewModel.cs     ← Create/Edit
-```
-
----
-
-## ⚠️ Important Notes | ملاحظات مهمة
-
-- All text must be in Arabic (RTL)
-- Phone validation: must start with 05, exactly 10 digits
-- Always show feedback to user (success/error messages)
-- Test with Arabic names that include special characters
+- **Pull `develop` first** to get Hassan's `ViewModelBase` with `ShowError`/`ShowSuccess`/`IsError`
+- **Test Task 1** by: selecting patient A → typing vitals → clicking a different patient → verify all fields are empty
+- **Test Task 2** by: clicking "حفظ" with no patient selected → verify message is RED not green
+- Do not modify files outside `/Features/Nurse` and `/Features/Reception`
 
 **Questions?** Ask Hassan (Team Lead)
