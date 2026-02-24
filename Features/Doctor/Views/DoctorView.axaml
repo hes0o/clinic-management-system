@@ -1,0 +1,222 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HealthCenter.Desktop.Features.Doctor.ViewModels"
+             x:Class="HealthCenter.Desktop.Features.Doctor.Views.DoctorView"
+             x:DataType="vm:DoctorViewModel"
+             FlowDirection="RightToLeft">
+
+    <UserControl.DataContext>
+        <vm:DoctorViewModel/>
+    </UserControl.DataContext>
+
+    <UserControl.Styles>
+        <Style Selector="TextBox">
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="Background" Value="#F8FAFC"/>
+        </Style>
+        <Style Selector="Button.primary">
+            <Setter Property="Background" Value="#2563EB"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16,12"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+        <Style Selector="ListBox">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+        <Style Selector="ListBoxItem">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="CornerRadius" Value="8"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid ColumnDefinitions="380, *" Background="#E2E8F0">
+        
+        <Border Grid.Column="0" Background="White" Margin="15" Padding="20" CornerRadius="16" BoxShadow="0 4 15 0 #0D000000">
+            <Grid RowDefinitions="Auto, Auto, *, Auto">
+                
+                <StackPanel Grid.Row="0" Spacing="15">
+                    <StackPanel>
+                        <TextBlock Text="👨‍⚕️ لوحة الطبيب" FontSize="26" FontWeight="Black" Foreground="#1E293B"/>
+                        <TextBlock Text="{Binding WaitingCount, StringFormat='{}المرضى في الانتظار: {0}'}" FontSize="14" Foreground="#64748B" Margin="0,5,0,0"/>
+                    </StackPanel>
+                    
+                    <Grid ColumnDefinitions="*,10,*,10,*" Margin="0,10,0,0">
+                        <Border Grid.Column="0" Background="#DBEAFE" CornerRadius="8" Padding="10">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="{Binding TodayPatients}" FontSize="20" FontWeight="Bold" Foreground="#1D4ED8" HorizontalAlignment="Center"/>
+                                <TextBlock Text="اليوم" FontSize="11" Foreground="#64748B" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="2" Background="#D1FAE5" CornerRadius="8" Padding="10">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="{Binding WeekPatients}" FontSize="20" FontWeight="Bold" Foreground="#047857" HorizontalAlignment="Center"/>
+                                <TextBlock Text="الأسبوع" FontSize="11" Foreground="#64748B" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="4" Background="#FEF3C7" CornerRadius="8" Padding="10">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="{Binding MonthPatients}" FontSize="20" FontWeight="Bold" Foreground="#B45309" HorizontalAlignment="Center"/>
+                                <TextBlock Text="الشهر" FontSize="11" Foreground="#64748B" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Margin="0,20" Spacing="10">
+                    <Button Click="OpenDisplay_Click" Background="#F1F5F9" Foreground="#334155" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="8" Padding="12" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="🖥️"/>
+                            <TextBlock Text="فتح شاشة الانتظار الخارجية" FontWeight="SemiBold"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <Border Grid.Row="2" Background="#F8FAFC" CornerRadius="12" BorderBrush="#E2E8F0" BorderThickness="1">
+                    <Grid RowDefinitions="Auto, *, Auto">
+                        <Border Background="#F1F5F9" CornerRadius="12,12,0,0" Padding="12">
+                            <TextBlock Text="⏳ طابور الانتظار (اختر مريضاً للنداء)" FontWeight="Bold" Foreground="#475569"/>
+                        </Border>
+                        
+                        <ScrollViewer Grid.Row="1" Padding="10">
+                            <ListBox ItemsSource="{Binding WaitingPatients}" SelectedItem="{Binding SelectedWaitingPatient}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="White" CornerRadius="8" Padding="10" BoxShadow="0 2 4 0 #0A000000" BorderBrush="#E2E8F0" BorderThickness="1">
+                                            <Grid ColumnDefinitions="Auto,*">
+                                                <Border Grid.Column="0" Background="#EFF6FF" CornerRadius="6" Width="40" Height="40" Margin="0,0,12,0">
+                                                    <TextBlock Text="{Binding TicketNumber}" FontSize="18" FontWeight="Bold" Foreground="#2563EB" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                                </Border>
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding FullName}" FontWeight="Bold" FontSize="14" Foreground="#1E293B"/>
+                                                    <TextBlock Text="⭐ أولوية" FontSize="11" Foreground="#D97706" FontWeight="Bold" IsVisible="{Binding IsPriority}"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </ScrollViewer>
+
+                        <Border Grid.Row="2" Padding="10" Background="White" CornerRadius="0,0,12,12" IsVisible="{Binding HasSelectedWaitingPatient}">
+                            <Button Classes="primary" Command="{Binding CallSelectedCommand}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Background="#10B981">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="📢"/>
+                                    <TextBlock Text="نداء وإدخال المريض المحدد"/>
+                                </StackPanel>
+                            </Button>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="3" Background="#F0FDF4" CornerRadius="8" Padding="12" Margin="0,15,0,0">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
+                        <TextBlock Text="✅ تم إنجاز:" Foreground="#166534" FontWeight="SemiBold"/>
+                        <TextBlock Text="{Binding CompletedToday, StringFormat='{}{0} مرضى'}" FontWeight="Black" Foreground="#166534"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Border Grid.Column="1" Background="White" Margin="0,15,15,15" CornerRadius="16" BoxShadow="0 4 15 0 #0D000000">
+            <Grid>
+                
+                <Border Background="White" CornerRadius="16" IsVisible="{Binding IsClinicEmpty}">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock Text="العيادة جاهزة لاستقبال المرضى" FontSize="26" FontWeight="Bold" Foreground="#64748B" HorizontalAlignment="Center"/>
+                        <TextBlock Text="قم بتحديد مريض من القائمة الجانبية واضغط على (نداء) لبدء العمل" FontSize="16" Foreground="#94A3B8" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Background="White" CornerRadius="16" Padding="25" IsVisible="{Binding HasCurrentPatient}">
+                    <Grid RowDefinitions="Auto, *">
+                        
+                        <Border Grid.Row="0" Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="12" Padding="20" Margin="0,0,0,20">
+                            <Grid ColumnDefinitions="Auto, *, Auto">
+                                <Border Grid.Column="0" Background="#1E293B" Width="70" Height="70" CornerRadius="35" Margin="0,0,20,0">
+                                    <TextBlock Text="{Binding CurrentPatient.TicketNumber, FallbackValue='-'}" Foreground="White" FontSize="28" FontWeight="Black" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="5">
+                                    <TextBlock Text="{Binding CurrentPatient.FullName, FallbackValue='اسم المريض'}" FontSize="24" FontWeight="Black" Foreground="#0F172A"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="15">
+                                        <TextBlock Text="{Binding CurrentPatient.PhoneNumber, StringFormat='{}📞 {0}', FallbackValue='-'}" Foreground="#64748B"/>
+                                        <TextBlock Text="{Binding CurrentPatient.Gender, StringFormat='{}👤 {0}', FallbackValue='-'}" Foreground="#64748B"/>
+                                    </StackPanel>
+                                </StackPanel>
+                                
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                    <Button Command="{Binding MarkAbsentCommand}" Background="#FEF2F2" Foreground="#DC2626" BorderThickness="0" CornerRadius="8" Padding="15,10">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock Text="❌"/>
+                                            <TextBlock Text="غائب (تأجيل)"/>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <ScrollViewer Grid.Row="1" Padding="0,0,15,0">
+                            <StackPanel Spacing="25">
+                                
+                                <Border Background="#F0F9FF" BorderBrush="#BAE6FD" BorderThickness="1" CornerRadius="12" Padding="20">
+                                    <StackPanel Spacing="15">
+                                        <TextBlock Text="🩺 العلامات الحيوية" FontWeight="Bold" FontSize="16" Foreground="#0369A1"/>
+                                        <Grid ColumnDefinitions="*,15,*,15,*,15,*">
+                                            <StackPanel Grid.Column="0" Spacing="5">
+                                                <TextBlock Text="الضغط (mmHg)" FontSize="12" Foreground="#0284C7" FontWeight="SemiBold"/>
+                                                <TextBox Text="{Binding BloodPressure}" Watermark="مثال: 120/80"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2" Spacing="5">
+                                                <TextBlock Text="الحرارة (°C)" FontSize="12" Foreground="#0284C7" FontWeight="SemiBold"/>
+                                                <TextBox Text="{Binding Temperature}" Watermark="37.5"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="4" Spacing="5">
+                                                <TextBlock Text="النبض (BPM)" FontSize="12" Foreground="#0284C7" FontWeight="SemiBold"/>
+                                                <TextBox Text="{Binding HeartRate}" Watermark="80"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="6" Spacing="5">
+                                                <TextBlock Text="الوزن (KG)" FontSize="12" Foreground="#0284C7" FontWeight="SemiBold"/>
+                                                <TextBox Text="{Binding Weight}" Watermark="75"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <Grid ColumnDefinitions="*, 20, *">
+                                    <StackPanel Grid.Column="0" Spacing="10">
+                                        <TextBlock Text="📋 التشخيص الطبي" FontWeight="Bold" FontSize="16" Foreground="#334155"/>
+                                        <ComboBox ItemsSource="{Binding CommonDiagnoses}" SelectedItem="{Binding SelectedDiagnosis}" PlaceholderText="اختر من التشخيصات الشائعة..." HorizontalAlignment="Stretch" CornerRadius="8" Height="40"/>
+                                        <TextBox Text="{Binding Diagnosis}" AcceptsReturn="True" TextWrapping="Wrap" Height="120" Watermark="اكتب التشخيص التفصيلي هنا..."/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2" Spacing="10">
+                                        <TextBlock Text="💊 الوصفة الطبية" FontWeight="Bold" FontSize="16" Foreground="#334155"/>
+                                        <ComboBox ItemsSource="{Binding CommonMedications}" SelectedItem="{Binding SelectedMedication}" PlaceholderText="إضافة دواء سريع..." HorizontalAlignment="Stretch" CornerRadius="8" Height="40"/>
+                                        <TextBox Text="{Binding Prescriptions}" AcceptsReturn="True" TextWrapping="Wrap" Height="120" Watermark="اكتب الأدوية والجرعات هنا..."/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <StackPanel Spacing="10">
+                                    <TextBlock Text="📝 ملاحظات وتوصيات" FontWeight="Bold" FontSize="16" Foreground="#334155"/>
+                                    <TextBox Text="{Binding Notes}" AcceptsReturn="True" TextWrapping="Wrap" Height="60" Watermark="ملاحظات إضافية للمريض..."/>
+                                </StackPanel>
+
+                                <Button Classes="primary" Command="{Binding CompleteVisitCommand}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="0,20,0,0" Background="#16A34A">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="✔️"/>
+                                        <TextBlock Text="إنهاء الزيارة وحفظ الملف الطبي"/>
+                                    </StackPanel>
+                                </Button>
+
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

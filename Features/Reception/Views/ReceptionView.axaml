@@ -10,7 +10,6 @@
     </UserControl.DataContext>
 
     <UserControl.Styles>
-        
         <Style Selector="TextBox">
             <Setter Property="CornerRadius" Value="6"/>
             <Setter Property="Height" Value="40"/>
@@ -94,7 +93,6 @@
         <Style Selector="Button.IconBtn:pointerover /template/ ContentPresenter">
             <Setter Property="Background" Value="#F1F5F9"/> 
         </Style>
-
     </UserControl.Styles>
 
     <Grid Background="#F1F5F9" FlowDirection="{Binding CurrentFlowDirection}">
@@ -154,7 +152,6 @@
                                 </StackPanel>
                                 <StackPanel Grid.Column="2">
                                     <TextBlock Text="{Binding BirthDateLabel}" Foreground="#475569" FontWeight="Medium" Margin="0,0,0,6"/>
-                                    
                                     <CalendarDatePicker SelectedDate="{Binding SelectedBirthDate}" 
                                                         Watermark="DD/MM/YYYY" 
                                                         UseFloatingWatermark="False"
@@ -213,14 +210,20 @@
                                                     </Border>
                                                 </StackPanel>
                                                 <StackPanel Orientation="Horizontal" Spacing="8">
-                                                     <TextBlock Text="{Binding PhoneNumber}" Foreground="#64748B" FontSize="13"/>
-                                                     <TextBlock Text="•" Foreground="#CBD5E1"/>
-                                                     <TextBlock Text="{Binding NationalId}" Foreground="#64748B" FontSize="13"/>
+                                                    <TextBlock Text="{Binding PhoneNumber}" Foreground="#64748B" FontSize="13"/>
+                                                    <TextBlock Text="•" Foreground="#CBD5E1"/>
+                                                    <TextBlock Text="{Binding NationalId}" Foreground="#64748B" FontSize="13"/>
                                                 </StackPanel>
                                             </StackPanel>
                                             
                                             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
                                                 
+                                                <Button Classes="IconBtn"
+                                                        Content="🩺" ToolTip.Tip="إرسال للطبيب"
+                                                        Command="{Binding #ReceptionRoot.((vm:ReceptionViewModel)DataContext).SendToQueueCommand}"
+                                                        CommandParameter="{Binding}"
+                                                        Foreground="#16A34A"/>
+
                                                 <Button Classes="IconBtn"
                                                         Content="🖨️" ToolTip.Tip="طباعة تذكرة"
                                                         Command="{Binding #ReceptionRoot.((vm:ReceptionViewModel)DataContext).PrintTicketCommand}"

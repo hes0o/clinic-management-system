@@ -52,7 +52,6 @@ public partial class ReceptionViewModel : ObservableObject
     
     [ObservableProperty] private string? _selectedBloodType;
     
-    // ✅ التعديل الأول: تغيير النوع إلى DateTime? ليتوافق مع CalendarDatePicker
     [ObservableProperty] private DateTime? _selectedBirthDate;
 
     // --- وضع التعديل ---
@@ -131,7 +130,6 @@ public partial class ReceptionViewModel : ObservableObject
     {
         if (IsEditMode && _editingPatientId != null)
         {
-            // --- تعديل ---
             var existing = ClinicStore.Instance.AllPatients.FirstOrDefault(p => p.Id == _editingPatientId);
             if (existing != null)
             {
@@ -140,8 +138,6 @@ public partial class ReceptionViewModel : ObservableObject
                 existing.NationalId = NationalId;
                 existing.Gender = SelectedGender?.Value ?? "M";
                 existing.BloodType = SelectedBloodType ?? "";
-                
-                // ✅ التعديل الثاني: تعيين التاريخ مباشرة بدون .DateTimeOffset
                 existing.BirthDate = SelectedBirthDate; 
                 
                 SuccessMessage = IsArabic ? "تم تعديل البيانات بنجاح!" : "Data Updated!";
@@ -152,7 +148,6 @@ public partial class ReceptionViewModel : ObservableObject
         }
         else
         {
-            // --- إضافة جديدة ---
             int nextTicketNumber = ClinicStore.Instance.TodayCount + 1;
 
             var newPatient = new Patient 
@@ -162,15 +157,12 @@ public partial class ReceptionViewModel : ObservableObject
                 NationalId = NationalId,
                 Gender = SelectedGender?.Value ?? "M",
                 BloodType = SelectedBloodType ?? "",
-                
-                // ✅ التعديل الثالث: تعيين التاريخ مباشرة
                 BirthDate = SelectedBirthDate,
-                
                 TicketNumber = nextTicketNumber,
                 RegistrationDate = DateTime.Now
             };
             
-            ClinicStore.Instance.AddPatientToQueue(newPatient);
+            ClinicStore.Instance.RegisterNewPatient(newPatient);
             SuccessMessage = IsArabic ? $"تم الحفظ! رقم التذكرة: {nextTicketNumber}" : $"Saved! Ticket #{nextTicketNumber}";
         }
 
@@ -187,8 +179,6 @@ public partial class ReceptionViewModel : ObservableObject
         NationalId = patient.NationalId;
         SelectedGender = GenderOptions.FirstOrDefault(g => g.Value == patient.Gender);
         SelectedBloodType = patient.BloodType;
-        
-        // ✅ التعديل الرابع: قراءة التاريخ مباشرة
         SelectedBirthDate = patient.BirthDate;
 
         IsEditMode = true;
@@ -227,5 +217,16 @@ public partial class ReceptionViewModel : ObservableObject
     private void PrintTicket(Patient patient)
     {
         OnPrintRequest?.Invoke(patient);
+    }
+
+    // ✅ هذه هي الدالة المفقودة التي ستجعل المريض يقفز إلى شاشة الطبيب!
+    [RelayCommand]
+    private void SendToQueue(Patient patient)
+    {
+        // إرسال المريض إلى طابور الطبيب في المخزن المركزي
+        ClinicStore.Instance.SendToDoctorQueue(patient);
+        
+        // إظهار رسالة النجاح في شاشة الاستقبال
+        SuccessMessage = IsArabic ? $"تم إرسال {patient.FullName} لطابور الطبيب بنجاح!" : $"Sent {patient.FullName} to Queue!";
     }
 }

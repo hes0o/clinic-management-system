@@ -7,49 +7,70 @@ namespace HealthCenter.Desktop.Services;
 
 public class ClinicStore
 {
-    // نمط Singleton: لضمان وجود نسخة واحدة فقط من البيانات في كامل التطبيق
     private static ClinicStore? _instance;
     public static ClinicStore Instance => _instance ??= new ClinicStore();
 
-    // ✅ هذه هي القائمة المشتركة التي سيراها الجميع (الاستقبال، الانتظار، الإحصائيات)
     public ObservableCollection<Patient> AllPatients { get; } = new();
+    public ObservableCollection<Patient> TodayActiveQueue { get; } = new();
 
-    // خاصية لحساب عدد المنتظرين (أي مريض مسجل اليوم)
-    public int WaitingCount => AllPatients.Count(p => p.RegistrationDate.Date == DateTime.Today);
-
-    // خاصية لحساب إجمالي مرضى اليوم
+    public int WaitingCount => TodayActiveQueue.Count;
     public int TodayCount => AllPatients.Count(p => p.RegistrationDate.Date == DateTime.Today);
 
-    // حدث (Event) لإبلاغ القوائم الأخرى عند حدوث تغيير (لتحديث العدادات فوراً)
     public event Action? QueueChanged;
+    public event Action<Patient>? OnPatientCalled; 
 
-    private ClinicStore()
+    private ClinicStore() { }
+
+    public void RegisterNewPatient(Patient patient)
     {
-        // إضافة مريض تجريبي عند التشغيل
-        AddPatientToQueue(new Patient 
-        { 
-            FullName = "تجربة ربط النظام", 
-            PhoneNumber = "0500000000", 
-            NationalId = "1000000000",
-            TicketNumber = 1, 
-            RegistrationDate = DateTime.Now 
-        });
+        if (!AllPatients.Any(p => p.NationalId == patient.NationalId))
+        {
+            AllPatients.Add(patient);
+            QueueChanged?.Invoke();
+        }
     }
 
-    // دالة لإضافة مريض جديد
-    public void AddPatientToQueue(Patient patient)
+    public void SendToDoctorQueue(Patient patient)
     {
-        AllPatients.Add(patient);
-        QueueChanged?.Invoke(); // تحديث العدادات
+        if (TodayActiveQueue.Any(p => p.Id == patient.Id)) return;
+
+        int age = 0;
+        if (patient.BirthDate.HasValue)
+        {
+            age = DateTime.Now.Year - patient.BirthDate.Value.Year;
+            if (patient.BirthDate.Value.Date > DateTime.Now.AddYears(-age)) age--;
+        }
+
+        patient.IsPriority = age >= 65; 
+
+        if (patient.IsPriority)
+        {
+            int insertIndex = TodayActiveQueue.Count(p => p.IsPriority);
+            TodayActiveQueue.Insert(insertIndex, patient);
+        }
+        else
+        {
+            TodayActiveQueue.Add(patient);
+        }
+
+        QueueChanged?.Invoke();
     }
 
-    // دالة لحذف مريض
+    public void CallPatient(Patient patient)
+    {
+        OnPatientCalled?.Invoke(patient);
+        TodayActiveQueue.Remove(patient);
+        QueueChanged?.Invoke();
+    }
+
     public void RemovePatient(Patient patient)
     {
         if (AllPatients.Contains(patient))
-        {
             AllPatients.Remove(patient);
-            QueueChanged?.Invoke(); // تحديث العدادات
-        }
+            
+        if (TodayActiveQueue.Contains(patient))
+            TodayActiveQueue.Remove(patient);
+            
+        QueueChanged?.Invoke();
     }
 }

@@ -13,12 +13,10 @@
 			<reception:ReceptionView/>
 		</TabItem>
 		
-		<TabItem Header="📋 شاشة الانتظار">
-			<queue:QueueDisplayView/>
-		</TabItem>
+
 		
 		<TabItem Header="👨‍⚕️ لوحة الطبيب">
-			<doctor:DoctorPanelView/>
+			<doctor:DoctorView/>
 		</TabItem>
 		
 	</TabControl>

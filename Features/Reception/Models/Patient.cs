@@ -12,7 +12,8 @@ public class Patient
     public string BloodType { get; set; } = string.Empty;
     public DateTime? BirthDate { get; set; } 
 
-    // ✅ الحقل الجديد: رقم التذكرة المتسلسل
+    public bool IsPriority { get; set; }
+
     public int TicketNumber { get; set; }
 
     public DateTime RegistrationDate { get; set; } = DateTime.Now;
