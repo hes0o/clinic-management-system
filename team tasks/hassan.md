@@ -93,4 +93,24 @@ public partial class ViewModelBase : ObservableObject
 - Your job is the shared base infrastructure (Task 1) and reviews (Task 2)
 - All team members must pull `develop` and rebase before opening a PR
 
+## 🧹 Code Formatting Rule (Mandatory)
+
+> **The "Clean Code Enforcer" GitHub Action will reject any push with formatting issues — this applies to everyone including the lead.**
+
+Before **every** `git push`, run:
+
+```bash
+dotnet format HealthCenter.Desktop.csproj
+```
+
+```bash
+# ✅ Full workflow before pushing:
+dotnet format HealthCenter.Desktop.csproj
+git add .
+git commit -m "your message"
+git push
+```
+
+---
+
 **Questions?** You're the lead, figure it out! 😄

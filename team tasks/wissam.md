@@ -197,4 +197,26 @@ git push origin feature/reception
 - **Test Task 2** by: clicking "حفظ" with no patient selected → verify message is RED not green
 - Do not modify files outside `/Features/Nurse` and `/Features/Reception`
 
+## 🧹 Code Formatting Rule (Mandatory)
+
+> **A GitHub Action called "Clean Code Enforcer" will automatically reject your push if your code is not properly formatted.**
+
+Before **every** `git push`, you MUST run:
+
+```bash
+dotnet format HealthCenter.Desktop.csproj
+```
+
+This auto-fixes all whitespace and formatting issues. If you skip this step your PR will **fail the CI check** and be blocked from merging.
+
+```bash
+# ✅ Full workflow before pushing:
+dotnet format HealthCenter.Desktop.csproj
+git add .
+git commit -m "your message"
+git push origin feature/reception
+```
+
+---
+
 **Questions?** Ask Hassan (Team Lead)

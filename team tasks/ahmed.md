@@ -157,4 +157,26 @@ git commit -m "feat(infra): global error handler + TicketStatus value converter"
 git push origin feature/infrastructure
 ```
 
+## 🧹 Code Formatting Rule (Mandatory)
+
+> **A GitHub Action called "Clean Code Enforcer" will automatically reject your push if your code is not properly formatted.**
+
+Before **every** `git push`, you MUST run:
+
+```bash
+dotnet format HealthCenter.Desktop.csproj
+```
+
+This auto-fixes all whitespace and formatting issues. If you skip this step your PR will **fail the CI check** and be blocked from merging.
+
+```bash
+# ✅ Full workflow before pushing:
+dotnet format HealthCenter.Desktop.csproj
+git add .
+git commit -m "your message"
+git push origin feature/infrastructure
+```
+
+---
+
 **Questions?** Ask Hassan

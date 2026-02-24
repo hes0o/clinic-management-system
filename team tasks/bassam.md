@@ -110,4 +110,26 @@ git push origin feature/database
 - Always test with `dotnet build` before committing
 - Coordinate with Wissam and Ela on how they will consume the `ToArabic()` extension
 
+## 🧹 Code Formatting Rule (Mandatory)
+
+> **A GitHub Action called "Clean Code Enforcer" will automatically reject your push if your code is not properly formatted.**
+
+Before **every** `git push`, you MUST run:
+
+```bash
+dotnet format HealthCenter.Desktop.csproj
+```
+
+This auto-fixes all whitespace and formatting issues. If you skip this step your PR will **fail the CI check** and be blocked from merging.
+
+```bash
+# ✅ Full workflow before pushing:
+dotnet format HealthCenter.Desktop.csproj
+git add .
+git commit -m "your message"
+git push origin feature/database
+```
+
+---
+
 **Questions?** Ask Hassan (Team Lead)
