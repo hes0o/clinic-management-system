@@ -1,0 +1,22 @@
+name: Clean Code Enforcer
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  check-format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x' # Update this to your project's version (e.g., 6.0, 7.0, 9.0)
+
+      - name: Run dotnet format
+        run: dotnet format --verify-no-changes --verbosity diagnostic
