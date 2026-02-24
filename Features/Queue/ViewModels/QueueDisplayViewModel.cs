@@ -53,28 +53,28 @@ public partial class QueueDisplayViewModel : HealthCenter.Desktop.ViewModels.Vie
 
     [ObservableProperty]
     private string _currentDate = DateTime.Now.ToString("yyyy/MM/dd");
-    
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CurrentDateHijri))]
     private string _hijriDate = string.Empty;
-    
+
     [ObservableProperty]
     private string _clinicHours = "8:00 ص - 4:00 م";
-    
+
     [ObservableProperty]
     private string _currentHealthTip = string.Empty;
-    
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PatientsAheadCount))]
     private int _patientsAhead = 0;
-    
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(EstimatedWaitTimeMinutes))]
     private int _estimatedWaitMinutes = 0;
-    
+
     [ObservableProperty]
     private double _averageServiceTimeMinutes = 10.0;
-    
+
     [ObservableProperty]
     private QueueTicket? _currentTicket;
 
@@ -109,7 +109,7 @@ public partial class QueueDisplayViewModel : HealthCenter.Desktop.ViewModels.Vie
     {
         _db = new HealthCenterDbContext();
         _notificationService = new AudioNotificationService();
-        
+
         // Load Clinic Hours from Settings if available
         try
         {
@@ -122,7 +122,7 @@ public partial class QueueDisplayViewModel : HealthCenter.Desktop.ViewModels.Vie
         }
 
         LoadQueue();
-        
+
         // Update time every minute
         _timer = new System.Timers.Timer(1000);
         _timer.Elapsed += (s, e) => Dispatcher.UIThread.Post(() =>
@@ -131,43 +131,43 @@ public partial class QueueDisplayViewModel : HealthCenter.Desktop.ViewModels.Vie
             CurrentDate = DateTime.Now.ToString("yyyy/MM/dd");
         });
         _timer.Start();
- 
-         // Heatlh Tips Timer
-         _healthTipTimer = new System.Timers.Timer(10000); // 10 seconds
-         _healthTipTimer.Elapsed += (s, e) => Dispatcher.UIThread.Post(() =>
-         {
-             CurrentHealthTip = HealthTips[_random.Next(HealthTips.Count)];
-         });
-         _healthTipTimer.Start();
-         if (HealthTips.Count > 0)
-             CurrentHealthTip = HealthTips[0];
- 
-         // Refresh Timer (5s) for audio check
-         _refreshTimer = new System.Timers.Timer(5000);
-         _refreshTimer.Elapsed += (_, _) => _ = RefreshQueueAsync();
-         _refreshTimer.Start();
-     }
+
+        // Heatlh Tips Timer
+        _healthTipTimer = new System.Timers.Timer(10000); // 10 seconds
+        _healthTipTimer.Elapsed += (s, e) => Dispatcher.UIThread.Post(() =>
+        {
+            CurrentHealthTip = HealthTips[_random.Next(HealthTips.Count)];
+        });
+        _healthTipTimer.Start();
+        if (HealthTips.Count > 0)
+            CurrentHealthTip = HealthTips[0];
+
+        // Refresh Timer (5s) for audio check
+        _refreshTimer = new System.Timers.Timer(5000);
+        _refreshTimer.Elapsed += (_, _) => _ = RefreshQueueAsync();
+        _refreshTimer.Start();
+    }
 
     public void Dispose()
     {
         _timer?.Stop();
         _timer?.Dispose();
         _healthTipTimer?.Stop();
-         _healthTipTimer?.Dispose();
-         _refreshTimer?.Stop();
-         _refreshTimer?.Dispose();
-         _db?.Dispose();
+        _healthTipTimer?.Dispose();
+        _refreshTimer?.Stop();
+        _refreshTimer?.Dispose();
+        _db?.Dispose();
         GC.SuppressFinalize(this);
     }
 
     public void LoadQueue()
     {
         var today = DateTime.Today;
-        
+
         // Get currently called patient
         var currentlyBeingServed = _db.QueueTickets
             .Include(q => q.Patient)
-            .Where(q => q.CreatedAt.Date == today && 
+            .Where(q => q.CreatedAt.Date == today &&
                        (q.Status == TicketStatus.Called || q.Status == TicketStatus.InProgress))
             .OrderByDescending(q => q.CalledAt)
             .FirstOrDefault();
@@ -189,17 +189,17 @@ public partial class QueueDisplayViewModel : HealthCenter.Desktop.ViewModels.Vie
         // Get waiting queue
         var waiting = _db.QueueTickets
             .Include(q => q.Patient)
-            .Where(q => q.CreatedAt.Date == today && 
+            .Where(q => q.CreatedAt.Date == today &&
                        (q.Status == TicketStatus.Waiting || q.Status == TicketStatus.AwaitingRecall))
             .OrderBy(q => q.TicketNumber)
             .Take(5)
             .ToList();
         WaitingQueue = new ObservableCollection<QueueTicket>(waiting);
         WaitingCount = WaitingQueue.Count;
-         
-         // Update Stats
-         PatientsAhead = WaitingQueue.Count;
-         EstimatedWaitMinutes = (int)(PatientsAhead * AverageServiceTimeMinutes);
+
+        // Update Stats
+        PatientsAhead = WaitingQueue.Count;
+        EstimatedWaitMinutes = (int)(PatientsAhead * AverageServiceTimeMinutes);
 
         // Get recently called (last 3)
         var recent = _db.QueueTickets
@@ -229,11 +229,11 @@ public partial class QueueDisplayViewModel : HealthCenter.Desktop.ViewModels.Vie
             }
         });
     }
- 
-     [RelayCommand]
-     private void ToggleMute()
-     {
-         IsMuted = !IsMuted;
-     }
+
+    [RelayCommand]
+    private void ToggleMute()
+    {
+        IsMuted = !IsMuted;
+    }
 }
 

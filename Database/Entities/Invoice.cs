@@ -24,13 +24,13 @@ public class Invoice
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid VisitId { get; set; }
     public Guid PatientId { get; set; }
-    
+
     public decimal Amount { get; set; }
     public decimal TaxAmount { get; set; }
-    
+
     public InvoiceStatus Status { get; set; } = InvoiceStatus.Pending;
     public PaymentMethod? PaymentMethod { get; set; }
-    
+
     public Guid CreatedById { get; set; } // The Cashier who generated/handled it
     public DateTime CreatedAt { get; set; }
     public DateTime? PaidAt { get; set; }

@@ -12,7 +12,7 @@ public class AuthService
     public static AuthService Instance => _instance ??= new AuthService();
 
     public User? CurrentUser { get; private set; }
-    
+
     // Event that UI or ViewModels can listen to when user logs in/out
     public event EventHandler? OnAuthStateChanged;
 

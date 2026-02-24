@@ -26,13 +26,13 @@ public class ClinicStore
     private ClinicStore()
     {
         // إضافة مريض تجريبي عند التشغيل
-        AddPatientToQueue(new Patient 
-        { 
-            FullName = "تجربة ربط النظام", 
-            PhoneNumber = "0500000000", 
+        AddPatientToQueue(new Patient
+        {
+            FullName = "تجربة ربط النظام",
+            PhoneNumber = "0500000000",
             NationalId = "1000000000",
-            TicketNumber = 1, 
-            RegistrationDate = DateTime.Now 
+            TicketNumber = 1,
+            RegistrationDate = DateTime.Now
         });
     }
 

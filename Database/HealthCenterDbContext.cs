@@ -22,13 +22,13 @@ public class HealthCenterDbContext : DbContext
         // Store database in AppData folder (cross-platform)
         var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         var healthCenterPath = Path.Combine(appDataPath, "HealthCenter");
-        
+
         // Create directory if it doesn't exist
         if (!Directory.Exists(healthCenterPath))
         {
             Directory.CreateDirectory(healthCenterPath);
         }
-        
+
         _dbPath = Path.Combine(healthCenterPath, "healthcenter.db");
     }
 
@@ -178,7 +178,7 @@ public class HealthCenterDbContext : DbContext
             {
                 Id = doctorId,
                 Username = "dr_ahmed",
-                PasswordHash = "doctor123", 
+                PasswordHash = "doctor123",
                 FullName = "د. أحمد صالح",
                 Role = UserRole.Doctor,
                 IsActive = true,
@@ -188,7 +188,7 @@ public class HealthCenterDbContext : DbContext
             {
                 Id = nurseId,
                 Username = "nurse_fatima",
-                PasswordHash = "nurse123", 
+                PasswordHash = "nurse123",
                 FullName = "الممرضة فاطمة",
                 Role = UserRole.Nurse,
                 IsActive = true,
@@ -198,7 +198,7 @@ public class HealthCenterDbContext : DbContext
             {
                 Id = cashierId,
                 Username = "cashier_omar",
-                PasswordHash = "cashier123", 
+                PasswordHash = "cashier123",
                 FullName = "المحاسب عمر",
                 Role = UserRole.Cashier,
                 IsActive = true,
@@ -208,7 +208,7 @@ public class HealthCenterDbContext : DbContext
             {
                 Id = labTechId,
                 Username = "tech_salem",
-                PasswordHash = "tech123", 
+                PasswordHash = "tech123",
                 FullName = "فني المختبر سالم",
                 Role = UserRole.LabTechnician,
                 IsActive = true,
@@ -218,7 +218,7 @@ public class HealthCenterDbContext : DbContext
             {
                 Id = receptionistId,
                 Username = "rec_nour",
-                PasswordHash = "rec123", 
+                PasswordHash = "rec123",
                 FullName = "م. الاستقبال نور",
                 Role = UserRole.Receptionist,
                 IsActive = true,
@@ -239,72 +239,96 @@ public class HealthCenterDbContext : DbContext
         var patient10 = Guid.Parse("10000000-0000-0000-0000-000000000010");
 
         modelBuilder.Entity<Patient>().HasData(
-            new Patient 
-            { 
-                Id = patient1, FullName = "أحمد محمد علي", PhoneNumber = "0501234567",
+            new Patient
+            {
+                Id = patient1,
+                FullName = "أحمد محمد علي",
+                PhoneNumber = "0501234567",
                 NationalId = "1090123456",
-                DateOfBirth = new DateTime(1985, 5, 15), Gender = Gender.Male,
-                Address = "الرياض، حي الملز", BloodType = "A+",
+                DateOfBirth = new DateTime(1985, 5, 15),
+                Gender = Gender.Male,
+                Address = "الرياض، حي الملز",
+                BloodType = "A+",
                 Allergies = "بنسلين",
                 ChronicConditions = "ضغط الدم",
                 EmergencyContact = "0559876543",
                 CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0),
                 UpdatedAt = new DateTime(2026, 1, 1, 8, 0, 0)
             },
-            new Patient 
-            { 
-                Id = patient2, FullName = "فاطمة خالد العمري", PhoneNumber = "0559876543",
+            new Patient
+            {
+                Id = patient2,
+                FullName = "فاطمة خالد العمري",
+                PhoneNumber = "0559876543",
                 NationalId = "1090234567",
-                DateOfBirth = new DateTime(1990, 8, 22), Gender = Gender.Female,
-                Address = "جدة، حي الروضة", BloodType = "O-",
+                DateOfBirth = new DateTime(1990, 8, 22),
+                Gender = Gender.Female,
+                Address = "جدة، حي الروضة",
+                BloodType = "O-",
                 Allergies = "لا يوجد",
                 ChronicConditions = "السكري النوع 2",
                 EmergencyContact = "0501234567",
                 CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0),
                 UpdatedAt = new DateTime(2026, 1, 1, 8, 0, 0)
             },
-            new Patient 
-            { 
-                Id = patient3, FullName = "عبدالله سعد الغامدي", PhoneNumber = "0551112233",
+            new Patient
+            {
+                Id = patient3,
+                FullName = "عبدالله سعد الغامدي",
+                PhoneNumber = "0551112233",
                 NationalId = "1090345678",
-                DateOfBirth = new DateTime(1978, 3, 10), Gender = Gender.Male,
-                Address = "الدمام، حي الفيصلية", BloodType = "B+",
+                DateOfBirth = new DateTime(1978, 3, 10),
+                Gender = Gender.Male,
+                Address = "الدمام، حي الفيصلية",
+                BloodType = "B+",
                 Allergies = "لا يوجد",
                 ChronicConditions = "الربو",
                 EmergencyContact = "0554445566",
                 CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0),
                 UpdatedAt = new DateTime(2026, 1, 1, 8, 0, 0)
             },
-            new Patient 
-            { 
-                Id = patient4, FullName = "نورة عبدالرحمن القحطاني", PhoneNumber = "0544445566",
+            new Patient
+            {
+                Id = patient4,
+                FullName = "نورة عبدالرحمن القحطاني",
+                PhoneNumber = "0544445566",
                 NationalId = "1090456789",
-                DateOfBirth = new DateTime(1995, 12, 5), Gender = Gender.Female,
-                Address = "مكة المكرمة، العزيزية", BloodType = "AB+",
+                DateOfBirth = new DateTime(1995, 12, 5),
+                Gender = Gender.Female,
+                Address = "مكة المكرمة، العزيزية",
+                BloodType = "AB+",
                 Allergies = "الغبار، حبوب اللقاح",
                 ChronicConditions = "لا يوجد",
                 EmergencyContact = "0551112233",
                 CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0),
                 UpdatedAt = new DateTime(2026, 1, 1, 8, 0, 0)
             },
-            new Patient 
-            { 
-                Id = patient5, FullName = "محمد عبدالعزيز الشهري", PhoneNumber = "0567778899",
+            new Patient
+            {
+                Id = patient5,
+                FullName = "محمد عبدالعزيز الشهري",
+                PhoneNumber = "0567778899",
                 NationalId = "1090567890",
-                DateOfBirth = new DateTime(1982, 7, 18), Gender = Gender.Male,
-                Address = "أبها، حي المنهل", BloodType = "O+",
+                DateOfBirth = new DateTime(1982, 7, 18),
+                Gender = Gender.Male,
+                Address = "أبها، حي المنهل",
+                BloodType = "O+",
                 Allergies = "لا يوجد",
                 ChronicConditions = "ضغط الدم، السكري",
                 EmergencyContact = "0561234567",
                 CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0),
                 UpdatedAt = new DateTime(2026, 1, 1, 8, 0, 0)
             },
-            new Patient 
-            { 
-                Id = patient6, FullName = "سارة أحمد الدوسري", PhoneNumber = "0533334444",
+            new Patient
+            {
+                Id = patient6,
+                FullName = "سارة أحمد الدوسري",
+                PhoneNumber = "0533334444",
                 NationalId = "1090678901",
-                DateOfBirth = new DateTime(1988, 11, 30), Gender = Gender.Female,
-                Address = "الرياض، حي النخيل", BloodType = "A-",
+                DateOfBirth = new DateTime(1988, 11, 30),
+                Gender = Gender.Female,
+                Address = "الرياض، حي النخيل",
+                BloodType = "A-",
                 Allergies = "إيبوبروفين",
                 ChronicConditions = "لا يوجد",
                 InsuranceProvider = "بوبا العربية",
@@ -313,24 +337,32 @@ public class HealthCenterDbContext : DbContext
                 CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0),
                 UpdatedAt = new DateTime(2026, 1, 1, 8, 0, 0)
             },
-            new Patient 
-            { 
-                Id = patient7, FullName = "خالد فهد المطيري", PhoneNumber = "0522223333",
+            new Patient
+            {
+                Id = patient7,
+                FullName = "خالد فهد المطيري",
+                PhoneNumber = "0522223333",
                 NationalId = "1090789012",
-                DateOfBirth = new DateTime(1992, 4, 25), Gender = Gender.Male,
-                Address = "الطائف، حي الشهداء", BloodType = "B-",
+                DateOfBirth = new DateTime(1992, 4, 25),
+                Gender = Gender.Male,
+                Address = "الطائف، حي الشهداء",
+                BloodType = "B-",
                 Allergies = "لا يوجد",
                 ChronicConditions = "لا يوجد",
                 EmergencyContact = "0533334444",
                 CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0),
                 UpdatedAt = new DateTime(2026, 1, 1, 8, 0, 0)
             },
-            new Patient 
-            { 
-                Id = patient8, FullName = "منى سليمان الحربي", PhoneNumber = "0588889999",
+            new Patient
+            {
+                Id = patient8,
+                FullName = "منى سليمان الحربي",
+                PhoneNumber = "0588889999",
                 NationalId = "1090890123",
-                DateOfBirth = new DateTime(1975, 9, 12), Gender = Gender.Female,
-                Address = "المدينة المنورة، حي العزيزية", BloodType = "O+",
+                DateOfBirth = new DateTime(1975, 9, 12),
+                Gender = Gender.Female,
+                Address = "المدينة المنورة، حي العزيزية",
+                BloodType = "O+",
                 Allergies = "لا يوجد",
                 ChronicConditions = "قصور الغدة الدرقية",
                 InsuranceProvider = "تأمين المجموعة",
@@ -339,24 +371,32 @@ public class HealthCenterDbContext : DbContext
                 CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0),
                 UpdatedAt = new DateTime(2026, 1, 1, 8, 0, 0)
             },
-            new Patient 
-            { 
-                Id = patient9, FullName = "ياسر علي الزهراني", PhoneNumber = "0577778888",
+            new Patient
+            {
+                Id = patient9,
+                FullName = "ياسر علي الزهراني",
+                PhoneNumber = "0577778888",
                 NationalId = "1090901234",
-                DateOfBirth = new DateTime(1987, 2, 8), Gender = Gender.Male,
-                Address = "جدة، حي السلامة", BloodType = "AB-",
+                DateOfBirth = new DateTime(1987, 2, 8),
+                Gender = Gender.Male,
+                Address = "جدة، حي السلامة",
+                BloodType = "AB-",
                 Allergies = "لا يوجد",
                 ChronicConditions = "لا يوجد",
                 EmergencyContact = "0588889999",
                 CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0),
                 UpdatedAt = new DateTime(2026, 1, 1, 8, 0, 0)
             },
-            new Patient 
-            { 
-                Id = patient10, FullName = "ريم محمد القرني", PhoneNumber = "0511112222",
+            new Patient
+            {
+                Id = patient10,
+                FullName = "ريم محمد القرني",
+                PhoneNumber = "0511112222",
                 NationalId = "1091012345",
-                DateOfBirth = new DateTime(1993, 6, 14), Gender = Gender.Female,
-                Address = "الخبر، حي الثقبة", BloodType = "A+",
+                DateOfBirth = new DateTime(1993, 6, 14),
+                Gender = Gender.Female,
+                Address = "الخبر، حي الثقبة",
+                BloodType = "A+",
                 Allergies = "لا يوجد",
                 ChronicConditions = "لا يوجد",
                 EmergencyContact = "0599998888",
@@ -424,7 +464,7 @@ public class HealthCenterDbContext : DbContext
         var visit1 = Guid.Parse("30000000-0000-0000-0000-000000000001");
         var visit2 = Guid.Parse("30000000-0000-0000-0000-000000000002");
         var visit3 = Guid.Parse("30000000-0000-0000-0000-000000000003");
-        
+
         modelBuilder.Entity<Visit>().HasData(
             new Visit
             {

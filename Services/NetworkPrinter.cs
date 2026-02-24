@@ -41,7 +41,7 @@ public class NetworkPrinter
             }
 
             using NetworkStream stream = client.GetStream();
-            
+
             stream.Write(new byte[] { 0x1B, 0x40 }, 0, 2); // تهيئة
             stream.Write(printData, 0, printData.Length);  // الصورة
             stream.Write(new byte[] { 0x1D, 0x56, 0x42, 0x00 }, 0, 4); // قص
@@ -54,29 +54,29 @@ public class NetworkPrinter
 
     private Bitmap CreateTicketImage(Patient patient, int waitingCount)
     {
-        int width = 570; 
+        int width = 570;
         int height = 650; // زدنا الارتفاع قليلاً
         Bitmap bmp = new Bitmap(width, height);
         using Graphics g = Graphics.FromImage(bmp);
-        
+
         g.Clear(Color.White);
 
         // تحسين الخطوط لتظهر واضحة
         Font fontTitle = new Font("Arial", 22, FontStyle.Bold);
         Font fontNormal = new Font("Arial", 18, FontStyle.Bold); // جعلناه Bold ليكون أوضح
         Font fontBig = new Font("Arial", 60, FontStyle.Bold);
-        
+
         StringFormat center = new StringFormat { Alignment = StringAlignment.Center };
-        StringFormat right = new StringFormat { Alignment = StringAlignment.Far }; 
+        StringFormat right = new StringFormat { Alignment = StringAlignment.Far };
 
         int y = 20;
-        
+
         // الرأس
         g.DrawString("المركز الصحي", fontTitle, Brushes.Black, width / 2, y, center);
         y += 45;
         g.DrawString("Health Center", new Font("Arial", 14), Brushes.Black, width / 2, y, center);
         y += 40;
-        
+
         // خط فاصل سميك
         g.FillRectangle(Brushes.Black, 20, y, width - 40, 3);
         y += 20;
@@ -99,7 +99,7 @@ public class NetworkPrinter
         // مربع الانتظار (أسود)
         g.FillRectangle(Brushes.Black, 20, y, width - 40, 60);
         g.DrawString($"أمامك: {waitingCount}", new Font("Arial", 24, FontStyle.Bold), Brushes.White, width / 2, y + 10, center);
-        
+
         return bmp;
     }
 
@@ -131,7 +131,7 @@ public class NetworkPrinter
                     {
                         Color c = bitmap.GetPixel(px, y);
                         // أي لون غير الأبيض نعتبره أسود
-                        if (c.R < 200 || c.G < 200 || c.B < 200) 
+                        if (c.R < 200 || c.G < 200 || c.B < 200)
                             b |= (byte)(1 << (7 - k));
                     }
                 }

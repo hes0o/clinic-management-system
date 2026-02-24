@@ -65,7 +65,7 @@ public static class SettingsService
             throw new InvalidOperationException("Database.Path is required in appsettings.json");
         }
 
-        if (string.IsNullOrWhiteSpace(settings.WorkingHours.Start) || 
+        if (string.IsNullOrWhiteSpace(settings.WorkingHours.Start) ||
             string.IsNullOrWhiteSpace(settings.WorkingHours.End))
         {
             throw new InvalidOperationException("WorkingHours.Start and WorkingHours.End are required in appsettings.json");

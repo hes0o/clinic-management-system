@@ -105,23 +105,23 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
     public void LoadQueue()
     {
         var today = DateTime.Today;
-        
+
         // Load waiting patients
         var waiting = _db.QueueTickets
             .Include(q => q.Patient)
-            .Where(q => q.CreatedAt.Date == today && 
+            .Where(q => q.CreatedAt.Date == today &&
                        (q.Status == TicketStatus.Waiting || q.Status == TicketStatus.AwaitingRecall))
             .OrderBy(q => q.Status == TicketStatus.AwaitingRecall ? 0 : 1) // Recall first
             .ThenBy(q => q.TicketNumber)
             .ToList();
-        
+
         WaitingPatients = new ObservableCollection<QueueTicket>(waiting);
         WaitingCount = waiting.Count;
 
         // Get current patient (being served)
         CurrentPatient = _db.QueueTickets
             .Include(q => q.Patient)
-            .Where(q => q.CreatedAt.Date == today && 
+            .Where(q => q.CreatedAt.Date == today &&
                        (q.Status == TicketStatus.Called || q.Status == TicketStatus.InProgress || q.Status == TicketStatus.Present))
             .OrderByDescending(q => q.CalledAt)
             .FirstOrDefault();
@@ -149,7 +149,7 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
             .OrderByDescending(v => v.VisitDate)
             .Take(10)
             .ToList();
-        
+
         PatientHistory = new ObservableCollection<Visit>(history);
     }
 
@@ -159,7 +159,7 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
         var today = DateTime.Today;
         var weekStart = today.AddDays(-(int)today.DayOfWeek);
         var monthStart = new DateTime(today.Year, today.Month, 1);
-        
+
         TodayPatients = _db.Visits.Count(v => v.VisitDate.Date == today);
         WeekPatients = _db.Visits.Count(v => v.VisitDate >= weekStart);
         MonthPatients = _db.Visits.Count(v => v.VisitDate >= monthStart);
@@ -237,7 +237,7 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
         if (CurrentPatient == null) return;
 
         // Try to get an active Doctor or Admin user. Fallback to first user.
-        var doctor = _db.Users.FirstOrDefault(u => u.Role == UserRole.Doctor || u.Role == UserRole.SuperAdmin) 
+        var doctor = _db.Users.FirstOrDefault(u => u.Role == UserRole.Doctor || u.Role == UserRole.SuperAdmin)
                      ?? _db.Users.FirstOrDefault();
         var doctorId = doctor?.Id ?? Guid.Empty;
 

@@ -15,7 +15,7 @@ public static class GlobalExceptionHandler
     public static void RegisterHandlers()
     {
         AppDomain.CurrentDomain.UnhandledException += OnAppDomainUnhandledException;
-        
+
         TaskScheduler.UnobservedTaskException += OnTaskSchedulerUnobservedTaskException;
 
         Log.Information("Global exception handlers registered");
@@ -53,7 +53,7 @@ public static class GlobalExceptionHandler
         if (e.ExceptionObject is Exception exception)
         {
             var errorId = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
-            
+
             Log.Fatal(exception, "خطأ غير متوقع في نطاق التطبيق. رقم الخطأ: {ErrorId}", errorId);
 
             if (Interlocked.CompareExchange(ref _isHandlingException, 1, 0) == 0)
@@ -87,7 +87,7 @@ public static class GlobalExceptionHandler
     private static void OnTaskSchedulerUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
     {
         var errorId = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
-        
+
         Log.Error(e.Exception, "استثناء غير ملحوظ في مهمة غير متزامنة. رقم الخطأ: {ErrorId}", errorId);
 
         e.SetObserved();
@@ -112,7 +112,7 @@ public static class GlobalExceptionHandler
     public static void HandleAvaloniaException(Exception exception)
     {
         var errorId = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
-        
+
         Log.Error(exception, "استثناء في واجهة المستخدم Avalonia. رقم الخطأ: {ErrorId}", errorId);
 
         if (Interlocked.CompareExchange(ref _isHandlingException, 1, 0) == 0)
@@ -151,7 +151,7 @@ public static class GlobalExceptionHandler
             {
                 try
                 {
-                    Dispatcher.UIThread.Post(async () => 
+                    Dispatcher.UIThread.Post(async () =>
                     {
                         await ErrorDialogService.ShowFatalErrorDialogAsync(exception, errorId);
                     }, DispatcherPriority.Send);

@@ -14,12 +14,12 @@ sealed class Program
     public static void Main(string[] args)
     {
         LoggingService.ConfigureLogging();
-        
+
         try
         {
             SettingsService.Initialize();
             GlobalExceptionHandler.RegisterHandlers();
-            
+
             Log.Information("Starting Health Center application");
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
             Log.Information("Application shut down gracefully");

@@ -68,26 +68,26 @@ public partial class MainWindowViewModel : ViewModelBase
 
         ActiveDashboard = user.Role switch
         {
-            UserRole.Doctor        => new DoctorPanelViewModel(),
-            UserRole.Nurse         => new NursePanelViewModel(),
-            UserRole.Receptionist  => new ReceptionViewModel(),
-            UserRole.Cashier       => new CashierPanelViewModel(),
+            UserRole.Doctor => new DoctorPanelViewModel(),
+            UserRole.Nurse => new NursePanelViewModel(),
+            UserRole.Receptionist => new ReceptionViewModel(),
+            UserRole.Cashier => new CashierPanelViewModel(),
             UserRole.LabTechnician => new LabPanelViewModel(),
             // SuperAdmin and ClinicManager get the full admin shell
-            _                      => new AdminShellViewModel(),
+            _ => new AdminShellViewModel(),
         };
     }
 
     private static string GetRoleDisplayName(UserRole role) => role switch
     {
-        UserRole.SuperAdmin     => "مدير النظام",
-        UserRole.ClinicManager  => "مدير العيادة",
-        UserRole.Doctor         => "طبيب",
-        UserRole.Nurse          => "ممرض / ممرضة",
-        UserRole.Receptionist   => "موظف الاستقبال",
-        UserRole.Cashier        => "أمين الصندوق",
-        UserRole.LabTechnician  => "فني المختبر",
-        _                       => role.ToString()
+        UserRole.SuperAdmin => "مدير النظام",
+        UserRole.ClinicManager => "مدير العيادة",
+        UserRole.Doctor => "طبيب",
+        UserRole.Nurse => "ممرض / ممرضة",
+        UserRole.Receptionist => "موظف الاستقبال",
+        UserRole.Cashier => "أمين الصندوق",
+        UserRole.LabTechnician => "فني المختبر",
+        _ => role.ToString()
     };
 
     [RelayCommand]

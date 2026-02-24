@@ -39,7 +39,7 @@ public static class ErrorDialogService
     {
         var message = $"حدث خطأ غير متوقع. تم حفظ تفاصيل الخطأ في ملف السجل.\n\nرقم الخطأ: {errorId}\nالوقت: {DateTime.Now:yyyy-MM-dd HH:mm:ss}";
         var title = "خطأ في التطبيق";
-        
+
         await ShowErrorDialogAsync(message, title, "");
     }
 
@@ -55,8 +55,8 @@ public static class ErrorDialogService
                 return;
             }
 
-            var messageWithDetails = string.IsNullOrEmpty(details) 
-                ? message 
+            var messageWithDetails = string.IsNullOrEmpty(details)
+                ? message
                 : $"{message}\n\n{details}";
 
             var messageBox = new Window

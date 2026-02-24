@@ -49,9 +49,9 @@ public partial class CashierPanelViewModel : HealthCenter.Desktop.ViewModels.Vie
 
         var method = SelectedPaymentMethod switch
         {
-            "Card"      => PaymentMethod.Card,
+            "Card" => PaymentMethod.Card,
             "Insurance" => PaymentMethod.Insurance,
-            _           => PaymentMethod.Cash
+            _ => PaymentMethod.Cash
         };
 
         SelectedInvoice.Status = InvoiceStatus.Paid;

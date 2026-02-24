@@ -10,7 +10,7 @@ public class Patient
     public string NationalId { get; set; } = string.Empty;
     public string Gender { get; set; } = string.Empty;
     public string BloodType { get; set; } = string.Empty;
-    public DateTime? BirthDate { get; set; } 
+    public DateTime? BirthDate { get; set; }
 
     // ✅ الحقل الجديد: رقم التذكرة المتسلسل
     public int TicketNumber { get; set; }

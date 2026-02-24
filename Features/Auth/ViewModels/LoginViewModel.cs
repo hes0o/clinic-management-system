@@ -39,7 +39,7 @@ public partial class LoginViewModel : HealthCenter.Desktop.ViewModels.ViewModelB
         try
         {
             var user = _db.Users.FirstOrDefault(u => u.Username == Username && u.IsActive);
-            
+
             if (user == null || user.PasswordHash != Password) // In production, hash the input!
             {
                 ErrorMessage = "اسم المستخدم أو كلمة المرور غير صحيحة.";
