@@ -100,7 +100,7 @@
 
         <!-- Left: Waiting List -->
         <Border Grid.Column="0" Background="White" Padding="20">
-            <Grid RowDefinitions="Auto,Auto,Auto,*,Auto">
+            <Grid RowDefinitions="Auto,Auto,Auto,*,Auto,Auto">
                 <!-- Header -->
                 <StackPanel Grid.Row="0" Margin="0,0,0,20">
                     <TextBlock Text="لوحة الطبيب" 
@@ -214,8 +214,42 @@
                     </ScrollViewer>
                 </Border>
 
+                <!-- Absent recall list (compact) -->
+                <Expander Grid.Row="4"
+                          Header="قائمة الغائبين (لإعادة النداء)"
+                          Margin="0,12,0,0"
+                          CornerRadius="10"
+                          Background="#F8FAFC">
+                    <Border Background="White" CornerRadius="8" Padding="10" Margin="0,8,0,0">
+                        <ScrollViewer MaxHeight="180">
+                            <ItemsControl ItemsSource="{Binding AbsentRecallPatients}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#F8FAFC" CornerRadius="8" Padding="10" Margin="0,0,0,8"
+                                                BorderBrush="#E2E8F0" BorderThickness="1">
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <StackPanel Grid.Column="0" Spacing="2">
+                                                    <TextBlock Text="{Binding Patient.FullName}" FontWeight="Medium"/>
+                                                    <TextBlock Text="{Binding TicketNumber, StringFormat='رقم التذكرة: {0}'}"
+                                                               FontSize="12" Foreground="#64748B"/>
+                                                </StackPanel>
+                                                <Button Grid.Column="1"
+                                                        Command="{Binding $parent[ItemsControl].((vm:DoctorPanelViewModel)DataContext).RecallAbsentCommand}"
+                                                        CommandParameter="{Binding}"
+                                                        Background="#2563EB" Foreground="White"
+                                                        CornerRadius="6" Padding="10,6"
+                                                        Content="إعادة نداء"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Border>
+                </Expander>
+
                 <!-- Completed today stats -->
-                <Border Grid.Row="4" Background="#F0FDF4" CornerRadius="8" Padding="12" Margin="0,12,0,0">
+                <Border Grid.Row="5" Background="#F0FDF4" CornerRadius="8" Padding="12" Margin="0,12,0,0">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="24">
                         <TextBlock Text="تم اليوم:" Foreground="#166534"/>
                         <TextBlock Text="{Binding CompletedToday}" 
@@ -272,7 +306,7 @@
                     <StackPanel Grid.Row="1" 
                                 Orientation="Horizontal" 
                                 Spacing="12"
-                                IsVisible="{Binding CurrentPatient, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                IsVisible="{Binding IsAttendanceActionsVisible}">
                         <Button Classes="success" Command="{Binding MarkPresentCommand}">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <TextBlock Text="حضر"/>
@@ -293,15 +327,34 @@
                     CornerRadius="16" 
                     Padding="24"
                     IsVisible="{Binding CurrentPatient, Converter={x:Static ObjectConverters.IsNotNull}}">
-                <Grid RowDefinitions="Auto,*,Auto,Auto">
+                <Grid RowDefinitions="Auto,Auto,*,Auto,Auto">
                     <TextBlock Grid.Row="0" 
                                Text="التشخيص والعلاج" 
                                FontSize="20" 
                                FontWeight="SemiBold"
-                               Margin="0,0,0,20"/>
+                               Margin="0,0,0,12"/>
+
+                    <!-- Status banner: success -->
+                    <Border Grid.Row="1" 
+                            IsVisible="{Binding IsSuccessMessage}"
+                            CornerRadius="8" Padding="14,10" Margin="0,0,0,12"
+                            Background="#F0FDF4">
+                        <TextBlock Text="{Binding StatusMessage}"
+                                   Foreground="#15803D"
+                                   TextWrapping="Wrap" FontWeight="Medium"/>
+                    </Border>
+                    <!-- Status banner: error -->
+                    <Border Grid.Row="1"
+                            IsVisible="{Binding IsError}"
+                            CornerRadius="8" Padding="14,10" Margin="0,0,0,12"
+                            Background="#FEF2F2">
+                        <TextBlock Text="{Binding StatusMessage}"
+                                   Foreground="#DC2626"
+                                   TextWrapping="Wrap" FontWeight="Medium"/>
+                    </Border>
 
                     <!-- Diagnosis -->
-                    <ScrollViewer Grid.Row="1">
+                    <ScrollViewer Grid.Row="2">
                         <StackPanel Spacing="16">
                             <!-- Task 2: Common Diagnosis Dropdown -->
                             <StackPanel Spacing="8">
@@ -315,12 +368,13 @@
 
                             <!-- Manual Diagnosis Entry -->
                             <StackPanel Spacing="8">
-                                <TextBlock Text="التشخيص التفصيلي" FontWeight="Medium" Foreground="#374151"/>
+                                <TextBlock Text="التشخيص التفصيلي (حد أقصى 1000 حرف)" FontWeight="Medium" Foreground="#374151"/>
                                 <TextBox Text="{Binding Diagnosis}"
+                                         MaxLength="1000"
                                          AcceptsReturn="True"
                                          TextWrapping="Wrap"
                                          Height="100"
-                                         Watermark="أدخل التشخيص هنا..."/>
+                                         Watermark="أدخل التشخيص التفصيلي (حتى 1000 حرف)..."/>
                             </StackPanel>
 
                             <!-- Task 2: Vital Signs Section -->
@@ -332,25 +386,25 @@
                                         <!-- Blood Pressure -->
                                         <StackPanel Grid.Column="0" Grid.Row="0" Spacing="6">
                                             <TextBlock Text="ضغط الدم (mmHg)" FontSize="13" Foreground="#64748B"/>
-                                            <TextBox Text="{Binding BloodPressure}" Watermark="120/80"/>
+                                            <TextBox Text="{Binding BloodPressure}" MaxLength="7" Watermark="مثال: 120/80"/>
                                         </StackPanel>
 
                                         <!-- Temperature -->
                                         <StackPanel Grid.Column="2" Grid.Row="0" Spacing="6">
                                             <TextBlock Text="الحرارة (°C)" FontSize="13" Foreground="#64748B"/>
-                                            <TextBox Text="{Binding Temperature}" Watermark="37.0"/>
+                                            <TextBox Text="{Binding TemperatureInput}" MaxLength="5" Watermark="مثال: 37"/>
                                         </StackPanel>
 
                                         <!-- Heart Rate -->
                                         <StackPanel Grid.Column="0" Grid.Row="2" Spacing="6">
                                             <TextBlock Text="نبضات القلب (BPM)" FontSize="13" Foreground="#64748B"/>
-                                            <TextBox Text="{Binding HeartRate}" Watermark="72"/>
+                                            <TextBox Text="{Binding HeartRateInput}" MaxLength="3" Watermark="مثال: 72"/>
                                         </StackPanel>
 
                                         <!-- Weight -->
                                         <StackPanel Grid.Column="2" Grid.Row="2" Spacing="6">
                                             <TextBlock Text="الوزن (KG)" FontSize="13" Foreground="#64748B"/>
-                                            <TextBox Text="{Binding Weight}" Watermark="70.5"/>
+                                            <TextBox Text="{Binding WeightInput}" MaxLength="6" Watermark="مثال: 70.5"/>
                                         </StackPanel>
                                     </Grid>
                                 </StackPanel>
@@ -368,22 +422,37 @@
 
                             <!-- Prescriptions Text Area -->
                             <StackPanel Spacing="8">
-                                <TextBlock Text="الأدوية الموصوفة" FontWeight="Medium" Foreground="#374151"/>
+                                <TextBlock Text="الأدوية الموصوفة (حد أقصى 1000 حرف)" FontWeight="Medium" Foreground="#374151"/>
                                 <TextBox Text="{Binding Prescriptions}"
+                                         MaxLength="1000"
                                          AcceptsReturn="True"
                                          TextWrapping="Wrap"
                                          Height="80"
-                                         Watermark="الأدوية والجرعات..."/>
+                                         Watermark="الأدوية والجرعات (حتى 1000 حرف)..."/>
                             </StackPanel>
 
                             <!-- Notes -->
                             <StackPanel Spacing="8">
-                                <TextBlock Text="ملاحظات" FontWeight="Medium" Foreground="#374151"/>
+                                <TextBlock Text="ملاحظات (حد أقصى 1000 حرف)" FontWeight="Medium" Foreground="#374151"/>
                                 <TextBox Text="{Binding Notes}"
+                                         MaxLength="1000"
                                          AcceptsReturn="True"
                                          TextWrapping="Wrap"
                                          Height="60"
-                                         Watermark="ملاحظات إضافية..."/>
+                                         Watermark="ملاحظات إضافية (حتى 1000 حرف)..."/>
+                            </StackPanel>
+
+                            <!-- Lab request -->
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="طلب فحوصات أو تحاليل مخبرية" FontWeight="Medium" Foreground="#374151"/>
+                                <TextBlock Text="يمكنك كتابة الفحوصات المطلوبة (مثال: فحص CBC، كيمياء الدم، أشعة سينية للصدر)" 
+                                           FontSize="12" Foreground="#64748B" TextWrapping="Wrap"/>
+                                <TextBox Text="{Binding LabTestName}"
+                                         MaxLength="300"
+                                         AcceptsReturn="True"
+                                         TextWrapping="Wrap"
+                                         Height="56"
+                                         Watermark="اكتب الفحوصات المطلوبة (حتى 300 حرف)..."/>
                             </StackPanel>
 
                             <!-- Task 1: Visit History Panel -->
@@ -429,15 +498,17 @@
                         </StackPanel>
                     </ScrollViewer>
 
-                    <!-- Complete Button -->
-                    <Button Grid.Row="3" 
+                    <!-- Complete Button (disabled until minimum info entered) -->
+                    <Button Grid.Row="4" 
                             Classes="success"
                             Command="{Binding CompleteVisitCommand}"
+                            IsEnabled="{Binding CanCompleteVisit}"
                             HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Center"
                             Margin="0,20,0,0"
                             FontSize="18"
-                            Padding="20,14">
+                            Padding="20,14"
+                            ToolTip.Tip="سيتم تفعيل الزر بعد إدخال التشخيص أو الملاحظات أو الأدوية">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock Text="انهاء الزيارة وحفظ"/>
                         </StackPanel>
@@ -445,5 +516,43 @@
                 </Grid>
             </Border>
         </Grid>
+
+        <!-- Modal dialog overlay (box message) -->
+        <Border IsVisible="{Binding IsDialogVisible}"
+                Background="#80000000"
+                Grid.ColumnSpan="2">
+            <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Width="520">
+                <Border Background="White" CornerRadius="14" Padding="18" BoxShadow="0 8 24 0 #33000000">
+                    <StackPanel Spacing="14">
+                        <TextBlock Text="{Binding DialogTitle}" FontSize="18" FontWeight="Bold" Foreground="#111827"/>
+                        <TextBlock Text="{Binding DialogMessage}" TextWrapping="Wrap" Foreground="#374151" FontSize="14"/>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+                            <Button Content="{Binding DialogSecondaryText}"
+                                    IsVisible="{Binding IsDialogConfirm}"
+                                    Command="{Binding DialogSecondaryCommand}"
+                                    Background="#F1F5F9" Foreground="#0F172A"
+                                    CornerRadius="8" Padding="14,10"/>
+
+                            <!-- Primary button: normal (blue) -->
+                            <Button Content="{Binding DialogPrimaryText}"
+                                    IsVisible="{Binding IsDialogError, Converter={x:Static BoolConverters.Not}}"
+                                    Command="{Binding DialogPrimaryCommand}"
+                                    Background="#2563EB"
+                                    Foreground="White"
+                                    CornerRadius="8" Padding="14,10"/>
+
+                            <!-- Primary button: error (red) -->
+                            <Button Content="{Binding DialogPrimaryText}"
+                                    IsVisible="{Binding IsDialogError}"
+                                    Command="{Binding DialogPrimaryCommand}"
+                                    Background="#DC2626"
+                                    Foreground="White"
+                                    CornerRadius="8" Padding="14,10"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>
