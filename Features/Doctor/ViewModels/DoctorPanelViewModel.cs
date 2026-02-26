@@ -165,11 +165,26 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
         MonthPatients = _db.Visits.Count(v => v.VisitDate >= monthStart);
     }
 
+    private void ClearDiagnosisForm()
+    {
+        Diagnosis = string.Empty;
+        Prescriptions = string.Empty;
+        Notes = string.Empty;
+        BloodPressure = string.Empty;
+        Temperature = null;
+        HeartRate = null;
+        Weight = null;
+        SelectedDiagnosis = null;
+        SelectedMedication = null;
+    }
+
     [RelayCommand]
     private void CallNext()
     {
         if (WaitingPatients.Count == 0)
             return;
+
+        ClearDiagnosisForm();
 
         // If there's a current patient, mark as absent if not already processed
         if (CurrentPatient != null && CurrentPatient.Status == TicketStatus.Called)
@@ -195,6 +210,8 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
     private void CallSpecific(QueueTicket ticket)
     {
         if (ticket == null) return;
+
+        ClearDiagnosisForm();
 
         // If there's a current patient, mark as awaiting recall
         if (CurrentPatient != null && CurrentPatient.Status == TicketStatus.Called)
@@ -264,16 +281,7 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
         CurrentPatient.CompletedAt = DateTime.Now;
         _db.SaveChanges();
 
-        // Clear form
-        Diagnosis = string.Empty;
-        Prescriptions = string.Empty;
-        Notes = string.Empty;
-        BloodPressure = string.Empty;
-        Temperature = null;
-        HeartRate = null;
-        Weight = null;
-        SelectedDiagnosis = null;
-        SelectedMedication = null;
+        ClearDiagnosisForm();
 
         LoadQueue();
         LoadStatistics();
