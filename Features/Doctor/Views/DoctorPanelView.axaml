@@ -192,7 +192,7 @@
                                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding Patient.FullName}" 
                                                            FontWeight="Medium"/>
-                                                <TextBlock Text="{Binding Status}" 
+                                                <TextBlock Text="{Binding Status, Converter={StaticResource TicketStatusConverter}}" 
                                                            FontSize="12"
                                                            Foreground="#94A3B8"/>
                                             </StackPanel>
@@ -287,12 +287,29 @@
                 </Grid>
             </Border>
 
-            <!-- Diagnosis Form -->
-            <Border Grid.Row="1" 
-                    Background="White" 
-                    CornerRadius="16" 
-                    Padding="24"
-                    IsVisible="{Binding CurrentPatient, Converter={x:Static ObjectConverters.IsNotNull}}">
+            <!-- Status Banner -->
+            <StackPanel Grid.Row="1">
+                <Border IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                        CornerRadius="12" Padding="14,10" Margin="0,0,0,12"
+                        Background="#F0FDF4">
+                    <TextBlock Text="{Binding StatusMessage}"
+                               IsVisible="{Binding IsError, Converter={x:Static BoolConverters.Not}}"
+                               Foreground="#15803D"
+                               TextWrapping="Wrap" FontWeight="Medium"/>
+                </Border>
+                <Border IsVisible="{Binding IsError}"
+                        CornerRadius="12" Padding="14,10" Margin="0,0,0,12"
+                        Background="#FEF2F2">
+                    <TextBlock Text="{Binding StatusMessage}"
+                               Foreground="#DC2626"
+                               TextWrapping="Wrap" FontWeight="Medium"/>
+                </Border>
+
+                <!-- Diagnosis Form -->
+                <Border Background="White" 
+                        CornerRadius="16" 
+                        Padding="24"
+                        IsVisible="{Binding CurrentPatient, Converter={x:Static ObjectConverters.IsNotNull}}">
                 <Grid RowDefinitions="Auto,*,Auto,Auto">
                     <TextBlock Grid.Row="0" 
                                Text="التشخيص والعلاج" 
@@ -444,6 +461,7 @@
                     </Button>
                 </Grid>
             </Border>
+            </StackPanel>
         </Grid>
     </Grid>
 </UserControl>

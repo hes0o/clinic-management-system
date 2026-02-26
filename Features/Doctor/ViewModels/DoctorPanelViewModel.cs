@@ -171,6 +171,9 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
         if (WaitingPatients.Count == 0)
             return;
 
+        ClearDiagnosisForm(); // Clear form for the new patient
+        ClearStatus();      // Clear any previous status messages
+
         // If there's a current patient, mark as absent if not already processed
         if (CurrentPatient != null && CurrentPatient.Status == TicketStatus.Called)
         {
@@ -195,6 +198,9 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
     private void CallSpecific(QueueTicket ticket)
     {
         if (ticket == null) return;
+
+        ClearDiagnosisForm(); // Clear form for the new patient
+        ClearStatus();      // Clear any previous status messages
 
         // If there's a current patient, mark as awaiting recall
         if (CurrentPatient != null && CurrentPatient.Status == TicketStatus.Called)
@@ -236,47 +242,47 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
     {
         if (CurrentPatient == null) return;
 
-        // Try to get an active Doctor or Admin user. Fallback to first user.
-        var doctor = _db.Users.FirstOrDefault(u => u.Role == UserRole.Doctor || u.Role == UserRole.SuperAdmin)
-                     ?? _db.Users.FirstOrDefault();
-        var doctorId = doctor?.Id ?? Guid.Empty;
-
-        // Create visit record
-        var visit = new Visit
+        try
         {
-            PatientId = CurrentPatient.PatientId,
-            DoctorId = doctorId,
-            Diagnosis = Diagnosis,
-            Prescriptions = Prescriptions,
-            Notes = Notes,
-            BloodPressure = BloodPressure,
-            Temperature = Temperature,
-            HeartRate = HeartRate,
-            Weight = Weight,
-            VisitDate = DateTime.Now,
-            CreatedAt = DateTime.UtcNow
-        };
+            // Try to get an active Doctor or Admin user. Fallback to first user.
+            var doctor = _db.Users.FirstOrDefault(u => u.Role == UserRole.Doctor || u.Role == UserRole.SuperAdmin)
+                         ?? _db.Users.FirstOrDefault();
+            var doctorId = doctor?.Id ?? Guid.Empty;
 
-        _db.Visits.Add(visit);
+            // Create visit record
+            var visit = new Visit
+            {
+                PatientId = CurrentPatient.PatientId,
+                DoctorId = doctorId,
+                Diagnosis = Diagnosis,
+                Prescriptions = Prescriptions,
+                Notes = Notes,
+                BloodPressure = BloodPressure,
+                Temperature = Temperature,
+                HeartRate = HeartRate,
+                Weight = Weight,
+                VisitDate = DateTime.Now,
+                CreatedAt = DateTime.UtcNow
+            };
 
-        // Complete the ticket
-        CurrentPatient.Status = TicketStatus.Completed;
-        CurrentPatient.CompletedAt = DateTime.Now;
-        _db.SaveChanges();
+            _db.Visits.Add(visit);
 
-        // Clear form
-        Diagnosis = string.Empty;
-        Prescriptions = string.Empty;
-        Notes = string.Empty;
-        BloodPressure = string.Empty;
-        Temperature = null;
-        HeartRate = null;
-        Weight = null;
-        SelectedDiagnosis = null;
-        SelectedMedication = null;
+            // Complete the ticket
+            CurrentPatient.Status = TicketStatus.Completed;
+            CurrentPatient.CompletedAt = DateTime.Now;
+            _db.SaveChanges();
 
-        LoadQueue();
-        LoadStatistics();
+            // Clear form
+            ClearDiagnosisForm();
+
+            LoadQueue();
+            LoadStatistics();
+            ShowSuccess("تمت زيارة المريض بنجاح وتم الحفظ.");
+        }
+        catch (Exception)
+        {
+            ShowError("حدث خطأ أثناء الحفظ. يرجى المحاولة مجدداً.");
+        }
     }
 
     [RelayCommand]
@@ -304,5 +310,18 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
                 Prescriptions += "\n";
             Prescriptions += value;
         }
+    }
+
+    private void ClearDiagnosisForm()
+    {
+        Diagnosis = string.Empty;
+        Prescriptions = string.Empty;
+        Notes = string.Empty;
+        BloodPressure = string.Empty;
+        Temperature = null;
+        HeartRate = null;
+        Weight = null;
+        SelectedDiagnosis = null;
+        SelectedMedication = null;
     }
 }
