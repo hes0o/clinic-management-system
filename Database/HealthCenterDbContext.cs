@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Microsoft.EntityFrameworkCore;
 using HealthCenter.Desktop.Database.Entities;
+using Serilog;
 
 namespace HealthCenter.Desktop.Database;
 
@@ -19,17 +20,45 @@ public class HealthCenterDbContext : DbContext
 
     public HealthCenterDbContext()
     {
-        // Store database in AppData folder (cross-platform)
-        var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        var healthCenterPath = Path.Combine(appDataPath, "HealthCenter");
-
-        // Create directory if it doesn't exist
-        if (!Directory.Exists(healthCenterPath))
+        try
         {
-            Directory.CreateDirectory(healthCenterPath);
-        }
+            // Store database in AppData folder (cross-platform)
+            var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var healthCenterPath = Path.Combine(appDataPath, "HealthCenter");
 
-        _dbPath = Path.Combine(healthCenterPath, "healthcenter.db");
+            // Create directory if it doesn't exist
+            if (!Directory.Exists(healthCenterPath))
+            {
+                Directory.CreateDirectory(healthCenterPath);
+            }
+
+            _dbPath = Path.Combine(healthCenterPath, "healthcenter.db");
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to initialize database path in constructor");
+            _dbPath = "healthcenter.db"; // Fallback to current directory
+        }
+    }
+
+    /// <summary>
+    /// Ensures the database is created in a safe manner and prevents raw exceptions from bubbling to the UI.
+    /// Call this from application startup where appropriate (e.g. Program.cs) instead of calling EnsureCreated() directly.
+    /// </summary>
+    public void InitializeDatabase()
+    {
+        try
+        {
+            Database.EnsureCreated();
+        }
+        catch (Exception ex)
+        {
+            // Log it using Serilog (Ahmed's LoggingService)
+            Log.Error(ex, "Database initialization failed (EnsureCreated)");
+
+            // Fallback for console if needed
+            Console.Error.WriteLine($"DB init failed: {ex.Message}");
+        }
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
