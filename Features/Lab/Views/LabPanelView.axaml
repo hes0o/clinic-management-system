@@ -30,7 +30,8 @@
                                Foreground="#1E293B" Margin="0,0,0,12"/>
                     <ListBox Grid.Row="1" ItemsSource="{Binding RequestedTests}"
                              SelectedItem="{Binding SelectedTest}"
-                             Background="Transparent">
+                             Background="Transparent"
+                             IsVisible="{Binding !HasNoTests}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Border Padding="14,10" CornerRadius="6" Background="#F8FAFC"
@@ -47,6 +48,14 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
+                    <StackPanel Grid.Row="1" IsVisible="{Binding HasNoTests}"
+                                VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8">
+                        <TextBlock Text="📋" FontSize="40" HorizontalAlignment="Center"/>
+                        <TextBlock Text="لا توجد فحوصات مطلوبة حالياً" FontSize="15"
+                                   Foreground="#94A3B8" HorizontalAlignment="Center"/>
+                        <TextBlock Text="ستظهر الفحوصات هنا عندما يطلبها الأطباء" FontSize="12"
+                                   Foreground="#CBD5E1" HorizontalAlignment="Center"/>
+                    </StackPanel>
                 </Grid>
             </Border>
 
