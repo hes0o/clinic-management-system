@@ -192,7 +192,7 @@
                                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding Patient.FullName}" 
                                                            FontWeight="Medium"/>
-                                                <TextBlock Text="{Binding Status}" 
+                                                <TextBlock Text="{Binding Status, Converter={StaticResource TicketStatusConverter}}" 
                                                            FontSize="12"
                                                            Foreground="#94A3B8"/>
                                             </StackPanel>

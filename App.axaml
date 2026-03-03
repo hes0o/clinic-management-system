@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="HealthCenter.Desktop.App"
              xmlns:local="using:HealthCenter.Desktop"
+             xmlns:converters="using:HealthCenter.Desktop.Converters"
              RequestedThemeVariant="Light">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
@@ -23,6 +24,9 @@
 		<FontFamily x:Key="ArabicFont">
 			avares://HealthCenter.Desktop/Assets/Fonts/Cairo-VariableFont_slnt,wght.ttf#Cairo
 		</FontFamily>
+
+		<!-- Converters -->
+		<converters:TicketStatusConverter x:Key="TicketStatusConverter" />
 
 		<!-- Override FluentTheme's internal brush resources for TextBox.
 		     These are used INSIDE the control template via DynamicResource,
