@@ -1,0 +1,36 @@
+using System;
+using System.Globalization;
+using Avalonia.Data.Converters;
+using HealthCenter.Desktop.Database.Entities;
+
+namespace HealthCenter.Desktop.Infrastructure.Converters;
+
+/// <summary>
+/// Converts a <see cref="TicketStatus"/> enum value to its Arabic display string.
+/// Registered as a global resource in App.axaml — use via StaticResource TicketStatusConverter.
+/// </summary>
+public class TicketStatusConverter : IValueConverter
+{
+    public static readonly TicketStatusConverter Instance = new();
+
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (value is TicketStatus status)
+        {
+            return status switch
+            {
+                TicketStatus.Waiting => "في الانتظار",
+                TicketStatus.Called => "تم النداء",
+                TicketStatus.InProgress => "قيد الفحص",
+                TicketStatus.AwaitingRecall => "بانتظار إعادة النداء",
+                TicketStatus.Completed => "منتهي",
+                TicketStatus.Present => "حاضر",
+                _ => value.ToString()
+            };
+        }
+        return value?.ToString();
+    }
+
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotImplementedException();
+}

@@ -20,7 +20,6 @@ public partial class NursePanelViewModel : HealthCenter.Desktop.ViewModels.ViewM
     [ObservableProperty] private string _temperature = string.Empty;
     [ObservableProperty] private string _heartRate = string.Empty;
     [ObservableProperty] private string _weight = string.Empty;
-    [ObservableProperty] private string _statusMessage = string.Empty;
     [ObservableProperty] private bool _hasNoPatients;
 
     public NursePanelViewModel()
@@ -46,7 +45,7 @@ public partial class NursePanelViewModel : HealthCenter.Desktop.ViewModels.ViewM
         }
         catch (Exception ex)
         {
-            StatusMessage = $"خطأ في تحميل قائمة الانتظار: {ex.Message}";
+            ShowError($"خطأ في تحميل قائمة الانتظار: {ex.Message}");
             WaitingQueue = new ObservableCollection<QueueTicket>();
             HasNoPatients = true;
         }
@@ -57,7 +56,7 @@ public partial class NursePanelViewModel : HealthCenter.Desktop.ViewModels.ViewM
     {
         if (SelectedTicket == null)
         {
-            StatusMessage = "الرجاء تحديد مريض من القائمة أولاً.";
+            ShowError("الرجاء تحديد مريض من القائمة أولاً.");
             return;
         }
 
@@ -78,7 +77,7 @@ public partial class NursePanelViewModel : HealthCenter.Desktop.ViewModels.ViewM
                 var doctor = _db.Users.FirstOrDefault(u => u.Role == UserRole.Doctor || u.Role == UserRole.SuperAdmin);
                 if (doctor == null)
                 {
-                    StatusMessage = "لا يوجد طبيب مسجّل في النظام.";
+                    ShowError("لا يوجد طبيب مسجّل في النظام.");
                     return;
                 }
 
@@ -103,7 +102,7 @@ public partial class NursePanelViewModel : HealthCenter.Desktop.ViewModels.ViewM
             SelectedTicket.Status = TicketStatus.Present;
 
             _db.SaveChanges();
-            StatusMessage = $"تم حفظ العلامات الحيوية وإرسال المريض {SelectedTicket.Patient?.FullName} إلى الطبيب";
+            ShowSuccess($"تم حفظ العلامات الحيوية وإرسال المريض {SelectedTicket.Patient?.FullName} إلى الطبيب");
 
             // Clear fields
             BloodPressure = string.Empty;
@@ -117,7 +116,7 @@ public partial class NursePanelViewModel : HealthCenter.Desktop.ViewModels.ViewM
         }
         catch (Exception ex)
         {
-            StatusMessage = $"خطأ في حفظ العلامات الحيوية: {ex.Message}";
+            ShowError($"خطأ في حفظ العلامات الحيوية: {ex.Message}");
         }
     }
 
@@ -125,7 +124,7 @@ public partial class NursePanelViewModel : HealthCenter.Desktop.ViewModels.ViewM
     private void RefreshQueue()
     {
         LoadQueue();
-        if (string.IsNullOrEmpty(StatusMessage) || !StatusMessage.StartsWith("خطأ"))
-            StatusMessage = "تم تحديث قائمة المرضى.";
+        if (!StatusMessage.StartsWith("خطأ"))
+            ShowSuccess("تم تحديث قائمة المرضى.");
     }
 }

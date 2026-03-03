@@ -1,9 +1,14 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:HealthCenter.Desktop.Features.Nurse.ViewModels"
+             xmlns:converters="using:HealthCenter.Desktop.Infrastructure.Converters"
              x:Class="HealthCenter.Desktop.Features.Nurse.Views.NursePanelView"
              x:DataType="vm:NursePanelViewModel"
              FlowDirection="RightToLeft">
+
+    <UserControl.Resources>
+        <converters:TicketStatusConverter x:Key="TicketStatusConverter"/>
+    </UserControl.Resources>
 
     <Grid RowDefinitions="Auto,*" Background="#F8FAFC">
 
@@ -45,7 +50,7 @@
                                             </Border>
                                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding Patient.FullName}" FontWeight="Medium" Foreground="#1E293B"/>
-                                                <TextBlock Text="{Binding Status}" FontSize="12" Foreground="#94A3B8"/>
+                                                <TextBlock Text="{Binding Status, Converter={StaticResource TicketStatusConverter}}" FontSize="12" Foreground="#94A3B8"/>
                                             </StackPanel>
                                         </Grid>
                                     </Border>
@@ -98,9 +103,21 @@
                             </StackPanel>
                         </Grid>
 
-                        <TextBlock Text="{Binding StatusMessage}"
-                                   Foreground="#16A34A" FontWeight="Medium"
-                                   IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                        <!-- Status message: success -->
+                        <Border IsVisible="{Binding IsError, Converter={x:Static BoolConverters.Not}}"
+                                CornerRadius="6" Padding="12,8" Margin="0,0,0,8"
+                                Background="#F0FDF4">
+                            <TextBlock Text="{Binding StatusMessage}"
+                                       IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                       Foreground="#15803D" TextWrapping="Wrap" FontWeight="Medium"/>
+                        </Border>
+                        <!-- Status message: error -->
+                        <Border CornerRadius="6" Padding="12,8" Margin="0,0,0,8"
+                                Background="#FEF2F2"
+                                IsVisible="{Binding IsError}">
+                            <TextBlock Text="{Binding StatusMessage}"
+                                       Foreground="#DC2626" TextWrapping="Wrap" FontWeight="Medium"/>
+                        </Border>
                     </StackPanel>
 
                     <Button Grid.Row="3" Content="حفظ وإرسال للطبيب"

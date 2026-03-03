@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -38,6 +39,18 @@ public partial class ReceptionViewModel : ObservableObject
     [ObservableProperty] private string? _insuranceProvider;
     [ObservableProperty] private string? _insuranceNumber;
 
+    // ── Validation Error Messages ──────────────────────────────
+    [ObservableProperty] private string _nationalIdError = string.Empty;
+    [ObservableProperty] private string _phoneNumberError = string.Empty;
+    [ObservableProperty] private string _emergencyContactError = string.Empty;
+
+    /// <summary>True when all validated fields have no outstanding errors.
+    /// Bind the Save/Register button's IsEnabled to this property.</summary>
+    public bool IsFormValid =>
+        string.IsNullOrEmpty(NationalIdError) &&
+        string.IsNullOrEmpty(PhoneNumberError) &&
+        string.IsNullOrEmpty(EmergencyContactError);
+
     // ── State ─────────────────────────────────────────────────
     [ObservableProperty] private bool _isEditMode;
     [ObservableProperty] private int _selectedTabIndex;
@@ -67,6 +80,51 @@ public partial class ReceptionViewModel : ObservableObject
     // ── Reactive search as user types ────────────────────────
     partial void OnSearchQueryChanged(string value) => RefreshSearch();
     partial void OnSelectedPatientChanged(Patient? value) => LoadSelectedPatientDetails(value);
+
+    // ── Reactive field validation ────────────────────────────────
+    partial void OnNationalIdChanged(string value)
+    {
+        NationalIdError = IsValidNationalId(value)
+            ? string.Empty
+            : string.IsNullOrEmpty(value)
+                ? string.Empty   // field may be left blank – only validated on Save
+                : "يجب أن يحتوي الرقم الوطني على أرقام فقط (11-12 خانة).";
+        OnPropertyChanged(nameof(IsFormValid));
+    }
+
+    partial void OnPhoneNumberChanged(string value)
+    {
+        PhoneNumberError = string.IsNullOrWhiteSpace(value)
+            ? string.Empty   // required check deferred to Save
+            : IsValidPhone(value)
+                ? string.Empty
+                : "رقم الهاتف غير صحيح (أرقام فقط، يمكن بدء بـ +).";
+        OnPropertyChanged(nameof(IsFormValid));
+    }
+
+    partial void OnEmergencyContactChanged(string? value)
+    {
+        EmergencyContactError = string.IsNullOrWhiteSpace(value)
+            ? string.Empty   // optional field – blank is valid
+            : IsValidPhone(value!)
+                ? string.Empty
+                : "هاتف الطوارئ غير صحيح (أرقام فقط، يمكن بدء بـ +).";
+        OnPropertyChanged(nameof(IsFormValid));
+    }
+
+    // ── Validation Helpers ──────────────────────────────────────
+    /// <summary>National ID: digits only, 11 or 12 characters.</summary>
+    private static bool IsValidNationalId(string value) =>
+        !string.IsNullOrEmpty(value) &&
+        Regex.IsMatch(value, @"^\d{11,12}$");
+
+    /// <summary>
+    /// Phone number: optional leading '+', then digits only.
+    /// Examples: 0501234567, +905001234567
+    /// </summary>
+    private static bool IsValidPhone(string value) =>
+        !string.IsNullOrEmpty(value) &&
+        Regex.IsMatch(value, @"^\+?\d+$");
 
     // ── Search ────────────────────────────────────────────────
     private void RefreshSearch()
@@ -117,13 +175,29 @@ public partial class ReceptionViewModel : ObservableObject
 
     // ── Registration: Save / Update ───────────────────────────
     [RelayCommand]
-    private void SavePatient()
+    private async Task SavePatient()
     {
+        // ── 1. Name check ────────────────────────────────────────
         if (string.IsNullOrWhiteSpace(PatientName) || PatientName.Trim().Length < 3)
         { ShowError("الاسم يجب أن يكون 3 أحرف على الأقل."); return; }
 
-        if (string.IsNullOrWhiteSpace(PhoneNumber) || PhoneNumber.Trim().Length < 9)
-        { ShowError("رقم الهاتف غير صحيح."); return; }
+        // ── 2. National ID validation (digits only, 11-12 chars) ─
+        if (!string.IsNullOrWhiteSpace(NationalId) && !IsValidNationalId(NationalId.Trim()))
+        { ShowError("الرقم الوطني يجب أن يتكون من 11-12 رقماً فقط."); return; }
+
+        // ── 3. Phone validation (digits + optional leading +) ────
+        if (string.IsNullOrWhiteSpace(PhoneNumber))
+        { ShowError("رقم الهاتف مطلوب."); return; }
+
+        if (!IsValidPhone(PhoneNumber.Trim()))
+        { ShowError("رقم الهاتف غير صحيح – أرقام فقط، يمكن بدء بـ +."); return; }
+
+        // ── 4. Emergency contact validation (optional) ───────────
+        if (!string.IsNullOrWhiteSpace(EmergencyContact) && !IsValidPhone(EmergencyContact!.Trim()))
+        { ShowError("هاتف الطوارئ غير صحيح – أرقام فقط، يمكن بدء بـ +."); return; }
+
+        // ── 5. Inline error indicators must be clear ─────────────
+        if (!IsFormValid) { ShowError("يرجى تصحيح أخطاء الإدخال قبل الحفظ."); return; }
 
         if (IsEditMode && _editingPatientId.HasValue)
         {
@@ -146,6 +220,9 @@ public partial class ReceptionViewModel : ObservableObject
             existing.UpdatedAt = DateTime.UtcNow;
 
             _db.SaveChanges();
+            // ── When you move persistence into SavePatientToDatabaseAsync,
+            //    remove the _db.SaveChanges() above and uncomment this line:
+            // await SavePatientToDatabaseAsync(existing);
             ShowSuccess("تم تحديث بيانات المريض بنجاح.");
         }
         else
@@ -174,6 +251,10 @@ public partial class ReceptionViewModel : ObservableObject
             };
             _db.Patients.Add(patient);
             _db.SaveChanges();
+            // ── When you move persistence into SavePatientToDatabaseAsync,
+            //    remove _db.Patients.Add() and _db.SaveChanges() above
+            //    and uncomment this line:
+            // await SavePatientToDatabaseAsync(patient);
 
             SelectedPatient = patient;
             ShowSuccess($"تم تسجيل المريض بنجاح.");
@@ -183,6 +264,46 @@ public partial class ReceptionViewModel : ObservableObject
         RefreshSearch();
         LoadTodayQueue();
         SelectedTabIndex = 1; // Switch to search tab
+    }
+
+    // ── Database Stub (Future-proofing) ───────────────────────────
+    /// <summary>
+    /// Asynchronous database persistence stub.
+    /// All validation has already been performed by <see cref="SavePatient"/> before this is called.
+    ///
+    /// HOW TO WIRE UP ENTITY FRAMEWORK CORE (EF Core + SQLite / SQL Server)
+    /// -------------------------------------------------------------------------
+    /// Step 1 – Inject the DbContext via constructor (already available as _db).
+    ///
+    /// Step 2 – For a NEW patient record:
+    ///   await _db.Patients.AddAsync(patient);
+    ///   await _db.SaveChangesAsync();
+    ///
+    /// Step 3 – For an EXISTING (edited) patient record:
+    ///   _db.Patients.Update(patient);
+    ///   // or: _db.Entry(patient).State = EntityState.Modified;
+    ///   await _db.SaveChangesAsync();
+    ///
+    /// Step 4 (optional) – Wrap in a transaction for multi-table writes:
+    ///   await using var tx = await _db.Database.BeginTransactionAsync();
+    ///   try { ... await _db.SaveChangesAsync(); await tx.CommitAsync(); }
+    ///   catch { await tx.RollbackAsync(); throw; }
+    ///
+    /// Step 5 (optional, raw SQLite without EF):
+    ///   using var conn = new SqliteConnection("Data Source=healthcenter.db");
+    ///   await conn.OpenAsync();
+    ///   var cmd = conn.CreateCommand();
+    ///   cmd.CommandText = "INSERT INTO Patients (...) VALUES (@name, @phone, ...);";
+    ///   cmd.Parameters.AddWithValue("@name", patient.FullName);
+    ///   // ... add remaining parameters ...
+    ///   await cmd.ExecuteNonQueryAsync();
+    /// </summary>
+    private Task SavePatientToDatabaseAsync(Patient patient)
+    {
+        // TODO: Replace this stub with your async EF Core or raw SQLite persistence logic.
+        // Until then, SavePatient() continues to use _db.SaveChanges() directly.
+        _ = patient; // suppress unused-parameter warning
+        return Task.CompletedTask;
     }
 
     // ── Queue Ticket ──────────────────────────────────────────

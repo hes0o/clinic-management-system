@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="HealthCenter.Desktop.App"
              xmlns:local="using:HealthCenter.Desktop"
+             xmlns:converters="using:HealthCenter.Desktop.Infrastructure.Converters"
              RequestedThemeVariant="Light">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
@@ -37,5 +38,8 @@
 		<SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="#9CA3AF"/>
 		<SolidColorBrush x:Key="TextControlPlaceholderForegroundPointerOver" Color="#9CA3AF"/>
 		<SolidColorBrush x:Key="TextControlPlaceholderForegroundFocused" Color="#9CA3AF"/>
+
+		<!-- ─── Value Converters (available to all views) ─────────────── -->
+		<converters:TicketStatusConverter x:Key="TicketStatusConverter"/>
 	</Application.Resources>
 </Application>
