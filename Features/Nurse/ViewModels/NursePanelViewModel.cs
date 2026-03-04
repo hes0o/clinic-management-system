@@ -148,7 +148,7 @@ public partial class NursePanelViewModel : HealthCenter.Desktop.ViewModels.ViewM
             if (decimal.TryParse(Weight, out var wt)) visit.Weight = wt;
 
             // Advance ticket status so the Doctor panel picks up the patient
-            SelectedTicket.Status = TicketStatus.Present;
+            SelectedTicket.Status = TicketStatus.ReadyForDoctor;
 
             _db.SaveChanges();
             ShowSuccess($"تم حفظ العلامات الحيوية وإرسال المريض {SelectedTicket.Patient?.FullName} إلى الطبيب");
