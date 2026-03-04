@@ -5,56 +5,19 @@
 
 ## 📋 Role Overview | نظرة عامة على الدور
 
-**English:** This sprint your job is to support the bug fixes by reviewing the database entities and ensuring the `TicketStatus` enum values have a proper Arabic display representation, so the UI can show human-readable status text instead of raw enum names like `Waiting`, `Called`, etc.
+**English:** This sprint your job is to enhance the patient history feature in the Doctor panel. You will update the database queries to include lab tests and doctor information, and build a detailed history UI so the doctor can see a patient's full medical background.
 
-**Arabic:** مهمتك في هذا السبرينت هي دعم إصلاح الأخطاء من خلال مراجعة كيانات قاعدة البيانات والتأكد من أن قيم `TicketStatus` لها تمثيل عربي مقروء، حتى لا تظهر في الواجهة بأسمائها البرمجية.
-
----
-
-## 🐛 Bug We Are Fixing
-
-**Bug 1 — Raw Status Values in UI:**  
-In the Nurse panel and Doctor panel, the ticket status shows as its raw enum name (e.g., `Waiting`, `AwaitingRecall`, `Called`) instead of a readable Arabic label. This must be fixed at the data/entity level.
+**Arabic:** مهمتك في هذا السبرينت هي تحسين ميزة سجل المريض في لوحة الطبيب. ستقوم بتحديث استعلامات قاعدة البيانات لتشمل نتائج المختبر ومعلومات الطبيب، وبناء واجهة سجل مفصلة.
 
 ---
 
-## ✅ Task 1: Add Arabic Display For `TicketStatus` Enum
-
-**Priority:** 🔴 High | **Estimated Time:** 1.5 hours  
-**File:** `/Database/Entities/QueueTicket.cs`
-
-### English Instructions:
-1. Open the file that defines the `TicketStatus` enum (likely inside `QueueTicket.cs` or a shared enums file)
-2. Add a static extension method or a `Description` attribute to map each enum value to an Arabic label
-3. The mapping should be:
-   - `Waiting` → `"في الانتظار"`
-   - `ReadyForDoctor` → `"جاهز للطبيب"`
-   - `Called` → `"تم النداء"`
-   - `InProgress` → `"قيد الفحص"`
-   - `AwaitingRecall` → `"بانتظار إعادة النداء"`
-   - `Completed` → `"منتهي"`
-   - `Present` → `"حاضر"`
-
----
-
-## ✅ Task 2: Verify No Raw Exception Leaks from DB Layer
-
-**Priority:** 🟡 Medium | **Estimated Time:** 1 hour  
-**File:** `/Database/HealthCenterDbContext.cs`
-
-### Instructions:
-1. Review any direct DB calls that might throw raw exceptions to the UI
-2. Ensure `EnsureCreated()` failures are caught and handled gracefully
-3. If there is any `try/catch` missing around migrations or seeding, add it
-
----
-
-## 🆕 Task 3: Enhance Doctor Patient History View
+## 🆕 Task 1: Enhance Doctor Patient History View
 
 **Priority:** 🔴 High | **Estimated Time:** 2 hours  
 **Files:**
 - `/Database/Entities/Visit.cs` — review structure
 - `/Features/Doctor/ViewModels/DoctorPanelViewModel.cs` — enhance `LoadPatientHistory()`
+- `/Features/Doctor/Views/DoctorPanelView.axaml` — enhance history UI
 
 ### Instructions:
 1. Review the `Visit` entity to ensure it has all necessary fields for a rich history view:
@@ -99,15 +62,12 @@ private void LoadPatientHistory(Guid patientId)
 ```
 /Database/
 ├── Entities/
-│   ├── QueueTicket.cs         ← Old
-│   └── Visit.cs               ← NEW Review
-└── HealthCenterDbContext.cs    ← Old
-
+│   └── Visit.cs               ← Review
 /Features/Doctor/
 ├── ViewModels/
-│   └── DoctorPanelViewModel.cs ← NEW Edit (LoadPatientHistory)
+│   └── DoctorPanelViewModel.cs ← Edit (LoadPatientHistory)
 └── Views/
-    └── DoctorPanelView.axaml   ← NEW Edit (History UI)
+    └── DoctorPanelView.axaml   ← Edit (History UI)
 ```
 
 ---

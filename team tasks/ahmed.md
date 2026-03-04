@@ -5,50 +5,13 @@
 
 ## 📋 Role Overview
 
-**English:** This sprint your job is to create a global error handling layer so that raw C# exceptions never appear in the UI. You will also create a reusable value converter so the team can display friendly Arabic status labels without code changes all over the place.
+**English:** This sprint your job is to add background auto-polling to the Lab and Cashier panels so they refresh automatically every 5 seconds, and to remove the manual refresh buttons from both pages.
 
-**Arabic:** مهمتك في هذا السبرينت هي إنشاء طبقة للتعامل مع الأخطاء على مستوى التطبيق كله، حتى لا تظهر أخطاء C# الخام في الواجهة. ستنشئ أيضاً محول قيم (Value Converter) قابلاً لإعادة الاستخدام لعرض الحالات بالعربية.
-
----
-
-## 🐛 Bug We Are Fixing
-
-**Bug 1 — Raw Error Messages:**  
-If any unhandled exception reaches the UI (e.g., EF Core failure, null reference, etc.), the user currently sees raw English error text or the app crashes. We need a global safety net that catches these and shows a friendly Arabic error banner.
+**Arabic:** مهمتك في هذا السبرينت هي إضافة التحديث التلقائي في الخلفية للوحة المختبر ولوحة المحاسب كل 5 ثوانٍ، وإزالة أزرار التحديث اليدوي من الصفحتين.
 
 ---
 
-## ✅ Task 1: Global Exception Handler
-
-**Priority:** 🔴 High | **Estimated Time:** 1.5 hours  
-**File:** `/Infrastructure/GlobalExceptionHandler.cs` (new file)
-
-### Instructions:
-1. Create `/Infrastructure/GlobalExceptionHandler.cs`
-2. Hook into `AppDomain.CurrentDomain.UnhandledException` and `TaskScheduler.UnobservedTaskException`
-3. When an unhandled exception occurs:
-   - Log it (console or file)
-   - Show a friendly dialog or notification to the user in Arabic
-   - Do NOT let the app crash silently
-
-4. Call `GlobalExceptionHandler.Register()` at the top of `Program.cs` before the app starts.
-
----
-
-## ✅ Task 2: Create `TicketStatusConverter` Value Converter
-
-**Priority:** 🔴 High | **Estimated Time:** 1 hour  
-**File:** `/Infrastructure/Converters/TicketStatusConverter.cs` (new file)
-
-### Instructions:
-1. Create the directory `/Infrastructure/Converters/` if it does not exist
-2. Create `TicketStatusConverter.cs` implementing `IValueConverter`
-3. It should convert a `TicketStatus` enum value to its Arabic string equivalent
-4. Register it in `App.axaml` resources so all views can use it
-
----
-
-## 🆕 Task 3: Add Auto-Polling to Lab Panel & Remove Refresh Button
+## 🆕 Task 1: Add Auto-Polling to Lab Panel & Remove Refresh Button
 
 **Priority:** 🔴 High | **Estimated Time:** 1.5 hours  
 **Files:**
@@ -93,7 +56,7 @@ private void LoadTestsSilent()
 
 ---
 
-## 🆕 Task 4: Add Auto-Polling to Cashier Panel & Remove Refresh Button
+## 🆕 Task 2: Add Auto-Polling to Cashier Panel & Remove Refresh Button
 
 **Priority:** 🔴 High | **Estimated Time:** 1.5 hours  
 **Files:**
@@ -140,25 +103,17 @@ private void LoadInvoicesSilent()
 ## 📁 Your Files
 
 ```
-/Infrastructure/
-├── GlobalExceptionHandler.cs     ← Old
-└── Converters/
-    └── TicketStatusConverter.cs  ← Old
-
 /Features/Lab/
 ├── ViewModels/
-│   └── LabPanelViewModel.cs     ← NEW Edit
+│   └── LabPanelViewModel.cs     ← Edit
 └── Views/
-    └── LabPanelView.axaml       ← NEW Edit
+    └── LabPanelView.axaml       ← Edit
 
 /Features/Cashier/
 ├── ViewModels/
-│   └── CashierPanelViewModel.cs ← NEW Edit
+│   └── CashierPanelViewModel.cs ← Edit
 └── Views/
-    └── CashierPanelView.axaml   ← NEW Edit
-
-Program.cs                        ← Old
-App.axaml                         ← Old
+    └── CashierPanelView.axaml   ← Edit
 ```
 
 ---
