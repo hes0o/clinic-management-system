@@ -334,23 +334,31 @@
                                FontWeight="SemiBold"
                                Margin="0,0,0,12"/>
 
-                    <!-- Status banner: success -->
+                    <!-- Status Banner (Success/Error) -->
+                    <!-- Success Banner -->
                     <Border Grid.Row="1" 
                             IsVisible="{Binding IsSuccessMessage}"
-                            CornerRadius="8" Padding="14,10" Margin="0,0,0,12"
+                            CornerRadius="8" 
+                            Padding="14,10" 
+                            Margin="0,0,0,12"
                             Background="#F0FDF4">
                         <TextBlock Text="{Binding StatusMessage}"
                                    Foreground="#15803D"
-                                   TextWrapping="Wrap" FontWeight="Medium"/>
+                                   TextWrapping="Wrap" 
+                                   FontWeight="Medium"/>
                     </Border>
-                    <!-- Status banner: error -->
+                    
+                    <!-- Error Banner -->
                     <Border Grid.Row="1"
                             IsVisible="{Binding IsError}"
-                            CornerRadius="8" Padding="14,10" Margin="0,0,0,12"
+                            CornerRadius="8" 
+                            Padding="14,10" 
+                            Margin="0,0,0,12"
                             Background="#FEF2F2">
                         <TextBlock Text="{Binding StatusMessage}"
                                    Foreground="#DC2626"
-                                   TextWrapping="Wrap" FontWeight="Medium"/>
+                                   TextWrapping="Wrap" 
+                                   FontWeight="Medium"/>
                     </Border>
 
                     <!-- Diagnosis -->
