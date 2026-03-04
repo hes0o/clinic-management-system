@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HealthCenter.Desktop.Database;
@@ -12,6 +13,7 @@ namespace HealthCenter.Desktop.Features.Doctor.ViewModels;
 public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.ViewModelBase
 {
     private readonly HealthCenterDbContext _db;
+    private readonly DispatcherTimer _refreshTimer;
 
     [ObservableProperty]
     private ObservableCollection<QueueTicket> _waitingPatients = new();
@@ -100,6 +102,47 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
         _db = new HealthCenterDbContext();
         LoadQueue();
         LoadStatistics();
+
+        // Setup background polling every 5 seconds
+        _refreshTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(5)
+        };
+        _refreshTimer.Tick += (sender, e) => LoadQueueSilent();
+        _refreshTimer.Start();
+    }
+
+    private void LoadQueueSilent()
+    {
+        try
+        {
+            var today = DateTime.Today;
+
+            // Load waiting patients
+            var waiting = _db.QueueTickets
+                .Include(q => q.Patient)
+                .Where(q => q.CreatedAt.Date == today &&
+                           (q.Status == TicketStatus.ReadyForDoctor || q.Status == TicketStatus.AwaitingRecall))
+                .OrderBy(q => q.Status == TicketStatus.AwaitingRecall ? 0 : 1) // Recall first
+                .ThenBy(q => q.TicketNumber)
+                .ToList();
+
+            // Only update if count changed or top ticket changed to avoid UI flickering
+            if (WaitingPatients.Count != waiting.Count || 
+                (waiting.Count > 0 && WaitingPatients.Count > 0 && waiting[0].Id != WaitingPatients[0].Id))
+            {
+                WaitingPatients = new ObservableCollection<QueueTicket>(waiting);
+                WaitingCount = waiting.Count;
+            }
+
+            // Stats
+            CompletedToday = _db.QueueTickets
+                .Count(q => q.CreatedAt.Date == today && q.Status == TicketStatus.Completed);
+        }
+        catch (Exception)
+        {
+            // Fail silently in the background
+        }
     }
 
     public void LoadQueue()

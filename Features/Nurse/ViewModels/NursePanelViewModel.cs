@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HealthCenter.Desktop.Database;
@@ -22,10 +23,46 @@ public partial class NursePanelViewModel : HealthCenter.Desktop.ViewModels.ViewM
     [ObservableProperty] private string _weight = string.Empty;
     [ObservableProperty] private bool _hasNoPatients;
 
+    private readonly DispatcherTimer _refreshTimer;
+
     public NursePanelViewModel()
     {
         _db = new HealthCenterDbContext();
         LoadQueue();
+
+        // Setup background polling every 5 seconds
+        _refreshTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(5)
+        };
+        _refreshTimer.Tick += (sender, e) => LoadQueueSilent();
+        _refreshTimer.Start();
+    }
+
+    private void LoadQueueSilent()
+    {
+        try
+        {
+            var today = DateTime.Today;
+            var tickets = _db.QueueTickets
+                .Include(q => q.Patient)
+                .Where(q => q.CreatedAt.Date == today &&
+                            (q.Status == TicketStatus.Waiting || q.Status == TicketStatus.AwaitingRecall))
+                .OrderBy(q => q.TicketNumber)
+                .ToList();
+
+            // Only update if count changed or top ticket changed to avoid UI flickering
+            if (WaitingQueue.Count != tickets.Count || 
+                (tickets.Count > 0 && WaitingQueue.Count > 0 && tickets[0].Id != WaitingQueue[0].Id))
+            {
+                WaitingQueue = new ObservableCollection<QueueTicket>(tickets);
+                HasNoPatients = WaitingQueue.Count == 0;
+            }
+        }
+        catch (Exception)
+        {
+            // Fail silently in the background
+        }
     }
 
     // Clears vitals fields whenever a different patient is selected,
