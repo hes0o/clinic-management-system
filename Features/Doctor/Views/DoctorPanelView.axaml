@@ -435,7 +435,7 @@
                                                                        IsVisible="{Binding Prescriptions, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
 
                                                             <!-- Vital Signs -->
-                                                            <StackPanel Spacing="4" IsVisible="{Binding $parent[ItemsControl].DataContext, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                                            <StackPanel Spacing="4">
                                                                 <TextBlock Text="📊 العلامات الحيوية:" FontWeight="Medium" Foreground="#374151" FontSize="11"/>
                                                                 <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" Margin="8,0,0,0">
                                                                     <TextBlock Grid.Row="0" Grid.Column="0"
@@ -445,15 +445,15 @@
                                                                     <TextBlock Grid.Row="0" Grid.Column="1"
                                                                                Text="{Binding Temperature, StringFormat='🌡️ حرارة: {0}°C'}" 
                                                                                Foreground="#6B7280" FontSize="11"
-                                                                               IsVisible="{Binding Temperature}"/>
+                                                                               IsVisible="{Binding Temperature, Converter={x:Static ObjectConverters.IsNotNull}}"/>
                                                                     <TextBlock Grid.Row="1" Grid.Column="0"
                                                                                Text="{Binding HeartRate, StringFormat='💓 نبض: {0}'}" 
                                                                                Foreground="#6B7280" FontSize="11"
-                                                                               IsVisible="{Binding HeartRate}"/>
+                                                                               IsVisible="{Binding HeartRate, Converter={x:Static ObjectConverters.IsNotNull}}"/>
                                                                     <TextBlock Grid.Row="1" Grid.Column="1"
                                                                                Text="{Binding Weight, StringFormat='⚖️ وزن: {0} كجم'}" 
                                                                                Foreground="#6B7280" FontSize="11"
-                                                                               IsVisible="{Binding Weight}"/>
+                                                                               IsVisible="{Binding Weight, Converter={x:Static ObjectConverters.IsNotNull}}"/>
                                                                 </Grid>
                                                             </StackPanel>
 
