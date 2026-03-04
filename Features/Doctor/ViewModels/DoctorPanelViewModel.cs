@@ -128,7 +128,7 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
                 .ToList();
 
             // Only update if count changed or top ticket changed to avoid UI flickering
-            if (WaitingPatients.Count != waiting.Count || 
+            if (WaitingPatients.Count != waiting.Count ||
                 (waiting.Count > 0 && WaitingPatients.Count > 0 && waiting[0].Id != WaitingPatients[0].Id))
             {
                 WaitingPatients = new ObservableCollection<QueueTicket>(waiting);

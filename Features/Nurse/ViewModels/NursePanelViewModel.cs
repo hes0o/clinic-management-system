@@ -52,7 +52,7 @@ public partial class NursePanelViewModel : HealthCenter.Desktop.ViewModels.ViewM
                 .ToList();
 
             // Only update if count changed or top ticket changed to avoid UI flickering
-            if (WaitingQueue.Count != tickets.Count || 
+            if (WaitingQueue.Count != tickets.Count ||
                 (tickets.Count > 0 && WaitingQueue.Count > 0 && tickets[0].Id != WaitingQueue[0].Id))
             {
                 WaitingQueue = new ObservableCollection<QueueTicket>(tickets);
