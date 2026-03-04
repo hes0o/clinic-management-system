@@ -41,6 +41,9 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
     private ObservableCollection<Visit> _patientHistory = new();
 
     [ObservableProperty]
+    private Visit? _selectedHistoryVisit;
+
+    [ObservableProperty]
     private bool _isHistoryExpanded = false;
 
     // Task 2: Enhanced Diagnosis - Common Diagnoses
@@ -188,12 +191,15 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
     private void LoadPatientHistory(Guid patientId)
     {
         var history = _db.Visits
+            .Include(v => v.Doctor)
+            .Include(v => v.LabTests)
             .Where(v => v.PatientId == patientId)
             .OrderByDescending(v => v.VisitDate)
             .Take(10)
             .ToList();
 
         PatientHistory = new ObservableCollection<Visit>(history);
+        SelectedHistoryVisit = null;
     }
 
     // Task 3: Load Statistics
