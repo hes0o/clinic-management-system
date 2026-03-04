@@ -28,6 +28,18 @@ public partial class NursePanelViewModel : HealthCenter.Desktop.ViewModels.ViewM
         LoadQueue();
     }
 
+    // Clears vitals fields whenever a different patient is selected,
+    // so the nurse cannot accidentally submit stale data from the previous patient.
+    partial void OnSelectedTicketChanged(QueueTicket? value)
+    {
+        BloodPressure = string.Empty;
+        Temperature = string.Empty;
+        HeartRate = string.Empty;
+        Weight = string.Empty;
+        StatusMessage = string.Empty;
+        IsError = false;
+    }
+
     private void LoadQueue()
     {
         try
