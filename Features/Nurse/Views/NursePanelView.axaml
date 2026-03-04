@@ -19,9 +19,6 @@
                     <TextBlock Text="لوحة التمريض" FontSize="20" FontWeight="Bold" Foreground="#1E293B"/>
                     <TextBlock Text="استقبال المرضى وتسجيل العلامات الحيوية" FontSize="13" Foreground="#64748B"/>
                 </StackPanel>
-                <Button Grid.Column="1" Content="تحديث" Command="{Binding RefreshQueueCommand}"
-                        Padding="14,8" CornerRadius="6"
-                        Background="#2563EB" Foreground="White"/>
             </Grid>
         </Border>
 

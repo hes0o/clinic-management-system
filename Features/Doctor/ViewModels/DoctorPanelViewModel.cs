@@ -322,13 +322,6 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
         LoadStatistics();
     }
 
-    [RelayCommand]
-    private void Refresh()
-    {
-        LoadQueue();
-        LoadStatistics();
-    }
-
     // Task 2: Add selected diagnosis to diagnosis field
     partial void OnSelectedDiagnosisChanged(string? value)
     {

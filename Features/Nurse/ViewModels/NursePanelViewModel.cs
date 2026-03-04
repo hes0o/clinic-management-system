@@ -168,12 +168,4 @@ public partial class NursePanelViewModel : HealthCenter.Desktop.ViewModels.ViewM
             ShowError($"خطأ في حفظ العلامات الحيوية: {ex.Message}");
         }
     }
-
-    [RelayCommand]
-    private void RefreshQueue()
-    {
-        LoadQueue();
-        if (!StatusMessage.StartsWith("خطأ"))
-            ShowSuccess("تم تحديث قائمة المرضى.");
-    }
 }
