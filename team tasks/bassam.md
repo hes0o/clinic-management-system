@@ -28,32 +28,12 @@ In the Nurse panel and Doctor panel, the ticket status shows as its raw enum nam
 2. Add a static extension method or a `Description` attribute to map each enum value to an Arabic label
 3. The mapping should be:
    - `Waiting` → `"في الانتظار"`
+   - `ReadyForDoctor` → `"جاهز للطبيب"`
    - `Called` → `"تم النداء"`
    - `InProgress` → `"قيد الفحص"`
    - `AwaitingRecall` → `"بانتظار إعادة النداء"`
    - `Completed` → `"منتهي"`
    - `Present` → `"حاضر"`
-
-### Code Example:
-```csharp
-public static class TicketStatusExtensions
-{
-    public static string ToArabic(this TicketStatus status) => status switch
-    {
-        TicketStatus.Waiting        => "في الانتظار",
-        TicketStatus.Called         => "تم النداء",
-        TicketStatus.InProgress     => "قيد الفحص",
-        TicketStatus.AwaitingRecall => "بانتظار إعادة النداء",
-        TicketStatus.Completed      => "منتهي",
-        TicketStatus.Present        => "حاضر",
-        _                           => status.ToString()
-    };
-}
-```
-
-Place this class in the same file as `TicketStatus`, or in a new file `/Database/Entities/EnumExtensions.cs`.
-
-> **Note:** The UI team (Wissam, Ela) will then use `{Binding Status}` differently — coordinate with them to use `ToArabic()` in a value converter or by exposing a computed property.
 
 ---
 
@@ -62,24 +42,72 @@ Place this class in the same file as `TicketStatus`, or in a new file `/Database
 **Priority:** 🟡 Medium | **Estimated Time:** 1 hour  
 **File:** `/Database/HealthCenterDbContext.cs`
 
-### English Instructions:
+### Instructions:
 1. Review any direct DB calls that might throw raw exceptions to the UI
 2. Ensure `EnsureCreated()` failures are caught and handled gracefully
 3. If there is any `try/catch` missing around migrations or seeding, add it
-4. Any caught exception should be logged (if logging is set up by Ahmed) — do NOT rethrow raw exceptions to the UI
+
+---
+
+## 🆕 Task 3: Enhance Doctor Patient History View
+
+**Priority:** 🔴 High | **Estimated Time:** 2 hours  
+**Files:**
+- `/Database/Entities/Visit.cs` — review structure
+- `/Features/Doctor/ViewModels/DoctorPanelViewModel.cs` — enhance `LoadPatientHistory()`
+
+### Instructions:
+1. Review the `Visit` entity to ensure it has all necessary fields for a rich history view:
+   - `VisitDate`, `Diagnosis`, `Prescriptions`, `Notes`
+   - `BloodPressure`, `Temperature`, `HeartRate`, `Weight`
+   - Navigation properties: `Doctor` (User), `Nurse` (User), `LabTests` (collection)
+2. Open `DoctorPanelViewModel.cs` and enhance `LoadPatientHistory()`:
+   - Currently it only loads the last 10 visits with basic data
+   - **Include** the `Doctor` navigation property so the history shows which doctor saw the patient
+   - **Include** the `LabTests` collection so the doctor can see past lab results
+3. Add a new observable property `SelectedHistoryVisit` (type `Visit?`) so the doctor can click a past visit and see its full details
+4. After the doctor calls a patient (`CallNext()` / `CallSpecific()`), the history should automatically load
 
 ### Code Example:
 ```csharp
-try
+private void LoadPatientHistory(Guid patientId)
 {
-    _db.Database.EnsureCreated();
+    var history = _db.Visits
+        .Include(v => v.Doctor)
+        .Include(v => v.LabTests)
+        .Where(v => v.PatientId == patientId)
+        .OrderByDescending(v => v.VisitDate)
+        .Take(10)
+        .ToList();
+
+    PatientHistory = new ObservableCollection<Visit>(history);
 }
-catch (Exception ex)
-{
-    // Log it (use Ahmed's LoggingService when available)
-    Console.Error.WriteLine($"DB init failed: {ex.Message}");
-    // Show user-friendly message via ShowError()
-}
+```
+
+5. In `DoctorPanelView.axaml`, enhance the history section to show:
+   - Visit date
+   - Doctor name
+   - Diagnosis
+   - Prescriptions
+   - Vital signs (if recorded)
+   - Any lab tests requested during that visit
+
+---
+
+## 📁 Your Files
+
+```
+/Database/
+├── Entities/
+│   ├── QueueTicket.cs         ← Old
+│   └── Visit.cs               ← NEW Review
+└── HealthCenterDbContext.cs    ← Old
+
+/Features/Doctor/
+├── ViewModels/
+│   └── DoctorPanelViewModel.cs ← NEW Edit (LoadPatientHistory)
+└── Views/
+    └── DoctorPanelView.axaml   ← NEW Edit (History UI)
 ```
 
 ---
@@ -88,31 +116,22 @@ catch (Exception ex)
 
 | Rule | Description |
 |------|-------------|
-| **Your Branch** | `feature/database` |
-| **Work Directory** | `/Database` folder ONLY |
-| **Merge To** | `develop` (via PR) |
+| **Your Branch** | `feature/patient-history` |
+| **Work Directory** | `/Database` + `/Features/Doctor` (history UI only) |
+| **Merge To** | `main` (via PR) |
 | **Requires** | Hassan's approval |
 
 ```bash
-git checkout feature/database
-git pull origin develop
-# ... do your work ...
+git checkout -b feature/patient-history
+git pull origin main
 git add .
-git commit -m "fix(db): add Arabic display for TicketStatus enum"
-git push origin feature/database
+git commit -m "feat(doctor): enhance patient history with lab tests and doctor info"
+git push origin feature/patient-history
 ```
 
 ---
 
-## ⚠️ Important Notes
-
-- Do NOT edit files outside `/Database`
-- Always test with `dotnet build` before committing
-- Coordinate with Wissam and Ela on how they will consume the `ToArabic()` extension
-
 ## 🧹 Code Formatting Rule (Mandatory)
-
-> **A GitHub Action called "Clean Code Enforcer" will automatically reject your push if your code is not properly formatted.**
 
 Before **every** `git push`, you MUST run:
 
@@ -120,14 +139,12 @@ Before **every** `git push`, you MUST run:
 dotnet format HealthCenter.Desktop.csproj
 ```
 
-This auto-fixes all whitespace and formatting issues. If you skip this step your PR will **fail the CI check** and be blocked from merging.
-
 ```bash
 # ✅ Full workflow before pushing:
 dotnet format HealthCenter.Desktop.csproj
 git add .
 git commit -m "your message"
-git push origin feature/database
+git push origin feature/patient-history
 ```
 
 ---

@@ -53,8 +53,6 @@ partial void OnSelectedTicketChanged(QueueTicket? value)
 }
 ```
 
-> **Note:** `ObservableProperty` automatically generates the `OnSelectedTicketChanged` partial method. You just need to implement it.
-
 ---
 
 ## ✅ Task 2: Fix Error/Success Display in Nurse Panel
@@ -65,58 +63,13 @@ partial void OnSelectedTicketChanged(QueueTicket? value)
 - `/Features/Nurse/Views/NursePanelView.axaml`
 
 ### Instructions (ViewModel):
-1. Make sure `NursePanelViewModel` inherits from `ViewModelBase` (pull `develop` to get Hassan's updated base class with `ShowError`/`ShowSuccess`/`IsError`)
+1. Make sure `NursePanelViewModel` inherits from `ViewModelBase`
 2. Replace all direct `StatusMessage = "..."` assignments with:
    - `ShowSuccess("...")` for success cases
    - `ShowError("...")` for error/warning cases
 
-### What to change in `SaveVitals()`:
-```csharp
-// BEFORE:
-StatusMessage = "الرجاء تحديد مريض من القائمة أولاً.";
-// AFTER:
-ShowError("الرجاء تحديد مريض من القائمة أولاً.");
-
-// BEFORE:
-StatusMessage = "لا يوجد طبيب مسجّل في النظام.";
-// AFTER:
-ShowError("لا يوجد طبيب مسجّل في النظام.");
-
-// BEFORE:
-StatusMessage = $"تم حفظ العلامات الحيوية للمريض: {SelectedTicket.Patient?.FullName}";
-// AFTER:
-ShowSuccess($"تم حفظ العلامات الحيوية للمريض: {SelectedTicket.Patient?.FullName}");
-
-// In RefreshQueue():
-// BEFORE:
-StatusMessage = "تم تحديث قائمة المرضى.";
-// AFTER:
-ShowSuccess("تم تحديث قائمة المرضى.");
-```
-
 ### Instructions (XAML):
-Replace the single green `TextBlock` with two separate bordered banners — one for success, one for error (same pattern as Reception view):
-
-```xml
-<!-- Success Banner -->
-<Border IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
-        CornerRadius="6" Padding="12,8" Margin="0,0,0,8"
-        Background="#F0FDF4"
-        IsVisible="{Binding IsError, Converter={x:Static BoolConverters.Not}}">
-    <TextBlock Text="{Binding StatusMessage}"
-               Foreground="#15803D" TextWrapping="Wrap" FontWeight="Medium"/>
-</Border>
-
-<!-- Error Banner -->
-<Border CornerRadius="6" Padding="12,8" Margin="0,0,0,8"
-        Background="#FEF2F2"
-        IsVisible="{Binding IsError}">
-    <TextBlock Text="{Binding StatusMessage}"
-               Foreground="#DC2626" TextWrapping="Wrap" FontWeight="Medium"/>
-</Border>
-```
-
-Place these banners just **above** the vitals fields grid (after the patient name label).
+Replace the single green `TextBlock` with two separate bordered banners — one for success, one for error.
 
 ---
 
@@ -126,16 +79,7 @@ Place these banners just **above** the vitals fields grid (after the patient nam
 **File:** `/Features/Nurse/Views/NursePanelView.axaml`
 
 ### Instructions:
-Coordinate with Ahmed — he will create a `TicketStatusConverter`. Once it's available, use it on the status text in the patient list:
-
-```xml
-<!-- BEFORE: -->
-<TextBlock Text="{Binding Status}" FontSize="12" Foreground="#94A3B8"/>
-
-<!-- AFTER: -->
-<TextBlock Text="{Binding Status, Converter={StaticResource TicketStatusConverter}}"
-           FontSize="12" Foreground="#94A3B8"/>
-```
+Use Ahmed's `TicketStatusConverter` on the status text in the patient list.
 
 ---
 
@@ -144,14 +88,30 @@ Coordinate with Ahmed — he will create a `TicketStatusConverter`. Once it's av
 **Priority:** 🟡 Medium | **Estimated Time:** 30 minutes  
 **File:** `/Features/Reception/Views/ReceptionView.axaml`
 
-The Reception view already has a good error/success pattern. Your job is to:
-1. Verify the success border (`Background="#F0FDF4"`) has `IsVisible` bound to both `StatusMessage IsNotNullOrEmpty` AND `IsError = false` (right now it always shows when there's a message, even if it's an error)
-2. Compare with the current AXAML and fix if needed:
-```xml
-<!-- Success border should only show when NOT an error: -->
-<Border IsVisible="{Binding IsError, Converter={x:Static BoolConverters.Not}}"
-        ...>
+The Reception view already has a good error/success pattern. Verify it works correctly.
+
+---
+
+## 🆕 Task 5: Add Auto-Polling to Reception Panel & Remove Refresh Button
+
+**Priority:** 🔴 High | **Estimated Time:** 1 hour  
+**Files:**
+- `/Features/Reception/ViewModels/ReceptionViewModel.cs`
+- `/Features/Reception/Views/ReceptionView.axaml`
+
+### Instructions:
+1. Open `ReceptionViewModel.cs`
+2. Add `using Avalonia.Threading;` at the top
+3. Add a `private readonly DispatcherTimer _refreshTimer;` field
+4. In the constructor, initialize the timer to poll every 5 seconds:
+```csharp
+_refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+_refreshTimer.Tick += (s, e) => LoadQueueSilent();
+_refreshTimer.Start();
 ```
+5. Create a `LoadQueueSilent()` method that silently re-queries the today's queue from the database (same query as `LoadQueue()`) but does NOT show a status message. Only update the `ObservableCollection` if the count changed.
+6. Remove the `RefreshQueueCommand` relay command method entirely
+7. The refresh button has already been removed from the AXAML — verify it is gone
 
 ---
 
@@ -165,8 +125,10 @@ The Reception view already has a good error/success pattern. Your job is to:
     └── NursePanelView.axaml     ← Edit
 
 /Features/Reception/
+├── ViewModels/
+│   └── ReceptionViewModel.cs    ← Edit
 └── Views/
-    └── ReceptionView.axaml      ← Verify/Edit
+    └── ReceptionView.axaml      ← Verify
 ```
 
 ---
@@ -175,31 +137,22 @@ The Reception view already has a good error/success pattern. Your job is to:
 
 | Rule | Description |
 |------|-------------|
-| **Your Branch** | `feature/reception` |
+| **Your Branch** | `feature/reception-polling` |
 | **Work Directory** | `/Features/Nurse` + `/Features/Reception` |
-| **Merge To** | `develop` (via PR) |
+| **Merge To** | `main` (via PR) |
 | **Requires** | Hassan's approval |
 
 ```bash
-git checkout feature/reception
-git pull origin develop
+git checkout -b feature/reception-polling
+git pull origin main
 git add .
-git commit -m "fix(nurse): clear vitals on patient switch + fix error/success display"
-git push origin feature/reception
+git commit -m "feat(reception): add auto-polling + remove refresh button"
+git push origin feature/reception-polling
 ```
 
 ---
 
-## ⚠️ Important Notes
-
-- **Pull `develop` first** to get Hassan's `ViewModelBase` with `ShowError`/`ShowSuccess`/`IsError`
-- **Test Task 1** by: selecting patient A → typing vitals → clicking a different patient → verify all fields are empty
-- **Test Task 2** by: clicking "حفظ" with no patient selected → verify message is RED not green
-- Do not modify files outside `/Features/Nurse` and `/Features/Reception`
-
 ## 🧹 Code Formatting Rule (Mandatory)
-
-> **A GitHub Action called "Clean Code Enforcer" will automatically reject your push if your code is not properly formatted.**
 
 Before **every** `git push`, you MUST run:
 
@@ -207,14 +160,12 @@ Before **every** `git push`, you MUST run:
 dotnet format HealthCenter.Desktop.csproj
 ```
 
-This auto-fixes all whitespace and formatting issues. If you skip this step your PR will **fail the CI check** and be blocked from merging.
-
 ```bash
 # ✅ Full workflow before pushing:
 dotnet format HealthCenter.Desktop.csproj
 git add .
 git commit -m "your message"
-git push origin feature/reception
+git push origin feature/reception-polling
 ```
 
 ---

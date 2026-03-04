@@ -31,39 +31,6 @@ If any unhandled exception reaches the UI (e.g., EF Core failure, null reference
    - Show a friendly dialog or notification to the user in Arabic
    - Do NOT let the app crash silently
 
-### Code Example:
-```csharp
-public static class GlobalExceptionHandler
-{
-    public static void Register()
-    {
-        AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
-        {
-            var ex = args.ExceptionObject as Exception;
-            Console.Error.WriteLine($"[FATAL] {ex?.Message}");
-            // Show a friendly Avalonia dialog
-            ShowFriendlyError("حدث خطأ غير متوقع. يرجى إعادة تشغيل التطبيق.");
-        };
-
-        TaskScheduler.UnobservedTaskException += (sender, args) =>
-        {
-            Console.Error.WriteLine($"[TASK ERROR] {args.Exception.Message}");
-            args.SetObserved(); // prevent crash
-        };
-    }
-
-    private static void ShowFriendlyError(string message)
-    {
-        // Use Avalonia dispatcher to show on UI thread
-        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
-        {
-            // Show a MessageBox or update a global status bar
-            Console.WriteLine($"UI Error: {message}");
-        });
-    }
-}
-```
-
 4. Call `GlobalExceptionHandler.Register()` at the top of `Program.cs` before the app starts.
 
 ---
@@ -79,51 +46,94 @@ public static class GlobalExceptionHandler
 3. It should convert a `TicketStatus` enum value to its Arabic string equivalent
 4. Register it in `App.axaml` resources so all views can use it
 
-### Code Example:
+---
+
+## 🆕 Task 3: Add Auto-Polling to Lab Panel & Remove Refresh Button
+
+**Priority:** 🔴 High | **Estimated Time:** 1.5 hours  
+**Files:**
+- `/Features/Lab/ViewModels/LabPanelViewModel.cs`
+- `/Features/Lab/Views/LabPanelView.axaml`
+
+### Instructions:
+1. Open `LabPanelViewModel.cs`
+2. Add `using Avalonia.Threading;` at the top
+3. Add a `private readonly DispatcherTimer _refreshTimer;` field
+4. In the constructor, initialize the timer to poll every 5 seconds:
 ```csharp
-using System;
-using System.Globalization;
-using Avalonia.Data.Converters;
-using HealthCenter.Desktop.Database.Entities;
-
-public class TicketStatusConverter : IValueConverter
+_refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+_refreshTimer.Tick += (s, e) => LoadTestsSilent();
+_refreshTimer.Start();
+```
+5. Create a `LoadTestsSilent()` method that silently re-queries lab tests from the database (same query as `LoadTests()`) but does NOT show any status message and only updates the collection if the count changed (to prevent UI flickering):
+```csharp
+private void LoadTestsSilent()
 {
-    public static readonly TicketStatusConverter Instance = new();
-
-    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    try
     {
-        if (value is TicketStatus status)
-        {
-            return status switch
-            {
-                TicketStatus.Waiting        => "في الانتظار",
-                TicketStatus.Called         => "تم النداء",
-                TicketStatus.InProgress     => "قيد الفحص",
-                TicketStatus.AwaitingRecall => "بانتظار إعادة النداء",
-                TicketStatus.Completed      => "منتهي",
-                TicketStatus.Present        => "حاضر",
-                _                           => value.ToString()
-            };
-        }
-        return value?.ToString();
-    }
+        var tests = _db.LabTests
+            .Include(t => t.Patient)
+            .Include(t => t.RequestedBy)
+            .Where(t => t.Status != LabTestStatus.Completed)
+            .OrderByDescending(t => t.RequestedAt)
+            .ToList();
 
-    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-        => throw new NotImplementedException();
+        if (RequestedTests.Count != tests.Count)
+        {
+            RequestedTests = new ObservableCollection<LabTest>(tests);
+            HasNoTests = RequestedTests.Count == 0;
+        }
+    }
+    catch (Exception) { /* Fail silently */ }
 }
 ```
+6. **Delete** the `RefreshTests()` relay command method entirely
+7. Open `LabPanelView.axaml` and **remove** the refresh button (`تحديث`) from the header (line 17)
+8. Also remove the local `_statusMessage` field if it shadows `ViewModelBase.StatusMessage`. Use `ShowError()` and `ShowSuccess()` from the base class instead.
 
-5. Register in `App.axaml`:
-```xml
-<Application.Resources>
-    <converters:TicketStatusConverter x:Key="TicketStatusConverter"/>
-</Application.Resources>
-```
+---
 
-6. Document usage for the team — they use it in XAML like:
-```xml
-<TextBlock Text="{Binding Status, Converter={StaticResource TicketStatusConverter}}"/>
+## 🆕 Task 4: Add Auto-Polling to Cashier Panel & Remove Refresh Button
+
+**Priority:** 🔴 High | **Estimated Time:** 1.5 hours  
+**Files:**
+- `/Features/Cashier/ViewModels/CashierPanelViewModel.cs`
+- `/Features/Cashier/Views/CashierPanelView.axaml`
+
+### Instructions:
+1. Open `CashierPanelViewModel.cs`
+2. Add `using Avalonia.Threading;` at the top
+3. Add a `private readonly DispatcherTimer _refreshTimer;` field
+4. In the constructor, initialize the timer to poll every 5 seconds:
+```csharp
+_refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+_refreshTimer.Tick += (s, e) => LoadInvoicesSilent();
+_refreshTimer.Start();
 ```
+5. Create a `LoadInvoicesSilent()` method that silently re-queries pending invoices from the database (same query as `LoadInvoices()`) but does NOT show a status message and only updates the collection if the count changed:
+```csharp
+private void LoadInvoicesSilent()
+{
+    try
+    {
+        var invoices = _db.Invoices
+            .Include(i => i.Patient)
+            .Where(i => i.Status == InvoiceStatus.Pending)
+            .OrderByDescending(i => i.CreatedAt)
+            .ToList();
+
+        if (PendingInvoices.Count != invoices.Count)
+        {
+            PendingInvoices = new ObservableCollection<Invoice>(invoices);
+            HasNoInvoices = PendingInvoices.Count == 0;
+        }
+    }
+    catch (Exception) { /* Fail silently */ }
+}
+```
+6. **Delete** the `RefreshInvoices()` relay command method entirely
+7. Open `CashierPanelView.axaml` and **remove** the refresh button (`تحديث`) from the header (line 17)
+8. Also remove the local `_statusMessage` field if it shadows `ViewModelBase.StatusMessage`. Use `ShowError()` and `ShowSuccess()` from the base class instead.
 
 ---
 
@@ -131,12 +141,24 @@ public class TicketStatusConverter : IValueConverter
 
 ```
 /Infrastructure/
-├── GlobalExceptionHandler.cs     ← Create
+├── GlobalExceptionHandler.cs     ← Old
 └── Converters/
-    └── TicketStatusConverter.cs  ← Create
+    └── TicketStatusConverter.cs  ← Old
 
-Program.cs                        ← Edit (register handler)
-App.axaml                         ← Edit (register converter)
+/Features/Lab/
+├── ViewModels/
+│   └── LabPanelViewModel.cs     ← NEW Edit
+└── Views/
+    └── LabPanelView.axaml       ← NEW Edit
+
+/Features/Cashier/
+├── ViewModels/
+│   └── CashierPanelViewModel.cs ← NEW Edit
+└── Views/
+    └── CashierPanelView.axaml   ← NEW Edit
+
+Program.cs                        ← Old
+App.axaml                         ← Old
 ```
 
 ---
@@ -145,21 +167,22 @@ App.axaml                         ← Edit (register converter)
 
 | Rule | Description |
 |------|-------------|
-| **Branch** | `feature/infrastructure` |
-| **Directory** | `/Infrastructure` + `App.axaml` + `Program.cs` |
-| **Merge To** | `develop` (via PR) |
+| **Your Branch** | `feature/lab-cashier-polling` |
+| **Work Directory** | `/Features/Lab` + `/Features/Cashier` |
+| **Merge To** | `main` (via PR) |
+| **Requires** | Hassan's approval |
 
 ```bash
-git checkout feature/infrastructure
-git pull origin develop
+git checkout -b feature/lab-cashier-polling
+git pull origin main
 git add .
-git commit -m "feat(infra): global error handler + TicketStatus value converter"
-git push origin feature/infrastructure
+git commit -m "feat(lab+cashier): add auto-polling + remove refresh buttons"
+git push origin feature/lab-cashier-polling
 ```
 
-## 🧹 Code Formatting Rule (Mandatory)
+---
 
-> **A GitHub Action called "Clean Code Enforcer" will automatically reject your push if your code is not properly formatted.**
+## 🧹 Code Formatting Rule (Mandatory)
 
 Before **every** `git push`, you MUST run:
 
@@ -167,16 +190,14 @@ Before **every** `git push`, you MUST run:
 dotnet format HealthCenter.Desktop.csproj
 ```
 
-This auto-fixes all whitespace and formatting issues. If you skip this step your PR will **fail the CI check** and be blocked from merging.
-
 ```bash
 # ✅ Full workflow before pushing:
 dotnet format HealthCenter.Desktop.csproj
 git add .
 git commit -m "your message"
-git push origin feature/infrastructure
+git push origin feature/lab-cashier-polling
 ```
 
 ---
 
-**Questions?** Ask Hassan
+**Questions?** Ask Hassan (Team Lead)
