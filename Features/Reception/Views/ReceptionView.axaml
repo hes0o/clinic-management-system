@@ -65,17 +65,14 @@
                                    IsVisible="{Binding IsEditMode}"
                                    FontSize="17" FontWeight="Bold" Foreground="#2563EB"/>
 
-                        <!-- Status message: success
-                             Outer Panel: hide entirely when StatusMessage is empty.
-                             Inner Border: hide when IsError is true (shows only on success). -->
-                        <Panel IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                            <Border IsVisible="{Binding IsError, Converter={x:Static BoolConverters.Not}}"
-                                    CornerRadius="6" Padding="12,8"
-                                    Background="#F0FDF4">
-                                <TextBlock Text="{Binding StatusMessage}"
-                                           Foreground="#15803D" TextWrapping="Wrap"/>
-                            </Border>
-                        </Panel>
+                        <!-- Status message: success -->
+                        <Border IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                CornerRadius="6" Padding="12,8"
+                                Background="#F0FDF4">
+                            <TextBlock Text="{Binding StatusMessage}"
+                                       IsVisible="{Binding IsError, Converter={x:Static BoolConverters.Not}}"
+                                       Foreground="#15803D" TextWrapping="Wrap"/>
+                        </Border>
                         <!-- Status message: error -->
                         <Border IsVisible="{Binding IsError}"
                                 CornerRadius="6" Padding="12,8"
@@ -93,19 +90,19 @@
                         <!-- National ID -->
                         <StackPanel Spacing="4">
                             <TextBlock Text="الرقم الوطني / الإقامة" Foreground="#374151" FontWeight="Medium"/>
-                            <TextBox Text="{Binding NationalId}" Watermark="1090123456" MaxLength="12"/>
+                            <TextBox Text="{Binding NationalId}" Watermark="1090123456"/>
                         </StackPanel>
 
                         <!-- Phone -->
                         <StackPanel Spacing="4">
                             <TextBlock Text="رقم الهاتف *" Foreground="#374151" FontWeight="Medium"/>
-                            <TextBox Text="{Binding PhoneNumber}" Watermark="0501234567" MaxLength="15"/>
+                            <TextBox Text="{Binding PhoneNumber}" Watermark="0501234567"/>
                         </StackPanel>
 
                         <!-- Emergency Contact -->
                         <StackPanel Spacing="4">
                             <TextBlock Text="هاتف الطوارئ" Foreground="#374151" FontWeight="Medium"/>
-                            <TextBox Text="{Binding EmergencyContact}" Watermark="05xxxxxxxx" MaxLength="15"/>
+                            <TextBox Text="{Binding EmergencyContact}" Watermark="05xxxxxxxx"/>
                         </StackPanel>
 
                         <!-- Gender + Blood Type row -->
