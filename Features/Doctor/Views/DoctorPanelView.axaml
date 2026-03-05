@@ -469,28 +469,88 @@
                                       CornerRadius="12"
                                       Background="#FEF3C7">
                                 <Border Background="White" CornerRadius="8" Padding="12" Margin="0,8,0,0">
-                                    <ScrollViewer MaxHeight="300">
+                                    <ScrollViewer MaxHeight="400">
                                         <ItemsControl ItemsSource="{Binding PatientHistory}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
                                                     <Border Background="#F8FAFC" 
                                                             CornerRadius="8" 
                                                             Padding="12"
-                                                            Margin="0,0,0,8">
+                                                            Margin="0,0,0,12"
+                                                            BorderBrush="#E5E7EB"
+                                                            BorderThickness="1"
+                                                            Cursor="Hand">
                                                         <StackPanel Spacing="8">
-                                                            <TextBlock Text="{Binding VisitDate, StringFormat='📅 {0:yyyy/MM/dd HH:mm}'}"
-                                                                       FontWeight="Bold" 
-                                                                       Foreground="#3B82F6"
-                                                                       FontSize="14"/>
-                                                            <TextBlock Text="{Binding Diagnosis, StringFormat='🩺 {0}'}" 
+                                                            <!-- Visit Date and Doctor -->
+                                                            <Grid ColumnDefinitions="*,*">
+                                                                <StackPanel Grid.Column="0" Spacing="4">
+                                                                    <TextBlock Text="{Binding VisitDate, StringFormat='📅 {0:yyyy/MM/dd HH:mm}'}"
+                                                                               FontWeight="Bold" 
+                                                                               Foreground="#3B82F6"
+                                                                               FontSize="14"/>
+                                                                </StackPanel>
+                                                                <TextBlock Grid.Column="1"
+                                                                           Text="{Binding Doctor.FullName, StringFormat='👨‍⚕️ د. {0}'}" 
+                                                                           TextWrapping="Wrap"
+                                                                           Foreground="#059669"
+                                                                           FontSize="12"
+                                                                           TextAlignment="Right"/>
+                                                            </Grid>
+
+                                                            <!-- Diagnosis -->
+                                                            <TextBlock Text="{Binding Diagnosis, StringFormat='🩺 التشخيص: {0}'}" 
                                                                        TextWrapping="Wrap"
                                                                        Foreground="#1E293B"
-                                                                       FontSize="13"/>
-                                                            <TextBlock Text="{Binding Prescriptions, StringFormat='💊 {0}'}" 
+                                                                       FontSize="13"
+                                                                       IsVisible="{Binding Diagnosis, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+
+                                                            <!-- Prescriptions -->
+                                                            <TextBlock Text="{Binding Prescriptions, StringFormat='💊 الأدوية: {0}'}" 
                                                                        Foreground="#64748B" 
                                                                        FontSize="12"
-                                                                       TextWrapping="Wrap"/>
-                                                            <TextBlock Text="{Binding Notes, StringFormat='📝 {0}'}" 
+                                                                       TextWrapping="Wrap"
+                                                                       IsVisible="{Binding Prescriptions, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+
+                                                            <!-- Vital Signs -->
+                                                            <StackPanel Spacing="4">
+                                                                <TextBlock Text="📊 العلامات الحيوية:" FontWeight="Medium" Foreground="#374151" FontSize="11"/>
+                                                                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" Margin="8,0,0,0">
+                                                                    <TextBlock Grid.Row="0" Grid.Column="0"
+                                                                               Text="{Binding BloodPressure, StringFormat='🩸 ضغط: {0}'}" 
+                                                                               Foreground="#6B7280" FontSize="11"
+                                                                               IsVisible="{Binding BloodPressure, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                                                                    <TextBlock Grid.Row="0" Grid.Column="1"
+                                                                               Text="{Binding Temperature, StringFormat='🌡️ حرارة: {0}°C'}" 
+                                                                               Foreground="#6B7280" FontSize="11"
+                                                                               IsVisible="{Binding Temperature, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                                                                    <TextBlock Grid.Row="1" Grid.Column="0"
+                                                                               Text="{Binding HeartRate, StringFormat='💓 نبض: {0}'}" 
+                                                                               Foreground="#6B7280" FontSize="11"
+                                                                               IsVisible="{Binding HeartRate, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                                                                    <TextBlock Grid.Row="1" Grid.Column="1"
+                                                                               Text="{Binding Weight, StringFormat='⚖️ وزن: {0} كجم'}" 
+                                                                               Foreground="#6B7280" FontSize="11"
+                                                                               IsVisible="{Binding Weight, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                                                                </Grid>
+                                                            </StackPanel>
+
+                                                            <!-- Lab Tests -->
+                                                            <StackPanel Spacing="4" IsVisible="{Binding LabTests.Count}">
+                                                                <TextBlock Text="🧪 اختبارات المختبر:" FontWeight="Medium" Foreground="#374151" FontSize="11"/>
+                                                                <ItemsControl ItemsSource="{Binding LabTests}" Margin="8,0,0,0">
+                                                                    <ItemsControl.ItemTemplate>
+                                                                        <DataTemplate>
+                                                                            <TextBlock Text="{Binding TestName, StringFormat='• {0}'}" 
+                                                                                       Foreground="#6B7280" 
+                                                                                       FontSize="11"
+                                                                                       Margin="0,2,0,0"/>
+                                                                        </DataTemplate>
+                                                                    </ItemsControl.ItemTemplate>
+                                                                </ItemsControl>
+                                                            </StackPanel>
+
+                                                            <!-- Notes -->
+                                                            <TextBlock Text="{Binding Notes, StringFormat='📝 ملاحظات: {0}'}" 
                                                                        Foreground="#94A3B8" 
                                                                        FontSize="12"
                                                                        TextWrapping="Wrap"

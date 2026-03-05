@@ -17,6 +17,7 @@ public partial class CashierPanelViewModel : HealthCenter.Desktop.ViewModels.Vie
     [ObservableProperty] private Invoice? _selectedInvoice;
     [ObservableProperty] private string _selectedPaymentMethod = "Cash";
     [ObservableProperty] private string _statusMessage = string.Empty;
+    [ObservableProperty] private bool _hasNoInvoices;
 
     public ObservableCollection<string> PaymentMethods { get; } = new()
         { "Cash", "Card", "Insurance" };
@@ -29,13 +30,23 @@ public partial class CashierPanelViewModel : HealthCenter.Desktop.ViewModels.Vie
 
     private void LoadInvoices()
     {
-        var invoices = _db.Invoices
-            .Include(i => i.Patient)
-            .Where(i => i.Status == InvoiceStatus.Pending)
-            .OrderByDescending(i => i.CreatedAt)
-            .ToList();
+        try
+        {
+            var invoices = _db.Invoices
+                .Include(i => i.Patient)
+                .Where(i => i.Status == InvoiceStatus.Pending)
+                .OrderByDescending(i => i.CreatedAt)
+                .ToList();
 
-        PendingInvoices = new ObservableCollection<Invoice>(invoices);
+            PendingInvoices = new ObservableCollection<Invoice>(invoices);
+            HasNoInvoices = PendingInvoices.Count == 0;
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"خطأ في تحميل الفواتير: {ex.Message}";
+            PendingInvoices = new ObservableCollection<Invoice>();
+            HasNoInvoices = true;
+        }
     }
 
     [RelayCommand]
@@ -47,27 +58,35 @@ public partial class CashierPanelViewModel : HealthCenter.Desktop.ViewModels.Vie
             return;
         }
 
-        var method = SelectedPaymentMethod switch
+        try
         {
-            "Card" => PaymentMethod.Card,
-            "Insurance" => PaymentMethod.Insurance,
-            _ => PaymentMethod.Cash
-        };
+            var method = SelectedPaymentMethod switch
+            {
+                "Card" => PaymentMethod.Card,
+                "Insurance" => PaymentMethod.Insurance,
+                _ => PaymentMethod.Cash
+            };
 
-        SelectedInvoice.Status = InvoiceStatus.Paid;
-        SelectedInvoice.PaymentMethod = method;
-        SelectedInvoice.PaidAt = DateTime.UtcNow;
+            SelectedInvoice.Status = InvoiceStatus.Paid;
+            SelectedInvoice.PaymentMethod = method;
+            SelectedInvoice.PaidAt = DateTime.UtcNow;
 
-        _db.SaveChanges();
+            _db.SaveChanges();
 
-        StatusMessage = $"تم تحديد فاتورة المريض {SelectedInvoice.Patient?.FullName} كمدفوعة.";
-        LoadInvoices();
+            StatusMessage = $"تم تحديد فاتورة المريض {SelectedInvoice.Patient?.FullName} كمدفوعة.";
+            LoadInvoices();
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"خطأ في تحديث الفاتورة: {ex.Message}";
+        }
     }
 
     [RelayCommand]
     private void RefreshInvoices()
     {
         LoadInvoices();
-        StatusMessage = "تم تحديث قائمة الفواتير.";
+        if (string.IsNullOrEmpty(StatusMessage) || !StatusMessage.StartsWith("خطأ"))
+            StatusMessage = "تم تحديث قائمة الفواتير.";
     }
 }

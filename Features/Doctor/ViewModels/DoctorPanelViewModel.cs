@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HealthCenter.Desktop.Database;
@@ -17,6 +18,7 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
     private const int MaxLabRequestLength = 300;
 
     private readonly HealthCenterDbContext _db;
+    private readonly DispatcherTimer _refreshTimer;
 
     [ObservableProperty]
     private ObservableCollection<QueueTicket> _waitingPatients = new();
@@ -88,6 +90,9 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
     private ObservableCollection<Visit> _patientHistory = new();
 
     [ObservableProperty]
+    private Visit? _selectedHistoryVisit;
+
+    [ObservableProperty]
     private bool _isHistoryExpanded = false;
 
     // Task 2: Enhanced Diagnosis - Common Diagnoses
@@ -153,23 +158,31 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
         LoadQueue();
         LoadStatistics();
         UpdateCanCompleteVisit();
+
+        // Setup background polling every 5 seconds
+        _refreshTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(5)
+        };
+        _refreshTimer.Tick += (sender, e) => LoadQueueSilent();
+        _refreshTimer.Start();
     }
 
     public bool IsAttendanceActionsVisible => CurrentPatient != null && CurrentPatient.Status == TicketStatus.Called;
 
-    private void ShowError(string msg)
+    private new void ShowError(string msg)
     {
         // Prefer modal dialog for user-facing errors (Arabic).
         ShowDialog(title: "تنبيه", message: msg, isError: true);
     }
 
-    private void ShowSuccess(string msg)
+    private new void ShowSuccess(string msg)
     {
         StatusMessage = msg;
         IsError = false;
     }
 
-    private void ClearStatus()
+    private new void ClearStatus()
     {
         StatusMessage = string.Empty;
         IsError = false;
@@ -215,6 +228,39 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
     {
         CanCompleteVisit = CurrentPatient != null &&
             (!string.IsNullOrWhiteSpace(Diagnosis) || !string.IsNullOrWhiteSpace(Notes) || !string.IsNullOrWhiteSpace(Prescriptions));
+    }
+
+    private void LoadQueueSilent()
+    {
+        try
+        {
+            var today = DateTime.Today;
+
+            // Load waiting patients
+            var waiting = _db.QueueTickets
+                .Include(q => q.Patient)
+                .Where(q => q.CreatedAt.Date == today &&
+                           (q.Status == TicketStatus.ReadyForDoctor || q.Status == TicketStatus.AwaitingRecall))
+                .OrderBy(q => q.Status == TicketStatus.AwaitingRecall ? 0 : 1) // Recall first
+                .ThenBy(q => q.TicketNumber)
+                .ToList();
+
+            // Only update if count changed or top ticket changed to avoid UI flickering
+            if (WaitingPatients.Count != waiting.Count ||
+                (waiting.Count > 0 && WaitingPatients.Count > 0 && waiting[0].Id != WaitingPatients[0].Id))
+            {
+                WaitingPatients = new ObservableCollection<QueueTicket>(waiting);
+                WaitingCount = waiting.Count;
+            }
+
+            // Stats
+            CompletedToday = _db.QueueTickets
+                .Count(q => q.CreatedAt.Date == today && q.Status == TicketStatus.Completed);
+        }
+        catch (Exception)
+        {
+            // Fail silently in the background
+        }
     }
 
     public void LoadQueue()
@@ -270,12 +316,15 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
     private void LoadPatientHistory(Guid patientId)
     {
         var history = _db.Visits
+            .Include(v => v.Doctor)
+            .Include(v => v.LabTests)
             .Where(v => v.PatientId == patientId)
             .OrderByDescending(v => v.VisitDate)
             .Take(10)
             .ToList();
 
         PatientHistory = new ObservableCollection<Visit>(history);
+        SelectedHistoryVisit = null;
     }
 
     // Task 3: Load Statistics
@@ -643,6 +692,7 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
         OnPropertyChanged(nameof(IsAttendanceActionsVisible));
     }
 
+    // Task 2: Add selected diagnosis to diagnosis field
     partial void OnSelectedDiagnosisChanged(string? value)
     {
         if (!string.IsNullOrEmpty(value) && value != "أخرى...")

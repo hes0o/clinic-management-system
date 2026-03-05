@@ -5,81 +5,69 @@
 
 ## 📋 Role Overview | نظرة عامة على الدور
 
-**English:** This sprint your job is to support the bug fixes by reviewing the database entities and ensuring the `TicketStatus` enum values have a proper Arabic display representation, so the UI can show human-readable status text instead of raw enum names like `Waiting`, `Called`, etc.
+**English:** This sprint your job is to enhance the patient history feature in the Doctor panel. You will update the database queries to include lab tests and doctor information, and build a detailed history UI so the doctor can see a patient's full medical background.
 
-**Arabic:** مهمتك في هذا السبرينت هي دعم إصلاح الأخطاء من خلال مراجعة كيانات قاعدة البيانات والتأكد من أن قيم `TicketStatus` لها تمثيل عربي مقروء، حتى لا تظهر في الواجهة بأسمائها البرمجية.
-
----
-
-## 🐛 Bug We Are Fixing
-
-**Bug 1 — Raw Status Values in UI:**  
-In the Nurse panel and Doctor panel, the ticket status shows as its raw enum name (e.g., `Waiting`, `AwaitingRecall`, `Called`) instead of a readable Arabic label. This must be fixed at the data/entity level.
+**Arabic:** مهمتك في هذا السبرينت هي تحسين ميزة سجل المريض في لوحة الطبيب. ستقوم بتحديث استعلامات قاعدة البيانات لتشمل نتائج المختبر ومعلومات الطبيب، وبناء واجهة سجل مفصلة.
 
 ---
 
-## ✅ Task 1: Add Arabic Display For `TicketStatus` Enum
+## 🆕 Task 1: Enhance Doctor Patient History View
 
-**Priority:** 🔴 High | **Estimated Time:** 1.5 hours  
-**File:** `/Database/Entities/QueueTicket.cs`
+**Priority:** 🔴 High | **Estimated Time:** 2 hours  
+**Files:**
+- `/Database/Entities/Visit.cs` — review structure
+- `/Features/Doctor/ViewModels/DoctorPanelViewModel.cs` — enhance `LoadPatientHistory()`
+- `/Features/Doctor/Views/DoctorPanelView.axaml` — enhance history UI
 
-### English Instructions:
-1. Open the file that defines the `TicketStatus` enum (likely inside `QueueTicket.cs` or a shared enums file)
-2. Add a static extension method or a `Description` attribute to map each enum value to an Arabic label
-3. The mapping should be:
-   - `Waiting` → `"في الانتظار"`
-   - `Called` → `"تم النداء"`
-   - `InProgress` → `"قيد الفحص"`
-   - `AwaitingRecall` → `"بانتظار إعادة النداء"`
-   - `Completed` → `"منتهي"`
-   - `Present` → `"حاضر"`
+### Instructions:
+1. Review the `Visit` entity to ensure it has all necessary fields for a rich history view:
+   - `VisitDate`, `Diagnosis`, `Prescriptions`, `Notes`
+   - `BloodPressure`, `Temperature`, `HeartRate`, `Weight`
+   - Navigation properties: `Doctor` (User), `Nurse` (User), `LabTests` (collection)
+2. Open `DoctorPanelViewModel.cs` and enhance `LoadPatientHistory()`:
+   - Currently it only loads the last 10 visits with basic data
+   - **Include** the `Doctor` navigation property so the history shows which doctor saw the patient
+   - **Include** the `LabTests` collection so the doctor can see past lab results
+3. Add a new observable property `SelectedHistoryVisit` (type `Visit?`) so the doctor can click a past visit and see its full details
+4. After the doctor calls a patient (`CallNext()` / `CallSpecific()`), the history should automatically load
 
 ### Code Example:
 ```csharp
-public static class TicketStatusExtensions
+private void LoadPatientHistory(Guid patientId)
 {
-    public static string ToArabic(this TicketStatus status) => status switch
-    {
-        TicketStatus.Waiting        => "في الانتظار",
-        TicketStatus.Called         => "تم النداء",
-        TicketStatus.InProgress     => "قيد الفحص",
-        TicketStatus.AwaitingRecall => "بانتظار إعادة النداء",
-        TicketStatus.Completed      => "منتهي",
-        TicketStatus.Present        => "حاضر",
-        _                           => status.ToString()
-    };
+    var history = _db.Visits
+        .Include(v => v.Doctor)
+        .Include(v => v.LabTests)
+        .Where(v => v.PatientId == patientId)
+        .OrderByDescending(v => v.VisitDate)
+        .Take(10)
+        .ToList();
+
+    PatientHistory = new ObservableCollection<Visit>(history);
 }
 ```
 
-Place this class in the same file as `TicketStatus`, or in a new file `/Database/Entities/EnumExtensions.cs`.
-
-> **Note:** The UI team (Wissam, Ela) will then use `{Binding Status}` differently — coordinate with them to use `ToArabic()` in a value converter or by exposing a computed property.
+5. In `DoctorPanelView.axaml`, enhance the history section to show:
+   - Visit date
+   - Doctor name
+   - Diagnosis
+   - Prescriptions
+   - Vital signs (if recorded)
+   - Any lab tests requested during that visit
 
 ---
 
-## ✅ Task 2: Verify No Raw Exception Leaks from DB Layer
+## 📁 Your Files
 
-**Priority:** 🟡 Medium | **Estimated Time:** 1 hour  
-**File:** `/Database/HealthCenterDbContext.cs`
-
-### English Instructions:
-1. Review any direct DB calls that might throw raw exceptions to the UI
-2. Ensure `EnsureCreated()` failures are caught and handled gracefully
-3. If there is any `try/catch` missing around migrations or seeding, add it
-4. Any caught exception should be logged (if logging is set up by Ahmed) — do NOT rethrow raw exceptions to the UI
-
-### Code Example:
-```csharp
-try
-{
-    _db.Database.EnsureCreated();
-}
-catch (Exception ex)
-{
-    // Log it (use Ahmed's LoggingService when available)
-    Console.Error.WriteLine($"DB init failed: {ex.Message}");
-    // Show user-friendly message via ShowError()
-}
+```
+/Database/
+├── Entities/
+│   └── Visit.cs               ← Review
+/Features/Doctor/
+├── ViewModels/
+│   └── DoctorPanelViewModel.cs ← Edit (LoadPatientHistory)
+└── Views/
+    └── DoctorPanelView.axaml   ← Edit (History UI)
 ```
 
 ---
@@ -88,31 +76,22 @@ catch (Exception ex)
 
 | Rule | Description |
 |------|-------------|
-| **Your Branch** | `feature/database` |
-| **Work Directory** | `/Database` folder ONLY |
-| **Merge To** | `develop` (via PR) |
+| **Your Branch** | `feature/patient-history` |
+| **Work Directory** | `/Database` + `/Features/Doctor` (history UI only) |
+| **Merge To** | `main` (via PR) |
 | **Requires** | Hassan's approval |
 
 ```bash
-git checkout feature/database
-git pull origin develop
-# ... do your work ...
+git checkout -b feature/patient-history
+git pull origin main
 git add .
-git commit -m "fix(db): add Arabic display for TicketStatus enum"
-git push origin feature/database
+git commit -m "feat(doctor): enhance patient history with lab tests and doctor info"
+git push origin feature/patient-history
 ```
 
 ---
 
-## ⚠️ Important Notes
-
-- Do NOT edit files outside `/Database`
-- Always test with `dotnet build` before committing
-- Coordinate with Wissam and Ela on how they will consume the `ToArabic()` extension
-
 ## 🧹 Code Formatting Rule (Mandatory)
-
-> **A GitHub Action called "Clean Code Enforcer" will automatically reject your push if your code is not properly formatted.**
 
 Before **every** `git push`, you MUST run:
 
@@ -120,14 +99,12 @@ Before **every** `git push`, you MUST run:
 dotnet format HealthCenter.Desktop.csproj
 ```
 
-This auto-fixes all whitespace and formatting issues. If you skip this step your PR will **fail the CI check** and be blocked from merging.
-
 ```bash
 # ✅ Full workflow before pushing:
 dotnet format HealthCenter.Desktop.csproj
 git add .
 git commit -m "your message"
-git push origin feature/database
+git push origin feature/patient-history
 ```
 
 ---

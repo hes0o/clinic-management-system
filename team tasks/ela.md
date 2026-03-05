@@ -100,46 +100,8 @@ Apply the same `ClearDiagnosisForm()` call at the start of `CallSpecific()` too.
 3. If the visit save fails (wrap in try/catch), call `ShowError("حدث خطأ أثناء الحفظ. يرجى المحاولة مجدداً.")`
 4. In `CallNext()` and `CallSpecific()`, call `ClearStatus()` so the previous message disappears
 
-### Code Example (ViewModel):
-```csharp
-[RelayCommand]
-private void CompleteVisit()
-{
-    if (CurrentPatient == null) return;
-
-    try
-    {
-        // ... existing save logic ...
-        _db.SaveChanges();
-        ClearDiagnosisForm();
-        LoadQueue();
-        LoadStatistics();
-        ShowSuccess("تمت زيارة المريض بنجاح وتم الحفظ.");
-    }
-    catch (Exception)
-    {
-        ShowError("حدث خطأ أثناء الحفظ. يرجى المحاولة مجدداً.");
-    }
-}
-```
-
 ### Instructions (XAML):
-Add a status banner **above the diagnosis form** (between the Current Patient card and the Diagnosis form). Use the same pattern as Reception:
-
-```xml
-<!-- Success Banner -->
-<Border IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
-        CornerRadius="8" Padding="14,10" Margin="0,0,0,12"
-        Background="{Binding IsError, Converter={x:Static BoolConverters.Not},
-                     ConverterParameter='#F0FDF4|#FEF2F2'}">
-    <TextBlock Text="{Binding StatusMessage}"
-               Foreground="{Binding IsError, Converter={x:Static BoolConverters.Not},
-                            ConverterParameter='#15803D|#DC2626'}"
-               TextWrapping="Wrap" FontWeight="Medium"/>
-</Border>
-```
-
-> **Simpler approach (if converter chaining is complex):** Use two separate Borders — one for success (IsError = false) and one for error (IsError = true), same as Reception view does it.
+Add a status banner **above the diagnosis form**. Use two separate Borders — one for success (IsError = false) and one for error (IsError = true), same as Nurse view.
 
 ---
 
@@ -149,15 +111,102 @@ Add a status banner **above the diagnosis form** (between the Current Patient ca
 **File:** `/Features/Doctor/Views/DoctorPanelView.axaml`
 
 ### Instructions:
-Coordinate with Ahmed — he will create a `TicketStatusConverter`. Once it's available, use it in the waiting list item template where `{Binding Status}` currently shows the raw enum name:
+Use Ahmed's `TicketStatusConverter` on the status text in the waiting list item template:
 
 ```xml
-<!-- BEFORE (shows raw enum): -->
-<TextBlock Text="{Binding Status}" FontSize="12" Foreground="#94A3B8"/>
-
 <!-- AFTER (shows Arabic): -->
 <TextBlock Text="{Binding Status, Converter={StaticResource TicketStatusConverter}}"
            FontSize="12" Foreground="#94A3B8"/>
+```
+
+---
+
+## 🆕 Task 4: Doctor → Lab Integration (Send Patient to Lab & Select Tests)
+
+**Priority:** 🔴 High | **Estimated Time:** 3 hours  
+**Files:**
+- `/Features/Doctor/ViewModels/DoctorPanelViewModel.cs`
+- `/Features/Doctor/Views/DoctorPanelView.axaml`
+
+### Instructions:
+1. Add a UI section to the Doctor panel (below the diagnosis form) titled **"طلب فحوصات مخبرية"** (Request Lab Tests)
+2. Add a `TextBox` for `SelectedLabTestName` so the doctor can type a test name (e.g., "فحص السكر التراكمي", "فحص CBC")
+3. Add a list of common lab tests as quick-select buttons (similar to CommonDiagnoses):
+   - `"تحليل دم كامل CBC"`
+   - `"فحص السكر التراكمي HbA1c"`
+   - `"فحص وظائف الكلى"`
+   - `"فحص وظائف الكبد"`
+   - `"تحليل بول"`
+   - `"فحص الغدة الدرقية TSH"`
+4. Add a `[RelayCommand] SendToLab()` method that:
+   - Creates a new `LabTest` entity with `Status = LabTestStatus.Requested`
+   - Sets `PatientId`, `RequestedById` (current doctor), `VisitId`, `TestName`, `RequestedAt`
+   - Saves to DB
+   - Shows a success message: `"تم إرسال طلب فحص {TestName} للمختبر"`
+5. The Doctor should be able to send **multiple** tests for the same patient before completing the visit
+
+### Code Example:
+```csharp
+[ObservableProperty] private string _selectedLabTestName = string.Empty;
+
+[RelayCommand]
+private void SendToLab()
+{
+    if (CurrentPatient == null) { ShowError("لا يوجد مريض حالي"); return; }
+    if (string.IsNullOrWhiteSpace(SelectedLabTestName)) { ShowError("الرجاء تحديد اسم الفحص"); return; }
+
+    var visit = _db.Visits.FirstOrDefault(v => v.PatientId == CurrentPatient.PatientId && v.VisitDate.Date == DateTime.Today);
+    
+    var labTest = new LabTest
+    {
+        PatientId = CurrentPatient.PatientId,
+        VisitId = visit?.Id ?? Guid.Empty,
+        TestName = SelectedLabTestName,
+        Status = LabTestStatus.Requested,
+        RequestedById = _db.Users.FirstOrDefault(u => u.Role == UserRole.Doctor)?.Id ?? Guid.Empty,
+        RequestedAt = DateTime.UtcNow
+    };
+
+    _db.LabTests.Add(labTest);
+    _db.SaveChanges();
+    ShowSuccess($"تم إرسال طلب فحص: {SelectedLabTestName} للمختبر");
+    SelectedLabTestName = string.Empty;
+}
+```
+
+---
+
+## 🆕 Task 5: Doctor → Cashier Integration (Generate Invoice on Visit Complete)
+
+**Priority:** 🔴 High | **Estimated Time:** 1.5 hours  
+**File:** `/Features/Doctor/ViewModels/DoctorPanelViewModel.cs`
+
+### Instructions:
+1. In the existing `CompleteVisit()` method, **after** saving the visit and marking the ticket as Completed, automatically create an `Invoice` for the Cashier:
+2. Create a new `Invoice` entity with:
+   - `VisitId` = the visit just saved
+   - `PatientId` = current patient
+   - `Amount` = 150.00m (default consultation fee)
+   - `TaxAmount` = 22.50m (15% VAT)
+   - `Status` = `InvoiceStatus.Pending`
+   - `CreatedById` = current doctor's user ID
+   - `CreatedAt` = DateTime.UtcNow
+3. This invoice will then automatically appear in the Cashier panel through the auto-polling
+
+### Code Example:
+```csharp
+// Inside CompleteVisit(), after _db.Visits.Add(visit):
+var invoice = new Invoice
+{
+    VisitId = visit.Id,
+    PatientId = CurrentPatient.PatientId,
+    Amount = 150.00m,
+    TaxAmount = 22.50m,
+    Status = InvoiceStatus.Pending,
+    CreatedById = doctorId,
+    CreatedAt = DateTime.UtcNow
+};
+_db.Invoices.Add(invoice);
 ```
 
 ---
@@ -178,26 +227,20 @@ Coordinate with Ahmed — he will create a `TicketStatusConverter`. Once it's av
 
 | Rule | Description |
 |------|-------------|
-| **Your Branch** | `feature/doctor` |
+| **Your Branch** | `feature/doctor-integration` |
 | **Work Directory** | `/Features/Doctor` folder |
-| **Merge To** | `develop` (via PR) |
+| **Merge To** | `main` (via PR) |
 | **Requires** | Hassan's approval |
 
 ```bash
-git checkout feature/doctor
-git pull origin develop
+git checkout -b feature/doctor-integration
+git pull origin main
 git add .
-git commit -m "fix(doctor): clear form on call next + add error/success banner"
-git push origin feature/doctor
+git commit -m "feat(doctor): add lab test requests + invoice generation"
+git push origin feature/doctor-integration
 ```
 
 ---
-
-## ⚠️ Important Notes
-
-- Pull `develop` first to get Hassan's `ViewModelBase` changes before you start
-- The `ClearDiagnosisForm()` fix (Task 1) is the highest priority — do it first
-- Test by: calling patient A → filling diagnosis → pressing "نداء التالي" → verifying all fields are empty
 
 ## 🧹 Code Formatting Rule (Mandatory)
 
@@ -209,14 +252,12 @@ Before **every** `git push`, you MUST run:
 dotnet format HealthCenter.Desktop.csproj
 ```
 
-This auto-fixes all whitespace and formatting issues. If you skip this step your PR will **fail the CI check** and be blocked from merging.
-
 ```bash
 # ✅ Full workflow before pushing:
 dotnet format HealthCenter.Desktop.csproj
 git add .
 git commit -m "your message"
-git push origin feature/doctor
+git push origin feature/doctor-integration
 ```
 
 ---

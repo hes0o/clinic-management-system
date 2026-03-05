@@ -5,138 +5,115 @@
 
 ## 📋 Role Overview
 
-**English:** This sprint your job is to create a global error handling layer so that raw C# exceptions never appear in the UI. You will also create a reusable value converter so the team can display friendly Arabic status labels without code changes all over the place.
+**English:** This sprint your job is to add background auto-polling to the Lab and Cashier panels so they refresh automatically every 5 seconds, and to remove the manual refresh buttons from both pages.
 
-**Arabic:** مهمتك في هذا السبرينت هي إنشاء طبقة للتعامل مع الأخطاء على مستوى التطبيق كله، حتى لا تظهر أخطاء C# الخام في الواجهة. ستنشئ أيضاً محول قيم (Value Converter) قابلاً لإعادة الاستخدام لعرض الحالات بالعربية.
-
----
-
-## 🐛 Bug We Are Fixing
-
-**Bug 1 — Raw Error Messages:**  
-If any unhandled exception reaches the UI (e.g., EF Core failure, null reference, etc.), the user currently sees raw English error text or the app crashes. We need a global safety net that catches these and shows a friendly Arabic error banner.
+**Arabic:** مهمتك في هذا السبرينت هي إضافة التحديث التلقائي في الخلفية للوحة المختبر ولوحة المحاسب كل 5 ثوانٍ، وإزالة أزرار التحديث اليدوي من الصفحتين.
 
 ---
 
-## ✅ Task 1: Global Exception Handler
+## 🆕 Task 1: Add Auto-Polling to Lab Panel & Remove Refresh Button
 
 **Priority:** 🔴 High | **Estimated Time:** 1.5 hours  
-**File:** `/Infrastructure/GlobalExceptionHandler.cs` (new file)
+**Files:**
+- `/Features/Lab/ViewModels/LabPanelViewModel.cs`
+- `/Features/Lab/Views/LabPanelView.axaml`
 
 ### Instructions:
-1. Create `/Infrastructure/GlobalExceptionHandler.cs`
-2. Hook into `AppDomain.CurrentDomain.UnhandledException` and `TaskScheduler.UnobservedTaskException`
-3. When an unhandled exception occurs:
-   - Log it (console or file)
-   - Show a friendly dialog or notification to the user in Arabic
-   - Do NOT let the app crash silently
-
-### Code Example:
+1. Open `LabPanelViewModel.cs`
+2. Add `using Avalonia.Threading;` at the top
+3. Add a `private readonly DispatcherTimer _refreshTimer;` field
+4. In the constructor, initialize the timer to poll every 5 seconds:
 ```csharp
-public static class GlobalExceptionHandler
+_refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+_refreshTimer.Tick += (s, e) => LoadTestsSilent();
+_refreshTimer.Start();
+```
+5. Create a `LoadTestsSilent()` method that silently re-queries lab tests from the database (same query as `LoadTests()`) but does NOT show any status message and only updates the collection if the count changed (to prevent UI flickering):
+```csharp
+private void LoadTestsSilent()
 {
-    public static void Register()
+    try
     {
-        AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
-        {
-            var ex = args.ExceptionObject as Exception;
-            Console.Error.WriteLine($"[FATAL] {ex?.Message}");
-            // Show a friendly Avalonia dialog
-            ShowFriendlyError("حدث خطأ غير متوقع. يرجى إعادة تشغيل التطبيق.");
-        };
+        var tests = _db.LabTests
+            .Include(t => t.Patient)
+            .Include(t => t.RequestedBy)
+            .Where(t => t.Status != LabTestStatus.Completed)
+            .OrderByDescending(t => t.RequestedAt)
+            .ToList();
 
-        TaskScheduler.UnobservedTaskException += (sender, args) =>
+        if (RequestedTests.Count != tests.Count)
         {
-            Console.Error.WriteLine($"[TASK ERROR] {args.Exception.Message}");
-            args.SetObserved(); // prevent crash
-        };
+            RequestedTests = new ObservableCollection<LabTest>(tests);
+            HasNoTests = RequestedTests.Count == 0;
+        }
     }
-
-    private static void ShowFriendlyError(string message)
-    {
-        // Use Avalonia dispatcher to show on UI thread
-        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
-        {
-            // Show a MessageBox or update a global status bar
-            Console.WriteLine($"UI Error: {message}");
-        });
-    }
+    catch (Exception) { /* Fail silently */ }
 }
 ```
-
-4. Call `GlobalExceptionHandler.Register()` at the top of `Program.cs` before the app starts.
+6. **Delete** the `RefreshTests()` relay command method entirely
+7. Open `LabPanelView.axaml` and **remove** the refresh button (`تحديث`) from the header (line 17)
+8. Also remove the local `_statusMessage` field if it shadows `ViewModelBase.StatusMessage`. Use `ShowError()` and `ShowSuccess()` from the base class instead.
 
 ---
 
-## ✅ Task 2: Create `TicketStatusConverter` Value Converter
+## 🆕 Task 2: Add Auto-Polling to Cashier Panel & Remove Refresh Button
 
-**Priority:** 🔴 High | **Estimated Time:** 1 hour  
-**File:** `/Infrastructure/Converters/TicketStatusConverter.cs` (new file)
+**Priority:** 🔴 High | **Estimated Time:** 1.5 hours  
+**Files:**
+- `/Features/Cashier/ViewModels/CashierPanelViewModel.cs`
+- `/Features/Cashier/Views/CashierPanelView.axaml`
 
 ### Instructions:
-1. Create the directory `/Infrastructure/Converters/` if it does not exist
-2. Create `TicketStatusConverter.cs` implementing `IValueConverter`
-3. It should convert a `TicketStatus` enum value to its Arabic string equivalent
-4. Register it in `App.axaml` resources so all views can use it
-
-### Code Example:
+1. Open `CashierPanelViewModel.cs`
+2. Add `using Avalonia.Threading;` at the top
+3. Add a `private readonly DispatcherTimer _refreshTimer;` field
+4. In the constructor, initialize the timer to poll every 5 seconds:
 ```csharp
-using System;
-using System.Globalization;
-using Avalonia.Data.Converters;
-using HealthCenter.Desktop.Database.Entities;
-
-public class TicketStatusConverter : IValueConverter
+_refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+_refreshTimer.Tick += (s, e) => LoadInvoicesSilent();
+_refreshTimer.Start();
+```
+5. Create a `LoadInvoicesSilent()` method that silently re-queries pending invoices from the database (same query as `LoadInvoices()`) but does NOT show a status message and only updates the collection if the count changed:
+```csharp
+private void LoadInvoicesSilent()
 {
-    public static readonly TicketStatusConverter Instance = new();
-
-    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    try
     {
-        if (value is TicketStatus status)
-        {
-            return status switch
-            {
-                TicketStatus.Waiting        => "في الانتظار",
-                TicketStatus.Called         => "تم النداء",
-                TicketStatus.InProgress     => "قيد الفحص",
-                TicketStatus.AwaitingRecall => "بانتظار إعادة النداء",
-                TicketStatus.Completed      => "منتهي",
-                TicketStatus.Present        => "حاضر",
-                _                           => value.ToString()
-            };
-        }
-        return value?.ToString();
-    }
+        var invoices = _db.Invoices
+            .Include(i => i.Patient)
+            .Where(i => i.Status == InvoiceStatus.Pending)
+            .OrderByDescending(i => i.CreatedAt)
+            .ToList();
 
-    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-        => throw new NotImplementedException();
+        if (PendingInvoices.Count != invoices.Count)
+        {
+            PendingInvoices = new ObservableCollection<Invoice>(invoices);
+            HasNoInvoices = PendingInvoices.Count == 0;
+        }
+    }
+    catch (Exception) { /* Fail silently */ }
 }
 ```
-
-5. Register in `App.axaml`:
-```xml
-<Application.Resources>
-    <converters:TicketStatusConverter x:Key="TicketStatusConverter"/>
-</Application.Resources>
-```
-
-6. Document usage for the team — they use it in XAML like:
-```xml
-<TextBlock Text="{Binding Status, Converter={StaticResource TicketStatusConverter}}"/>
-```
+6. **Delete** the `RefreshInvoices()` relay command method entirely
+7. Open `CashierPanelView.axaml` and **remove** the refresh button (`تحديث`) from the header (line 17)
+8. Also remove the local `_statusMessage` field if it shadows `ViewModelBase.StatusMessage`. Use `ShowError()` and `ShowSuccess()` from the base class instead.
 
 ---
 
 ## 📁 Your Files
 
 ```
-/Infrastructure/
-├── GlobalExceptionHandler.cs     ← Create
-└── Converters/
-    └── TicketStatusConverter.cs  ← Create
+/Features/Lab/
+├── ViewModels/
+│   └── LabPanelViewModel.cs     ← Edit
+└── Views/
+    └── LabPanelView.axaml       ← Edit
 
-Program.cs                        ← Edit (register handler)
-App.axaml                         ← Edit (register converter)
+/Features/Cashier/
+├── ViewModels/
+│   └── CashierPanelViewModel.cs ← Edit
+└── Views/
+    └── CashierPanelView.axaml   ← Edit
 ```
 
 ---
@@ -145,21 +122,22 @@ App.axaml                         ← Edit (register converter)
 
 | Rule | Description |
 |------|-------------|
-| **Branch** | `feature/infrastructure` |
-| **Directory** | `/Infrastructure` + `App.axaml` + `Program.cs` |
-| **Merge To** | `develop` (via PR) |
+| **Your Branch** | `feature/lab-cashier-polling` |
+| **Work Directory** | `/Features/Lab` + `/Features/Cashier` |
+| **Merge To** | `main` (via PR) |
+| **Requires** | Hassan's approval |
 
 ```bash
-git checkout feature/infrastructure
-git pull origin develop
+git checkout -b feature/lab-cashier-polling
+git pull origin main
 git add .
-git commit -m "feat(infra): global error handler + TicketStatus value converter"
-git push origin feature/infrastructure
+git commit -m "feat(lab+cashier): add auto-polling + remove refresh buttons"
+git push origin feature/lab-cashier-polling
 ```
 
-## 🧹 Code Formatting Rule (Mandatory)
+---
 
-> **A GitHub Action called "Clean Code Enforcer" will automatically reject your push if your code is not properly formatted.**
+## 🧹 Code Formatting Rule (Mandatory)
 
 Before **every** `git push`, you MUST run:
 
@@ -167,16 +145,14 @@ Before **every** `git push`, you MUST run:
 dotnet format HealthCenter.Desktop.csproj
 ```
 
-This auto-fixes all whitespace and formatting issues. If you skip this step your PR will **fail the CI check** and be blocked from merging.
-
 ```bash
 # ✅ Full workflow before pushing:
 dotnet format HealthCenter.Desktop.csproj
 git add .
 git commit -m "your message"
-git push origin feature/infrastructure
+git push origin feature/lab-cashier-polling
 ```
 
 ---
 
-**Questions?** Ask Hassan
+**Questions?** Ask Hassan (Team Lead)

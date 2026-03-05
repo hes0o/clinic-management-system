@@ -4,13 +4,14 @@ namespace HealthCenter.Desktop.Database.Entities;
 
 public enum TicketStatus
 {
-    Waiting,      // ⏳ In queue
-    Called,       // 📢 Doctor called the patient
-    Present,      // ✅ Patient responded and is present
-    Absent,       // ❌ Patient did not respond to call
-    AwaitingRecall, // 🔄 Will be called again later
-    InProgress,   // 🏥 With the doctor
-    Completed     // ✔️ Visit finished
+    Waiting,          // ⏳ In queue
+    ReadyForDoctor,   // 👨‍⚕️ Nurse finished vitals, waiting for Doctor
+    Called,           // 📢 Doctor called the patient
+    Present,          // ✅ Patient responded and is present
+    Absent,           // ❌ Patient did not respond to call
+    AwaitingRecall,   // 🔄 Will be called again later
+    InProgress,       // 🏥 With the doctor
+    Completed         // ✔️ Visit finished
 }
 
 /// <summary>

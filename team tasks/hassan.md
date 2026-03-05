@@ -5,75 +5,24 @@
 
 ## 📋 Role Overview | نظرة عامة على الدور
 
-**English:** You are the Team Lead. Your job this sprint is to coordinate the two bug fixes, review all PRs, and implement the global infrastructure for user-friendly error handling so the rest of the team can use it.
+**English:** You are the Team Lead. Your job this sprint is to review all PRs for the new Sprint 2 integration features and ensure the full patient flow (Reception → Nurse → Doctor → Lab → Cashier) works end-to-end.
 
-**Arabic:** أنت قائد الفريق. مهمتك في هذا السبرينت هي تنسيق إصلاح الخطأين، مراجعة جميع طلبات الدمج، وتطبيق البنية التحتية لعرض رسائل الخطأ الودية حتى يتمكن باقي الفريق من استخدامها.
-
----
-
-## 🐛 Background: The Two Bugs We Are Fixing
-
-### Bug 1 — Raw/Code Error Messages
-In some interfaces (especially Nurse and Doctor panels), errors are shown either as raw exception text, raw enum values (e.g., `Waiting`, `Called`), or not shown at all. The UI must show friendly Arabic messages like "حدث خطأ، يرجى المحاولة مرة أخرى" instead of code output.
-
-### Bug 2 — Stale Patient Data After "Call Next"
-When the doctor presses "نداء المريض التالي" (Call Next Patient), the new patient's information appears in the header — but the diagnosis form fields (Diagnosis, Prescriptions, Notes, vital signs) still contain the **previous patient's data**. The same issue exists in the Nurse panel when switching selected patients. All form fields must be cleared when a new patient is called/selected.
+**Arabic:** أنت قائد الفريق. مهمتك في هذا السبرينت هي مراجعة جميع طلبات الدمج للميزات الجديدة والتأكد من أن تدفق المريض الكامل يعمل بشكل صحيح.
 
 ---
 
-## ✅ Task 1: Create Shared `StatusMessage` Infrastructure
-
-**Priority:** 🔴 High | **Estimated Time:** 1.5 hours
-**File:** `/ViewModels/ViewModelBase.cs`
-
-### English Instructions:
-1. Open `/ViewModels/ViewModelBase.cs`
-2. Add two observable properties that all ViewModels can inherit:
-   - `StatusMessage` (string) — Arabic message to display
-   - `IsError` (bool) — true = red error style, false = green success style
-3. Add two helper methods: `ShowError(string msg)` and `ShowSuccess(string msg)`
-4. Add a `ClearStatus()` method that resets both to empty/false
-5. Verify that `DoctorPanelViewModel`, `NursePanelViewModel`, and `ReceptionViewModel` all inherit from `ViewModelBase`
-
-### Code Example:
-```csharp
-public partial class ViewModelBase : ObservableObject
-{
-    [ObservableProperty] private string _statusMessage = string.Empty;
-    [ObservableProperty] private bool _isError;
-
-    protected void ShowError(string msg)
-    {
-        StatusMessage = msg;
-        IsError = true;
-    }
-
-    protected void ShowSuccess(string msg)
-    {
-        StatusMessage = msg;
-        IsError = false;
-    }
-
-    protected void ClearStatus()
-    {
-        StatusMessage = string.Empty;
-        IsError = false;
-    }
-}
-```
-
----
-
-## ✅ Task 2: Code Review & Merge
+## 🆕 Task 1: Code Review & Merge for Sprint 2 Integration Tasks
 
 **Priority:** 🔴 High | **Estimated Time:** ongoing
 
 ### Instructions:
-1. Review PRs from Bassam, Ahmed, Ela, and Wissam as they submit them
-2. Make sure each fix addresses only its assigned bug — no scope creep
-3. Check that error messages are in Arabic and not raw English exception text
-4. Check that form fields are fully cleared (not partially) when calling next patient
-5. Merge approved PRs to `develop`
+1. Review all new PRs from the team for Sprint 2 integration features
+2. Verify that the Doctor→Lab→Cashier flow works end-to-end
+3. Test that auto-polling is working correctly on Lab and Cashier pages
+4. Ensure all refresh buttons have been removed from Lab and Cashier views
+5. Validate that the Doctor can properly send patients to Lab and select tests
+6. Validate that completed visits generate invoices for the Cashier
+7. Merge approved PRs to `main`
 
 ---
 
@@ -82,16 +31,16 @@ public partial class ViewModelBase : ObservableObject
 | Rule | Description |
 |------|-------------|
 | **Your Branch** | `main` (direct access) |
-| **Protected** | `main`, `develop` |
+| **Protected** | `main` |
 | **Merge Authority** | Only YOU can merge to `main` |
 
 ---
 
 ## ⚠️ Important Notes
 
-- Do NOT implement the UI fixes yourself — delegate to the team
-- Your job is the shared base infrastructure (Task 1) and reviews (Task 2)
-- All team members must pull `develop` and rebase before opening a PR
+- Do NOT implement the features yourself — delegate to the team
+- Your job is reviews and merging
+- All team members must pull `main` and rebase before opening a PR
 
 ## 🧹 Code Formatting Rule (Mandatory)
 
