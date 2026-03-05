@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HealthCenter.Desktop.Database;
@@ -12,11 +13,11 @@ namespace HealthCenter.Desktop.Features.Cashier.ViewModels;
 public partial class CashierPanelViewModel : HealthCenter.Desktop.ViewModels.ViewModelBase
 {
     private readonly HealthCenterDbContext _db;
+    private readonly DispatcherTimer _refreshTimer;
 
     [ObservableProperty] private ObservableCollection<Invoice> _pendingInvoices = new();
     [ObservableProperty] private Invoice? _selectedInvoice;
     [ObservableProperty] private string _selectedPaymentMethod = "Cash";
-    [ObservableProperty] private string _statusMessage = string.Empty;
     [ObservableProperty] private bool _hasNoInvoices;
 
     public ObservableCollection<string> PaymentMethods { get; } = new()
@@ -26,6 +27,11 @@ public partial class CashierPanelViewModel : HealthCenter.Desktop.ViewModels.Vie
     {
         _db = new HealthCenterDbContext();
         LoadInvoices();
+
+        // Setup background polling every 5 seconds
+        _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+        _refreshTimer.Tick += (s, e) => LoadInvoicesSilent();
+        _refreshTimer.Start();
     }
 
     private void LoadInvoices()
@@ -43,10 +49,29 @@ public partial class CashierPanelViewModel : HealthCenter.Desktop.ViewModels.Vie
         }
         catch (Exception ex)
         {
-            StatusMessage = $"خطأ في تحميل الفواتير: {ex.Message}";
+            ShowError($"خطأ في تحميل الفواتير: {ex.Message}");
             PendingInvoices = new ObservableCollection<Invoice>();
             HasNoInvoices = true;
         }
+    }
+
+    private void LoadInvoicesSilent()
+    {
+        try
+        {
+            var invoices = _db.Invoices
+                .Include(i => i.Patient)
+                .Where(i => i.Status == InvoiceStatus.Pending)
+                .OrderByDescending(i => i.CreatedAt)
+                .ToList();
+
+            if (PendingInvoices.Count != invoices.Count)
+            {
+                PendingInvoices = new ObservableCollection<Invoice>(invoices);
+                HasNoInvoices = PendingInvoices.Count == 0;
+            }
+        }
+        catch (Exception) { /* Fail silently */ }
     }
 
     [RelayCommand]
@@ -73,20 +98,13 @@ public partial class CashierPanelViewModel : HealthCenter.Desktop.ViewModels.Vie
 
             _db.SaveChanges();
 
-            StatusMessage = $"تم تحديد فاتورة المريض {SelectedInvoice.Patient?.FullName} كمدفوعة.";
+            ShowSuccess($"تم تحديد فاتورة المريض {SelectedInvoice.Patient?.FullName} كمدفوعة.");
             LoadInvoices();
         }
         catch (Exception ex)
         {
-            StatusMessage = $"خطأ في تحديث الفاتورة: {ex.Message}";
+            ShowError($"خطأ في تحديث الفاتورة: {ex.Message}");
         }
     }
 
-    [RelayCommand]
-    private void RefreshInvoices()
-    {
-        LoadInvoices();
-        if (string.IsNullOrEmpty(StatusMessage) || !StatusMessage.StartsWith("خطأ"))
-            StatusMessage = "تم تحديث قائمة الفواتير.";
-    }
 }
