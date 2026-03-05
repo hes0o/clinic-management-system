@@ -25,6 +25,9 @@
 			avares://HealthCenter.Desktop/Assets/Fonts/Cairo-VariableFont_slnt,wght.ttf#Cairo
 		</FontFamily>
 
+		<!-- Converters -->
+		<converters:TicketStatusConverter x:Key="TicketStatusConverter" />
+
 		<!-- Override FluentTheme's internal brush resources for TextBox.
 		     These are used INSIDE the control template via DynamicResource,
 		     which is why outer style selectors alone cannot fix the invisible text problem. -->
@@ -38,8 +41,5 @@
 		<SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="#9CA3AF"/>
 		<SolidColorBrush x:Key="TextControlPlaceholderForegroundPointerOver" Color="#9CA3AF"/>
 		<SolidColorBrush x:Key="TextControlPlaceholderForegroundFocused" Color="#9CA3AF"/>
-
-		<!-- ─── Value Converters (available to all views) ─────────────── -->
-		<converters:TicketStatusConverter x:Key="TicketStatusConverter"/>
 	</Application.Resources>
 </Application>
