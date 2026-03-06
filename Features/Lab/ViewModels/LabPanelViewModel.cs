@@ -11,7 +11,7 @@ using HealthCenter.Desktop.Services;
 
 namespace HealthCenter.Desktop.Features.Lab.ViewModels;
 
-public partial class LabPanelViewModel : HealthCenter.Desktop.ViewModels.ViewModelBase
+public partial class LabPanelViewModel : HealthCenter.Desktop.ViewModels.ViewModelBase, IDisposable
 {
     private readonly HealthCenterDbContext _db;
     private readonly DispatcherTimer _refreshTimer;
@@ -30,6 +30,14 @@ public partial class LabPanelViewModel : HealthCenter.Desktop.ViewModels.ViewMod
         _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
         _refreshTimer.Tick += (s, e) => LoadTestsSilent();
         _refreshTimer.Start();
+    }
+
+    public void Dispose()
+    {
+        _refreshTimer?.Stop();
+        _refreshTimer?.Tick -= (s, e) => LoadTestsSilent();
+        _db?.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     private void LoadTests()
@@ -65,7 +73,22 @@ public partial class LabPanelViewModel : HealthCenter.Desktop.ViewModels.ViewMod
                 .OrderByDescending(t => t.RequestedAt)
                 .ToList();
 
-            if (RequestedTests.Count != tests.Count)
+            // Detect changes comparing count, IDs, or timestamps
+            bool hasChanged = RequestedTests.Count != tests.Count;
+            if (!hasChanged)
+            {
+                for (int i = 0; i < tests.Count; i++)
+                {
+                    if (RequestedTests[i].Id != tests[i].Id ||
+                        RequestedTests[i].RequestedAt != tests[i].RequestedAt)
+                    {
+                        hasChanged = true;
+                        break;
+                    }
+                }
+            }
+
+            if (hasChanged)
             {
                 RequestedTests = new ObservableCollection<LabTest>(tests);
                 HasNoTests = RequestedTests.Count == 0;

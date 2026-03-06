@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HealthCenter.Desktop.Features.Cashier.ViewModels;
 
-public partial class CashierPanelViewModel : HealthCenter.Desktop.ViewModels.ViewModelBase
+public partial class CashierPanelViewModel : HealthCenter.Desktop.ViewModels.ViewModelBase, IDisposable
 {
     private readonly HealthCenterDbContext _db;
     private readonly DispatcherTimer _refreshTimer;
@@ -32,6 +32,14 @@ public partial class CashierPanelViewModel : HealthCenter.Desktop.ViewModels.Vie
         _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
         _refreshTimer.Tick += (s, e) => LoadInvoicesSilent();
         _refreshTimer.Start();
+    }
+
+    public void Dispose()
+    {
+        _refreshTimer?.Stop();
+        _refreshTimer?.Tick -= (s, e) => LoadInvoicesSilent();
+        _db?.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     private void LoadInvoices()
@@ -65,7 +73,21 @@ public partial class CashierPanelViewModel : HealthCenter.Desktop.ViewModels.Vie
                 .OrderByDescending(i => i.CreatedAt)
                 .ToList();
 
-            if (PendingInvoices.Count != invoices.Count)
+            bool hasChanged = PendingInvoices.Count != invoices.Count;
+            if (!hasChanged)
+            {
+                for (int i = 0; i < invoices.Count; i++)
+                {
+                    if (PendingInvoices[i].Id != invoices[i].Id ||
+                        PendingInvoices[i].CreatedAt != invoices[i].CreatedAt)
+                    {
+                        hasChanged = true;
+                        break;
+                    }
+                }
+            }
+
+            if (hasChanged)
             {
                 PendingInvoices = new ObservableCollection<Invoice>(invoices);
                 HasNoInvoices = PendingInvoices.Count == 0;
