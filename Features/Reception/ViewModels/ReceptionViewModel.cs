@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.EntityFrameworkCore;
@@ -15,9 +16,10 @@ namespace HealthCenter.Desktop.Features.Reception.ViewModels;
 /// Reception panel: registers/searches patients, issues queue tickets.
 /// Uses EF Core directly — data persists to the database.
 /// </summary>
-public partial class ReceptionViewModel : ObservableObject
+public partial class ReceptionViewModel : HealthCenter.Desktop.ViewModels.ViewModelBase
 {
     private readonly HealthCenterDbContext _db;
+    private readonly DispatcherTimer _refreshTimer;
 
     // ── Search ────────────────────────────────────────────────
     [ObservableProperty] private string _searchQuery = string.Empty;
@@ -41,8 +43,6 @@ public partial class ReceptionViewModel : ObservableObject
     // ── State ─────────────────────────────────────────────────
     [ObservableProperty] private bool _isEditMode;
     [ObservableProperty] private int _selectedTabIndex;
-    [ObservableProperty] private string _statusMessage = string.Empty;
-    [ObservableProperty] private bool _isError;
 
     // ── Today's Queue ─────────────────────────────────────────
     public ObservableCollection<QueueTicket> TodayQueue { get; } = new();
@@ -62,6 +62,11 @@ public partial class ReceptionViewModel : ObservableObject
         _db.Database.EnsureCreated();
         RefreshSearch();
         LoadTodayQueue();
+
+        // Auto-poll every 5 seconds so the queue stays fresh without a manual refresh button
+        _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+        _refreshTimer.Tick += (s, e) => LoadQueueSilent();
+        _refreshTimer.Start();
     }
 
     // ── Reactive search as user types ────────────────────────
@@ -106,6 +111,36 @@ public partial class ReceptionViewModel : ObservableObject
         WaitingCount = tickets.Count(t => t.Status == TicketStatus.Waiting || t.Status == TicketStatus.AwaitingRecall);
 
         foreach (var t in tickets) TodayQueue.Add(t);
+    }
+
+    // Silently re-queries the queue in background; only updates UI when data changed
+    private void LoadQueueSilent()
+    {
+        try
+        {
+            var today = DateTime.Today;
+            var tickets = _db.QueueTickets
+                .Include(t => t.Patient)
+                .Where(t => t.CreatedAt.Date == today)
+                .OrderBy(t => t.TicketNumber)
+                .ToList();
+
+            var newCount = tickets.Count;
+            var newWaiting = tickets.Count(t => t.Status == TicketStatus.Waiting || t.Status == TicketStatus.AwaitingRecall);
+
+            if (newCount != TodayCount ||
+                (tickets.Count > 0 && TodayQueue.Count > 0 && tickets[0].Id != TodayQueue[0].Id))
+            {
+                TodayQueue.Clear();
+                foreach (var t in tickets) TodayQueue.Add(t);
+                TodayCount = newCount;
+                WaitingCount = newWaiting;
+            }
+        }
+        catch (Exception)
+        {
+            // Fail silently — background polling should never crash the UI
+        }
     }
 
     // ── Patient selection → pre-fill read-only details ────────
@@ -263,10 +298,4 @@ public partial class ReceptionViewModel : ObservableObject
         _editingPatientId = null; IsEditMode = false;
     }
 
-    // ── Helpers ───────────────────────────────────────────────
-    private void ShowError(string msg) { StatusMessage = msg; IsError = true; }
-    private void ShowSuccess(string msg) { StatusMessage = msg; IsError = false; }
-
-    [RelayCommand]
-    private void RefreshQueue() { LoadTodayQueue(); RefreshSearch(); }
 }
