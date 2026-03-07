@@ -79,10 +79,22 @@
                                   HorizontalAlignment="Stretch"/>
                     </StackPanel>
 
-                    <TextBlock Grid.Row="4" Text="{Binding StatusMessage}"
-                               Foreground="#16A34A" FontWeight="Medium"
-                               VerticalAlignment="Bottom" Margin="0,16,0,0"
-                               IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                    <!-- Status message: success -->
+                    <Border Grid.Row="4" IsVisible="{Binding IsSuccess}"
+                            CornerRadius="6" Padding="12,8" Margin="0,16,0,0"
+                            VerticalAlignment="Bottom"
+                            Background="#F0FDF4">
+                        <TextBlock Text="{Binding StatusMessage}"
+                                   Foreground="#15803D" TextWrapping="Wrap" FontWeight="Medium"/>
+                    </Border>
+                    <!-- Status message: error -->
+                    <Border Grid.Row="4" CornerRadius="6" Padding="12,8" Margin="0,16,0,0"
+                            VerticalAlignment="Bottom"
+                            Background="#FEF2F2"
+                            IsVisible="{Binding IsError}">
+                        <TextBlock Text="{Binding StatusMessage}"
+                                   Foreground="#DC2626" TextWrapping="Wrap" FontWeight="Medium"/>
+                    </Border>
 
                     <Button Grid.Row="5" Content="تاكيد الدفع - مدفوعة"
                             Command="{Binding MarkAsPaidCommand}"

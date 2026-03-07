@@ -101,7 +101,7 @@ public partial class CashierPanelViewModel : HealthCenter.Desktop.ViewModels.Vie
     {
         if (SelectedInvoice == null)
         {
-            StatusMessage = "الرجاء تحديد فاتورة أولاً.";
+            ShowError("الرجاء تحديد فاتورة أولاً.");
             return;
         }
 

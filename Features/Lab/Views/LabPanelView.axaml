@@ -74,9 +74,20 @@
                                  Height="140"
                                  Watermark="أدخل نتائج الفحص هنا..."/>
 
-                        <TextBlock Text="{Binding StatusMessage}"
-                                   Foreground="#16A34A" FontWeight="Medium"
-                                   IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                        <!-- Status message: success -->
+                        <Border IsVisible="{Binding IsSuccess}"
+                                CornerRadius="6" Padding="12,8" Margin="0,0,0,8"
+                                Background="#F0FDF4">
+                            <TextBlock Text="{Binding StatusMessage}"
+                                       Foreground="#15803D" TextWrapping="Wrap" FontWeight="Medium"/>
+                        </Border>
+                        <!-- Status message: error -->
+                        <Border CornerRadius="6" Padding="12,8" Margin="0,0,0,8"
+                                Background="#FEF2F2"
+                                IsVisible="{Binding IsError}">
+                            <TextBlock Text="{Binding StatusMessage}"
+                                       Foreground="#DC2626" TextWrapping="Wrap" FontWeight="Medium"/>
+                        </Border>
                     </StackPanel>
 
                     <Button Grid.Row="4" Content="تسجيل النتيجة - مكتمل"
