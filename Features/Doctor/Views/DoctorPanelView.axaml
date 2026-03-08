@@ -385,34 +385,77 @@
                                          Watermark="أدخل التشخيص التفصيلي (حتى 1000 حرف)..."/>
                             </StackPanel>
 
-                            <!-- Task 2: Vital Signs Section -->
-                            <Border Background="#F8FAFC" CornerRadius="12" Padding="16">
+                            <!-- Task 2: Vital Signs Section (Read-Only - Filled by Nurse) -->
+                            <Border Background="#FEF3C7" CornerRadius="12" Padding="16" BorderBrush="#FDE047" BorderThickness="1">
                                 <StackPanel Spacing="12">
-                                    <TextBlock Text="العلامات الحيوية" FontWeight="SemiBold" FontSize="16" Foreground="#1E293B"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="📊" FontSize="18"/>
+                                        <TextBlock Text="العلامات الحيوية" FontWeight="SemiBold" FontSize="16" Foreground="#1E293B"/>
+                                        <TextBlock Text="(يتم تعبئتها من قبل الممرضين)" 
+                                                   FontSize="11" 
+                                                   Foreground="#92400E" 
+                                                   FontStyle="Italic"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    
+                                    <!-- Check if vital signs are filled -->
+                                    <Border IsVisible="{Binding !CurrentPatient.Patient, Converter={x:Static ObjectConverters.IsNull}}"
+                                            Background="#FFFBEB" 
+                                            CornerRadius="8" 
+                                            Padding="12"
+                                            BorderBrush="#FCD34D" 
+                                            BorderThickness="1">
+                                        <StackPanel Spacing="4">
+                                            <TextBlock Text="⚠️ لم يتم تعبئة العلامات الحيوية بعد" 
+                                                       FontWeight="Medium" 
+                                                       Foreground="#92400E"
+                                                       IsVisible="{Binding IsVitalSignsEmpty}"/>
+                                            <TextBlock Text="يرجى انتظار الممرض/الممرضة لتعبئة البيانات" 
+                                                       FontSize="11" 
+                                                       Foreground="#78350F"
+                                                       IsVisible="{Binding IsVitalSignsEmpty}"/>
+                                        </StackPanel>
+                                    </Border>
                                     
                                     <Grid ColumnDefinitions="*,12,*" RowDefinitions="Auto,12,Auto">
-                                        <!-- Blood Pressure -->
+                                        <!-- Blood Pressure (Read-Only) -->
                                         <StackPanel Grid.Column="0" Grid.Row="0" Spacing="6">
                                             <TextBlock Text="ضغط الدم (mmHg)" FontSize="13" Foreground="#64748B"/>
-                                            <TextBox Text="{Binding BloodPressure}" MaxLength="7" Watermark="مثال: 120/80"/>
+                                            <TextBox Text="{Binding BloodPressure}" 
+                                                     IsReadOnly="True"
+                                                     Background="#F9FAFB"
+                                                     Foreground="#374151"
+                                                     Watermark="لم يتم القياس"/>
                                         </StackPanel>
 
-                                        <!-- Temperature -->
+                                        <!-- Temperature (Read-Only) -->
                                         <StackPanel Grid.Column="2" Grid.Row="0" Spacing="6">
                                             <TextBlock Text="الحرارة (°C)" FontSize="13" Foreground="#64748B"/>
-                                            <TextBox Text="{Binding TemperatureInput}" MaxLength="5" Watermark="مثال: 37"/>
+                                            <TextBox Text="{Binding TemperatureInput}" 
+                                                     IsReadOnly="True"
+                                                     Background="#F9FAFB"
+                                                     Foreground="#374151"
+                                                     Watermark="لم يتم القياس"/>
                                         </StackPanel>
 
-                                        <!-- Heart Rate -->
+                                        <!-- Heart Rate (Read-Only) -->
                                         <StackPanel Grid.Column="0" Grid.Row="2" Spacing="6">
                                             <TextBlock Text="نبضات القلب (BPM)" FontSize="13" Foreground="#64748B"/>
-                                            <TextBox Text="{Binding HeartRateInput}" MaxLength="3" Watermark="مثال: 72"/>
+                                            <TextBox Text="{Binding HeartRateInput}" 
+                                                     IsReadOnly="True"
+                                                     Background="#F9FAFB"
+                                                     Foreground="#374151"
+                                                     Watermark="لم يتم القياس"/>
                                         </StackPanel>
 
-                                        <!-- Weight -->
+                                        <!-- Weight (Read-Only) -->
                                         <StackPanel Grid.Column="2" Grid.Row="2" Spacing="6">
                                             <TextBlock Text="الوزن (KG)" FontSize="13" Foreground="#64748B"/>
-                                            <TextBox Text="{Binding WeightInput}" MaxLength="6" Watermark="مثال: 70.5"/>
+                                            <TextBox Text="{Binding WeightInput}" 
+                                                     IsReadOnly="True"
+                                                     Background="#F9FAFB"
+                                                     Foreground="#374151"
+                                                     Watermark="لم يتم القياس"/>
                                         </StackPanel>
                                     </Grid>
                                 </StackPanel>
@@ -450,18 +493,52 @@
                                          Watermark="ملاحظات إضافية (حتى 1000 حرف)..."/>
                             </StackPanel>
 
-                            <!-- Lab request -->
-                            <StackPanel Spacing="8">
-                                <TextBlock Text="طلب فحوصات أو تحاليل مخبرية" FontWeight="Medium" Foreground="#374151"/>
-                                <TextBlock Text="يمكنك كتابة الفحوصات المطلوبة (مثال: فحص CBC، كيمياء الدم، أشعة سينية للصدر)" 
-                                           FontSize="12" Foreground="#64748B" TextWrapping="Wrap"/>
-                                <TextBox Text="{Binding LabTestName}"
-                                         MaxLength="300"
-                                         AcceptsReturn="True"
-                                         TextWrapping="Wrap"
-                                         Height="56"
-                                         Watermark="اكتب الفحوصات المطلوبة (حتى 300 حرف)..."/>
-                            </StackPanel>
+                            <!-- Task 4: Lab Test Request Section -->
+                            <Border Background="#F0F9FF" CornerRadius="12" Padding="16" BorderBrush="#BFDBFE" BorderThickness="1">
+                                <StackPanel Spacing="12">
+                                    <TextBlock Text="طلب فحوصات مخبرية" FontWeight="SemiBold" FontSize="16" Foreground="#1E293B"/>
+                                    
+                                    <!-- Common Lab Tests Dropdown -->
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Text="الفحوصات الشائعة" FontSize="13" Foreground="#64748B"/>
+                                        <ComboBox ItemsSource="{Binding CommonLabTests}"
+                                                  SelectedItem="{Binding SelectedLabTest}"
+                                                  PlaceholderText="اختر فحص شائع..."
+                                                  HorizontalAlignment="Stretch"
+                                                  CornerRadius="8"/>
+                                    </StackPanel>
+
+                                    <!-- Manual Lab Test Entry -->
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Text="أو اكتب اسم الفحص يدوياً" FontSize="13" Foreground="#64748B"/>
+                                        <TextBox Text="{Binding LabTestName}"
+                                                 MaxLength="300"
+                                                 TextWrapping="Wrap"
+                                                 Height="56"
+                                                 Watermark="مثال: فحص CBC، كيمياء الدم، أشعة سينية للصدر..."/>
+                                    </StackPanel>
+
+                                    <!-- Send to Lab Button -->
+                                    <Button Command="{Binding SendToLabCommand}"
+                                            Background="#0EA5E9"
+                                            Foreground="White"
+                                            CornerRadius="8"
+                                            Padding="14,10"
+                                            HorizontalAlignment="Stretch"
+                                            HorizontalContentAlignment="Center">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock Text="🧪"/>
+                                            <TextBlock Text="إرسال طلب للمختبر" FontWeight="Medium"/>
+                                        </StackPanel>
+                                    </Button>
+
+                                    <TextBlock Text="💡 يمكنك إرسال عدة فحوصات للمريض الواحد قبل إنهاء الزيارة" 
+                                               FontSize="11" 
+                                               Foreground="#64748B" 
+                                               TextWrapping="Wrap"
+                                               FontStyle="Italic"/>
+                                </StackPanel>
+                            </Border>
 
                             <!-- Task 1: Visit History Panel -->
                             <Expander Header="سجل الزيارات السابقة" 

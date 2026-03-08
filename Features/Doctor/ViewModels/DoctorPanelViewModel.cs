@@ -142,6 +142,20 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
     [ObservableProperty]
     private string _labTestName = string.Empty;
 
+    // Task 4: Common Lab Tests
+    public ObservableCollection<string> CommonLabTests { get; } = new()
+    {
+        "تحليل دم كامل CBC",
+        "فحص السكر التراكمي HbA1c",
+        "فحص وظائف الكلى",
+        "فحص وظائف الكبد",
+        "تحليل بول",
+        "فحص الغدة الدرقية TSH"
+    };
+
+    [ObservableProperty]
+    private string? _selectedLabTest;
+
     // Task 3: Statistics
     [ObservableProperty]
     private int _todayPatients;
@@ -151,6 +165,12 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
 
     [ObservableProperty]
     private int _monthPatients;
+
+    // Vital Signs Empty Check
+    public bool IsVitalSignsEmpty => string.IsNullOrWhiteSpace(BloodPressure) &&
+                                      string.IsNullOrWhiteSpace(TemperatureInput) &&
+                                      string.IsNullOrWhiteSpace(HeartRateInput) &&
+                                      string.IsNullOrWhiteSpace(WeightInput);
 
     public DoctorPanelViewModel()
     {
@@ -236,13 +256,12 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
         {
             var today = DateTime.Today;
 
-            // Load waiting patients
+            // Load waiting patients - use same status as LoadQueue for consistency
             var waiting = _db.QueueTickets
                 .Include(q => q.Patient)
                 .Where(q => q.CreatedAt.Date == today &&
-                           (q.Status == TicketStatus.ReadyForDoctor || q.Status == TicketStatus.AwaitingRecall))
-                .OrderBy(q => q.Status == TicketStatus.AwaitingRecall ? 0 : 1) // Recall first
-                .ThenBy(q => q.TicketNumber)
+                           q.Status == TicketStatus.Waiting)
+                .OrderBy(q => q.TicketNumber)
                 .ToList();
 
             // Only update if count changed or top ticket changed to avoid UI flickering
@@ -303,13 +322,45 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
         if (CurrentPatient != null)
         {
             LoadPatientHistory(CurrentPatient.PatientId);
+            LoadVitalSigns(CurrentPatient.PatientId);
         }
         else
         {
             PatientHistory.Clear();
+            ClearVitalSigns();
         }
 
         OnPropertyChanged(nameof(IsAttendanceActionsVisible));
+    }
+
+    // Load Vital Signs from today's visit (filled by nurse)
+    private void LoadVitalSigns(Guid patientId)
+    {
+        var today = DateTime.Today;
+        var visit = _db.Visits
+            .Where(v => v.PatientId == patientId && v.VisitDate.Date == today)
+            .OrderByDescending(v => v.VisitDate)
+            .FirstOrDefault();
+
+        if (visit != null)
+        {
+            BloodPressure = visit.BloodPressure ?? string.Empty;
+            TemperatureInput = visit.Temperature?.ToString("0.0") ?? string.Empty;
+            HeartRateInput = visit.HeartRate?.ToString() ?? string.Empty;
+            WeightInput = visit.Weight?.ToString("0.0") ?? string.Empty;
+        }
+        else
+        {
+            ClearVitalSigns();
+        }
+    }
+
+    private void ClearVitalSigns()
+    {
+        BloodPressure = string.Empty;
+        TemperatureInput = string.Empty;
+        HeartRateInput = string.Empty;
+        WeightInput = string.Empty;
     }
 
     // Task 1: Load Patient Visit History
@@ -344,15 +395,12 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
         Diagnosis = string.Empty;
         Prescriptions = string.Empty;
         Notes = string.Empty;
-        BloodPressure = string.Empty;
-        TemperatureInput = string.Empty;
-        HeartRateInput = string.Empty;
-        WeightInput = string.Empty;
         SelectedDiagnosis = null;
         SelectedMedication = null;
         LabTestName = string.Empty;
         ClearStatus();
         UpdateCanCompleteVisit();
+        // Note: Vital signs are NOT cleared here as they are filled by nurses
     }
 
     /// <summary>Validates form data; returns false and sets Arabic error message if invalid.</summary>
@@ -382,49 +430,7 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
             return false;
         }
 
-        if (!string.IsNullOrWhiteSpace(BloodPressure))
-        {
-            var bpMatch = Regex.Match(BloodPressure.Trim(), @"^(\d{1,3})/(\d{1,3})$");
-            if (!bpMatch.Success)
-            {
-                errorMessage = "صيغة ضغط الدم غير صحيحة. الرجاء استخدام الشكل 120/80 بالأرقام فقط.";
-                return false;
-            }
-            if (!int.TryParse(bpMatch.Groups[1].Value, NumberStyles.None, CultureInfo.InvariantCulture, out var sys) ||
-                !int.TryParse(bpMatch.Groups[2].Value, NumberStyles.None, CultureInfo.InvariantCulture, out var dia) ||
-                sys < 1 || sys > 300 || dia < 1 || dia > 200)
-            {
-                errorMessage = "قيم ضغط الدم غير منطقية. الرجاء إدخال قيم صحيحة (مثال: 120/80).";
-                return false;
-            }
-        }
-
-        if (!string.IsNullOrWhiteSpace(TemperatureInput))
-        {
-            if (!decimal.TryParse(TemperatureInput.Trim().Replace(',', '.'), NumberStyles.Number, CultureInfo.InvariantCulture, out var temp) || temp < 30 || temp > 45)
-            {
-                errorMessage = "قيمة الحرارة غير صحيحة. الرجاء إدخال قيمة بين 30 و 45 درجة مئوية (مثال: 37).";
-                return false;
-            }
-        }
-
-        if (!string.IsNullOrWhiteSpace(HeartRateInput))
-        {
-            if (!int.TryParse(HeartRateInput.Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out var hr) || hr < 1 || hr > 250)
-            {
-                errorMessage = "قيمة نبضات القلب غير صحيحة. الرجاء إدخال رقم بين 1 و 250.";
-                return false;
-            }
-        }
-
-        if (!string.IsNullOrWhiteSpace(WeightInput))
-        {
-            if (!decimal.TryParse(WeightInput.Trim().Replace(',', '.'), NumberStyles.Number, CultureInfo.InvariantCulture, out var w) || w < 1 || w > 500)
-            {
-                errorMessage = "قيمة الوزن غير صحيحة. الرجاء إدخال قيمة بين 1 و 500 كيلوغرام.";
-                return false;
-            }
-        }
+        // Note: Vital signs validation removed - they are filled and validated by nurses
 
         if (LabTestName.Length > MaxLabRequestLength)
         {
@@ -457,8 +463,6 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
             return;
         }
 
-        ClearDiagnosisForm();
-
         if (CurrentPatient != null && CurrentPatient.Status == TicketStatus.Called)
         {
             CurrentPatient.Status = TicketStatus.AwaitingRecall;
@@ -474,7 +478,8 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
         next.CallCount++;
         _db.SaveChanges();
 
-        LoadQueue();
+        LoadQueue(); // This will load vital signs for the new patient
+        ClearDiagnosisForm(); // Clear form AFTER loading queue so vital signs are preserved
     }
 
     [RelayCommand]
@@ -482,8 +487,6 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
     {
         ClearStatus();
         if (ticket == null) return;
-
-        ClearDiagnosisForm();
 
         if (CurrentPatient != null && CurrentPatient.Status == TicketStatus.Called)
         {
@@ -496,7 +499,8 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
         ticket.CallCount++;
         _db.SaveChanges();
 
-        LoadQueue();
+        LoadQueue(); // This will load vital signs for the new patient
+        ClearDiagnosisForm(); // Clear form AFTER loading queue so vital signs are preserved
     }
 
     [RelayCommand]
@@ -504,8 +508,6 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
     {
         ClearStatus();
         if (ticket == null) return;
-
-        ClearDiagnosisForm();
 
         // Move current called patient to recall if still called
         if (CurrentPatient != null && CurrentPatient.Status == TicketStatus.Called)
@@ -520,7 +522,8 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
         ticket.CallCount++;
         _db.SaveChanges();
 
-        LoadQueue();
+        LoadQueue(); // This will load vital signs for the new patient
+        ClearDiagnosisForm(); // Clear form AFTER loading queue so vital signs are preserved
     }
 
     [RelayCommand]
@@ -653,6 +656,20 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
                 _db.SaveChanges();
             }
 
+            // Task 5: Generate Invoice for Cashier
+            var invoice = new Invoice
+            {
+                VisitId = visit.Id,
+                PatientId = CurrentPatient.PatientId,
+                Amount = 150.00m,
+                TaxAmount = 22.50m,
+                Status = InvoiceStatus.Pending,
+                CreatedById = doctorId,
+                CreatedAt = DateTime.UtcNow
+            };
+            _db.Invoices.Add(invoice);
+            _db.SaveChanges();
+
             CurrentPatient.Status = TicketStatus.Completed;
             CurrentPatient.CompletedAt = DateTime.Now;
             _db.SaveChanges();
@@ -686,6 +703,12 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
     partial void OnDiagnosisChanged(string value) => UpdateCanCompleteVisit();
     partial void OnNotesChanged(string value) => UpdateCanCompleteVisit();
     partial void OnPrescriptionsChanged(string value) => UpdateCanCompleteVisit();
+
+    partial void OnBloodPressureChanged(string value) => OnPropertyChanged(nameof(IsVitalSignsEmpty));
+    partial void OnTemperatureInputChanged(string value) => OnPropertyChanged(nameof(IsVitalSignsEmpty));
+    partial void OnHeartRateInputChanged(string value) => OnPropertyChanged(nameof(IsVitalSignsEmpty));
+    partial void OnWeightInputChanged(string value) => OnPropertyChanged(nameof(IsVitalSignsEmpty));
+
     partial void OnCurrentPatientChanged(QueueTicket? value)
     {
         UpdateCanCompleteVisit();
@@ -706,6 +729,82 @@ public partial class DoctorPanelViewModel : HealthCenter.Desktop.ViewModels.View
             if (!string.IsNullOrWhiteSpace(Prescriptions))
                 Prescriptions += "\n";
             Prescriptions += value;
+        }
+    }
+
+    // Task 4: Add selected lab test to lab test name field
+    partial void OnSelectedLabTestChanged(string? value)
+    {
+        if (!string.IsNullOrEmpty(value))
+            LabTestName = value;
+    }
+
+    // Task 4: Send Lab Test Request
+    [RelayCommand]
+    private void SendToLab()
+    {
+        if (CurrentPatient == null)
+        {
+            ShowError("لا يوجد مريض حالي لإرسال طلب فحص له.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(LabTestName))
+        {
+            ShowError("الرجاء تحديد اسم الفحص المطلوب.");
+            return;
+        }
+
+        try
+        {
+            var doctorId = _db.Users.FirstOrDefault(u => u.Role == UserRole.Doctor || u.Role == UserRole.SuperAdmin)?.Id ?? Guid.Empty;
+
+            // Create a temporary visit if one doesn't exist yet for today
+            var today = DateTime.Today;
+            var visit = _db.Visits
+                .FirstOrDefault(v => v.PatientId == CurrentPatient.PatientId && v.VisitDate.Date == today);
+
+            Guid visitId;
+            if (visit == null)
+            {
+                // Create a placeholder visit that will be updated when CompleteVisit is called
+                visit = new Visit
+                {
+                    PatientId = CurrentPatient.PatientId,
+                    DoctorId = doctorId,
+                    Diagnosis = "جاري الفحص...",
+                    VisitDate = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow
+                };
+                _db.Visits.Add(visit);
+                _db.SaveChanges();
+                visitId = visit.Id;
+            }
+            else
+            {
+                visitId = visit.Id;
+            }
+
+            var labTest = new LabTest
+            {
+                PatientId = CurrentPatient.PatientId,
+                VisitId = visitId,
+                TestName = LabTestName.Trim(),
+                Status = LabTestStatus.Requested,
+                RequestedById = doctorId,
+                RequestedAt = DateTime.UtcNow
+            };
+
+            _db.LabTests.Add(labTest);
+            _db.SaveChanges();
+
+            ShowSuccess($"تم إرسال طلب فحص: {LabTestName} للمختبر بنجاح.");
+            LabTestName = string.Empty;
+            SelectedLabTest = null;
+        }
+        catch (Exception ex)
+        {
+            ShowError($"حدث خطأ أثناء إرسال طلب الفحص: {ex.Message}");
         }
     }
 }
