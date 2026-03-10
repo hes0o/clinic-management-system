@@ -21,6 +21,24 @@ public partial class NursePanelViewModel : HealthCenter.Desktop.ViewModels.ViewM
     [ObservableProperty] private string _temperature = string.Empty;
     [ObservableProperty] private string _heartRate = string.Empty;
     [ObservableProperty] private string _weight = string.Empty;
+
+    // Quick Diagnosis properties
+    public ObservableCollection<string> CommonDiagnoses { get; } = new()
+    {
+        "نزلة برد",
+        "إنفلونزا",
+        "صداع",
+        "ألم المعدة",
+        "التهاب الحلق",
+        "ارتفاع ضغط الدم",
+        "السكري",
+        "حساسية",
+        "أخرى..."
+    };
+
+    [ObservableProperty] private string? _selectedDiagnosis;
+    [ObservableProperty] private string _diagnosis = string.Empty;
+
     [ObservableProperty] private bool _hasNoPatients;
 
     private readonly DispatcherTimer _refreshTimer;
@@ -73,8 +91,16 @@ public partial class NursePanelViewModel : HealthCenter.Desktop.ViewModels.ViewM
         Temperature = string.Empty;
         HeartRate = string.Empty;
         Weight = string.Empty;
+        Diagnosis = string.Empty;
+        SelectedDiagnosis = null;
         StatusMessage = string.Empty;
         IsError = false;
+    }
+
+    partial void OnSelectedDiagnosisChanged(string? value)
+    {
+        if (!string.IsNullOrEmpty(value) && value != "أخرى...")
+            Diagnosis = value;
     }
 
     private void LoadQueue()
@@ -141,11 +167,12 @@ public partial class NursePanelViewModel : HealthCenter.Desktop.ViewModels.ViewM
                 _db.Visits.Add(visit);
             }
 
-            // Save vitals
+            // Save vitals & quick diagnosis
             if (!string.IsNullOrWhiteSpace(BloodPressure)) visit.BloodPressure = BloodPressure;
             if (decimal.TryParse(Temperature, out var temp)) visit.Temperature = temp;
             if (int.TryParse(HeartRate, out var hr)) visit.HeartRate = hr;
             if (decimal.TryParse(Weight, out var wt)) visit.Weight = wt;
+            if (!string.IsNullOrWhiteSpace(Diagnosis)) visit.Diagnosis = Diagnosis.Trim();
 
             // Advance ticket status so the Doctor panel picks up the patient
             SelectedTicket.Status = TicketStatus.ReadyForDoctor;
@@ -158,6 +185,8 @@ public partial class NursePanelViewModel : HealthCenter.Desktop.ViewModels.ViewM
             Temperature = string.Empty;
             HeartRate = string.Empty;
             Weight = string.Empty;
+            Diagnosis = string.Empty;
+            SelectedDiagnosis = null;
             SelectedTicket = null;
 
             // Reload queue — patient is no longer Waiting

@@ -114,6 +114,35 @@
                             <TextBlock Text="{Binding StatusMessage}"
                                        Foreground="#DC2626" TextWrapping="Wrap" FontWeight="Medium"/>
                         </Border>
+
+                        <Border Background="#F9FAFB" CornerRadius="12" Padding="16" BorderBrush="#E5E7EB" BorderThickness="1">
+                            <StackPanel Spacing="16">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="🩺" FontSize="18"/>
+                                    <TextBlock Text="التشخيص المبدئي (اختياري)" FontWeight="SemiBold" FontSize="16" Foreground="#1E293B"/>
+                                </StackPanel>
+
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="التشخيص السريع" FontWeight="Medium" Foreground="#374151"/>
+                                    <ComboBox ItemsSource="{Binding CommonDiagnoses}"
+                                              SelectedItem="{Binding SelectedDiagnosis}"
+                                              PlaceholderText="اختر تشخيص شائع..."
+                                              HorizontalAlignment="Stretch"
+                                              CornerRadius="8"/>
+                                </StackPanel>
+
+                                <!-- Manual Diagnosis Entry -->
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="التشخيص التفصيلي (حد أقصى 1000 حرف)" FontWeight="Medium" Foreground="#374151"/>
+                                    <TextBox Text="{Binding Diagnosis}"
+                                             MaxLength="1000"
+                                             AcceptsReturn="True"
+                                             TextWrapping="Wrap"
+                                             Height="80"
+                                             Watermark="أدخل التشخيص التفصيلي..."/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
 
                     <Button Grid.Row="3" Content="حفظ وإرسال للطبيب"

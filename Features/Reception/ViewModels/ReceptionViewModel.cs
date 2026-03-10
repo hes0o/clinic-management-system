@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,7 @@ namespace HealthCenter.Desktop.Features.Reception.ViewModels;
 public partial class ReceptionViewModel : ObservableObject
 {
     private readonly HealthCenterDbContext _db;
+    private readonly DispatcherTimer _refreshTimer;
 
     // ── Search ────────────────────────────────────────────────
     [ObservableProperty] private string _searchQuery = string.Empty;
@@ -62,6 +64,10 @@ public partial class ReceptionViewModel : ObservableObject
         _db.Database.EnsureCreated();
         RefreshSearch();
         LoadTodayQueue();
+
+        _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+        _refreshTimer.Tick += (s, e) => LoadQueueSilent();
+        _refreshTimer.Start();
     }
 
     // ── Reactive search as user types ────────────────────────
@@ -267,6 +273,22 @@ public partial class ReceptionViewModel : ObservableObject
     private void ShowError(string msg) { StatusMessage = msg; IsError = true; }
     private void ShowSuccess(string msg) { StatusMessage = msg; IsError = false; }
 
-    [RelayCommand]
-    private void RefreshQueue() { LoadTodayQueue(); RefreshSearch(); }
+    private void LoadQueueSilent()
+    {
+        var today = DateTime.Today;
+        var tickets = _db.QueueTickets
+            .Include(t => t.Patient)
+            .Where(t => t.CreatedAt.Date == today)
+            .OrderBy(t => t.TicketNumber)
+            .ToList();
+
+        if (tickets.Count != TodayQueue.Count)
+        {
+            TodayQueue.Clear();
+            foreach (var t in tickets) TodayQueue.Add(t);
+        }
+
+        TodayCount = tickets.Count;
+        WaitingCount = tickets.Count(t => t.Status == TicketStatus.Waiting || t.Status == TicketStatus.AwaitingRecall);
+    }
 }
