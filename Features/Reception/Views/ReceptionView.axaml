@@ -2,9 +2,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:HealthCenter.Desktop.Features.Reception.ViewModels"
              xmlns:entities="using:HealthCenter.Desktop.Database.Entities"
+             xmlns:converters="using:HealthCenter.Desktop.Infrastructure.Converters"
              x:Class="HealthCenter.Desktop.Features.Reception.Views.ReceptionView"
              x:DataType="vm:ReceptionViewModel"
              FlowDirection="RightToLeft">
+
+    <UserControl.Resources>
+        <converters:TicketStatusConverter x:Key="TicketStatusConverter"/>
+    </UserControl.Resources>
 
     <UserControl.Styles>
         <Style Selector="TextBox">
@@ -62,11 +67,10 @@
                                    FontSize="17" FontWeight="Bold" Foreground="#2563EB"/>
 
                         <!-- Status message: success -->
-                        <Border IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                        <Border IsVisible="{Binding IsSuccess}"
                                 CornerRadius="6" Padding="12,8"
                                 Background="#F0FDF4">
                             <TextBlock Text="{Binding StatusMessage}"
-                                       IsVisible="{Binding IsError, Converter={x:Static BoolConverters.Not}}"
                                        Foreground="#15803D" TextWrapping="Wrap"/>
                         </Border>
                         <!-- Status message: error -->
@@ -262,7 +266,7 @@
                                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding Patient.FullName}"
                                                            FontWeight="Medium" Foreground="#1E293B"/>
-                                                <TextBlock Text="{Binding Status}"
+                                                <TextBlock Text="{Binding Status, Converter={StaticResource TicketStatusConverter}}"
                                                            FontSize="11" Foreground="#94A3B8"/>
                                             </StackPanel>
                                         </Grid>

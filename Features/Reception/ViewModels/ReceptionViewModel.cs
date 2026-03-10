@@ -16,7 +16,7 @@ namespace HealthCenter.Desktop.Features.Reception.ViewModels;
 /// Reception panel: registers/searches patients, issues queue tickets.
 /// Uses EF Core directly — data persists to the database.
 /// </summary>
-public partial class ReceptionViewModel : ObservableObject
+public partial class ReceptionViewModel : HealthCenter.Desktop.ViewModels.ViewModelBase
 {
     private readonly HealthCenterDbContext _db;
     private readonly DispatcherTimer _refreshTimer;
@@ -43,8 +43,6 @@ public partial class ReceptionViewModel : ObservableObject
     // ── State ─────────────────────────────────────────────────
     [ObservableProperty] private bool _isEditMode;
     [ObservableProperty] private int _selectedTabIndex;
-    [ObservableProperty] private string _statusMessage = string.Empty;
-    [ObservableProperty] private bool _isError;
 
     // ── Today's Queue ─────────────────────────────────────────
     public ObservableCollection<QueueTicket> TodayQueue { get; } = new();
@@ -270,8 +268,6 @@ public partial class ReceptionViewModel : ObservableObject
     }
 
     // ── Helpers ───────────────────────────────────────────────
-    private void ShowError(string msg) { StatusMessage = msg; IsError = true; }
-    private void ShowSuccess(string msg) { StatusMessage = msg; IsError = false; }
 
     private void LoadQueueSilent()
     {
