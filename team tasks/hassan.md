@@ -11,18 +11,27 @@
 
 ---
 
-## 🆕 Task 1: Code Review & Merge for Sprint 2 Integration Tasks
 
-**Priority:** 🔴 High | **Estimated Time:** ongoing
+## 🆕 Assigned Issues
 
-### Instructions:
-1. Review all new PRs from the team for Sprint 2 integration features
-2. Verify that the Doctor→Lab→Cashier flow works end-to-end
-3. Test that auto-polling is working correctly on Lab and Cashier pages
-4. Ensure all refresh buttons have been removed from Lab and Cashier views
-5. Validate that the Doctor can properly send patients to Lab and select tests
-6. Validate that completed visits generate invoices for the Cashier
-7. Merge approved PRs to `main`
+### ✅ Task: Missing Global Exception Handling
+**Description:**
+Critical database operations like `_db.SaveChanges()` inside `SavePatient` and `IssueTicket` are completely unprotected by `try-catch` blocks. If the database locks up or throws an exception, the entire application will crash.
+
+**Instructions:**
+1. Wrap database calls in `ReceptionViewModel.cs` and `CashierPanelViewModel.cs` with robust `try-catch` blocks.
+2. Use the `ShowError(ex.Message)` method to gracefully report database failures to the user instead of crashing.
+
+---
+
+### ✅ Task: The initial diagnosis feature (closes #30)
+**Description:**
+The initial diagnosis feature is currently located in the doctor's dashboard, but it should be on the nurse's screen.
+
+**Instructions:**
+1. Review the issue details.
+2. Fix the related components.
+3. Make sure to commit with `closes #30` so it links to the GitHub issue.
 
 ---
 

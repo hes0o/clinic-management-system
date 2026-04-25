@@ -5,109 +5,40 @@
 
 ## 📋 Role Overview
 
-**English:** This sprint your job is to add background auto-polling to the Lab and Cashier panels so they refresh automatically every 5 seconds, and to remove the manual refresh buttons from both pages.
+**English:** This sprint your job is to fix memory leaks caused by `DispatcherTimer` instances across all ViewModels by implementing `IDisposable` in `ViewModelBase`.
 
-**Arabic:** مهمتك في هذا السبرينت هي إضافة التحديث التلقائي في الخلفية للوحة المختبر ولوحة المحاسب كل 5 ثوانٍ، وإزالة أزرار التحديث اليدوي من الصفحتين.
-
----
-
-## 🆕 Task 1: Add Auto-Polling to Lab Panel & Remove Refresh Button
-
-**Priority:** 🔴 High | **Estimated Time:** 1.5 hours  
-**Files:**
-- `/Features/Lab/ViewModels/LabPanelViewModel.cs`
-- `/Features/Lab/Views/LabPanelView.axaml`
-
-### Instructions:
-1. Open `LabPanelViewModel.cs`
-2. Add `using Avalonia.Threading;` at the top
-3. Add a `private readonly DispatcherTimer _refreshTimer;` field
-4. In the constructor, initialize the timer to poll every 5 seconds:
-```csharp
-_refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
-_refreshTimer.Tick += (s, e) => LoadTestsSilent();
-_refreshTimer.Start();
-```
-5. Create a `LoadTestsSilent()` method that silently re-queries lab tests from the database (same query as `LoadTests()`) but does NOT show any status message and only updates the collection if the count changed (to prevent UI flickering):
-```csharp
-private void LoadTestsSilent()
-{
-    try
-    {
-        var tests = _db.LabTests
-            .Include(t => t.Patient)
-            .Include(t => t.RequestedBy)
-            .Where(t => t.Status != LabTestStatus.Completed)
-            .OrderByDescending(t => t.RequestedAt)
-            .ToList();
-
-        if (RequestedTests.Count != tests.Count)
-        {
-            RequestedTests = new ObservableCollection<LabTest>(tests);
-            HasNoTests = RequestedTests.Count == 0;
-        }
-    }
-    catch (Exception) { /* Fail silently */ }
-}
-```
-6. **Delete** the `RefreshTests()` relay command method entirely
-7. Open `LabPanelView.axaml` and **remove** the refresh button (`تحديث`) from the header (line 17)
-8. Also remove the local `_statusMessage` field if it shadows `ViewModelBase.StatusMessage`. Use `ShowError()` and `ShowSuccess()` from the base class instead.
+**Arabic:** مهمتك في هذا السبرينت هي إصلاح تسرب الذاكرة الناتج عن استخدام `DispatcherTimer` في جميع الـ ViewModels عبر تطبيق `IDisposable` في `ViewModelBase`.
 
 ---
 
-## 🆕 Task 2: Add Auto-Polling to Cashier Panel & Remove Refresh Button
 
-**Priority:** 🔴 High | **Estimated Time:** 1.5 hours  
-**Files:**
-- `/Features/Cashier/ViewModels/CashierPanelViewModel.cs`
-- `/Features/Cashier/Views/CashierPanelView.axaml`
+## 🆕 Assigned Issues
 
-### Instructions:
-1. Open `CashierPanelViewModel.cs`
-2. Add `using Avalonia.Threading;` at the top
-3. Add a `private readonly DispatcherTimer _refreshTimer;` field
-4. In the constructor, initialize the timer to poll every 5 seconds:
-```csharp
-_refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
-_refreshTimer.Tick += (s, e) => LoadInvoicesSilent();
-_refreshTimer.Start();
-```
-5. Create a `LoadInvoicesSilent()` method that silently re-queries pending invoices from the database (same query as `LoadInvoices()`) but does NOT show a status message and only updates the collection if the count changed:
-```csharp
-private void LoadInvoicesSilent()
-{
-    try
-    {
-        var invoices = _db.Invoices
-            .Include(i => i.Patient)
-            .Where(i => i.Status == InvoiceStatus.Pending)
-            .OrderByDescending(i => i.CreatedAt)
-            .ToList();
+### ✅ Task: Memory Leaks from DispatcherTimer
+**Description:**
+The application relies on background polling using `DispatcherTimer` (e.g., refreshing queues every 5 seconds). However, these timers are never stopped when the user leaves the page or when the application cleans up memory, leading to severe memory leaks.
 
-        if (PendingInvoices.Count != invoices.Count)
-        {
-            PendingInvoices = new ObservableCollection<Invoice>(invoices);
-            HasNoInvoices = PendingInvoices.Count == 0;
-        }
-    }
-    catch (Exception) { /* Fail silently */ }
-}
-```
-6. **Delete** the `RefreshInvoices()` relay command method entirely
-7. Open `CashierPanelView.axaml` and **remove** the refresh button (`تحديث`) from the header (line 17)
-8. Also remove the local `_statusMessage` field if it shadows `ViewModelBase.StatusMessage`. Use `ShowError()` and `ShowSuccess()` from the base class instead.
-
----
+**Instructions:**
+1. Make `ViewModelBase` implement `IDisposable` with a virtual `Dispose()` method.
+2. Override `Dispose()` in all panel ViewModels (`Reception`, `Nurse`, `Doctor`, `Lab`, `Cashier`) to safely call `_refreshTimer?.Stop()`.
+3. Commit with an appropriate message.
 
 ## 📁 Your Files
 
 ```
-/Features/Lab/
-├── ViewModels/
-│   └── LabPanelViewModel.cs     ← Edit
-└── Views/
-    └── LabPanelView.axaml       ← Edit
+/ViewModels/
+├── ViewModelBase.cs             ← Edit
+/Features/Lab/ViewModels/
+├── LabPanelViewModel.cs         ← Edit
+/Features/Cashier/ViewModels/
+├── CashierPanelViewModel.cs     ← Edit
+/Features/Reception/ViewModels/
+├── ReceptionViewModel.cs        ← Edit
+/Features/Nurse/ViewModels/
+├── NursePanelViewModel.cs       ← Edit
+/Features/Doctor/ViewModels/
+├── DoctorPanelViewModel.cs      ← Edit
+```
 
 /Features/Cashier/
 ├── ViewModels/
